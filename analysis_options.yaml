@@ -1,0 +1,8 @@
+include: package:very_good_analysis/analysis_options.yaml
+
+linter:
+  rules:
+    public_member_api_docs: false
+    sort_constructors_first: false
+    file_names: false
+    sort_unnamed_constructors_first: false
