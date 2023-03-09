@@ -1,5 +1,5 @@
 import 'package:analyzer/dart/analysis/results.dart';
-import 'package:dart_lens/functions/project-structure.dart';
+import 'package:dart_lens/functions/project-packages-analysis.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -42,6 +42,11 @@ class ProjectStructureBloc extends Cubit<ProjectStructureBlocState> {
       ),
     );
     try {
+      await compute(
+        getPackages,
+        state.projectPath ?? '',
+      );
+/*
       final resolvedUnitResults = await compute(
         getProjectStructure,
         state.projectPath ?? '',
@@ -51,6 +56,7 @@ class ProjectStructureBloc extends Cubit<ProjectStructureBlocState> {
           resolvedUnitResults: resolvedUnitResults,
         ),
       );
+*/
     } catch (exception) {
       emit(
         state.copyWith(

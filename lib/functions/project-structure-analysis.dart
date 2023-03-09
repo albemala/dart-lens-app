@@ -15,11 +15,6 @@ Future<List<ResolvedUnitResult>> getProjectStructure(
     throw Exception('Project directory does not exist');
   }
 
-  final pubspecFile = File(path.join(projectDirectoryPath, 'pubspec.yaml'));
-  if (!pubspecFile.existsSync()) {
-    throw Exception('pubspec.yaml does not exist');
-  }
-
   // detect dart sdk installation path
   // NOTE: on macOS, App Sandbox must be disabled for this to work
   final whichDart = await Process.run('which', ['dart']);

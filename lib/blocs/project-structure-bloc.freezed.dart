@@ -137,7 +137,8 @@ class __$$_ProjectStructureBlocStateCopyWithImpl<$Res>
 
 /// @nodoc
 
-class _$_ProjectStructureBlocState extends _ProjectStructureBlocState {
+class _$_ProjectStructureBlocState extends _ProjectStructureBlocState
+    with DiagnosticableTreeMixin {
   const _$_ProjectStructureBlocState(
       {required this.projectPath,
       required final List<ResolvedUnitResult>? resolvedUnitResults,
@@ -165,8 +166,19 @@ class _$_ProjectStructureBlocState extends _ProjectStructureBlocState {
   final String? loadingError;
 
   @override
-  String toString() {
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
     return 'ProjectStructureBlocState(projectPath: $projectPath, resolvedUnitResults: $resolvedUnitResults, isLoading: $isLoading, loadingError: $loadingError)';
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(DiagnosticsProperty('type', 'ProjectStructureBlocState'))
+      ..add(DiagnosticsProperty('projectPath', projectPath))
+      ..add(DiagnosticsProperty('resolvedUnitResults', resolvedUnitResults))
+      ..add(DiagnosticsProperty('isLoading', isLoading))
+      ..add(DiagnosticsProperty('loadingError', loadingError));
   }
 
   @override
