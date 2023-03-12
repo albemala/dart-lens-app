@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:analyzer/dart/ast/ast.dart';
 import 'package:collection/collection.dart';
-import 'package:dart_lens/blocs/project-structure-bloc.dart';
+import 'package:dart_lens/blocs/project-analysis-bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -138,8 +138,7 @@ class FunctionViewModel with _$FunctionViewModel implements EntityViewModel {
 }
 
 class ProjectStructureViewBloc extends Cubit<ProjectStructureViewModel> {
-  late StreamSubscription<ProjectStructureBlocState>
-      projectStructureBlocListener;
+  late StreamSubscription<ProjectAnalysisBlocState> projectAnalysisBlocListener;
 
   ProjectStructureViewBloc(BuildContext context)
       : super(
@@ -148,14 +147,14 @@ class ProjectStructureViewBloc extends Cubit<ProjectStructureViewModel> {
             directories: [],
           ),
         ) {
-    projectStructureBlocListener = context //
-        .read<ProjectStructureBloc>()
+    projectAnalysisBlocListener = context //
+        .read<ProjectAnalysisBloc>()
         .stream
-        .listen((projectStructureBlocState) {
-      final projectPath = projectStructureBlocState.projectPath ?? '';
+        .listen((projectAnalysisBlocState) {
+      final projectPath = projectAnalysisBlocState.projectPath ?? '';
 
       final directories = <String, List<FileViewModel>>{};
-      projectStructureBlocState.resolvedUnitResults
+      projectAnalysisBlocState.resolvedUnitResults
           ?.forEach((resolvedUnitResult) {
         final filePath = relative(
           resolvedUnitResult.path,
@@ -221,7 +220,7 @@ class ProjectStructureViewBloc extends Cubit<ProjectStructureViewModel> {
 
   @override
   Future<void> close() {
-    projectStructureBlocListener.cancel();
+    projectAnalysisBlocListener.cancel();
     return super.close();
   }
 }

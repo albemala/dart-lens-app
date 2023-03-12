@@ -1,6 +1,7 @@
 import 'package:dart_lens/blocs/preferences-bloc.dart';
-import 'package:dart_lens/blocs/project-structure-bloc.dart';
+import 'package:dart_lens/blocs/project-analysis-bloc.dart';
 import 'package:dart_lens/functions/fs.dart';
+import 'package:dart_lens/views/project-packages/project-packages-view.dart';
 import 'package:dart_lens/views/project-structure/project-structure-view.dart';
 import 'package:flextras/flextras.dart';
 import 'package:flutter/cupertino.dart';
@@ -15,16 +16,31 @@ class MainView extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: const [
-          _TopView(),
-          Expanded(
-            child: ProjectStructureView(),
-          ),
-          _BottomView(),
-        ],
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        body: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: const [
+            _TopView(),
+            TabBar(
+              isScrollable: true,
+              tabs: [
+                Tab(text: 'Packages'),
+                Tab(text: 'Project structure'),
+              ],
+            ),
+            Expanded(
+              child: TabBarView(
+                children: [
+                  ProjectPackagesView(),
+                  ProjectStructureView(),
+                ],
+              ),
+            ),
+            _BottomView(),
+          ],
+        ),
       ),
     );
   }
@@ -35,12 +51,12 @@ class _TopView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final projectStructureBloc = context.watch<ProjectStructureBloc>();
+    final projectAnalysisBloc = context.watch<ProjectAnalysisBloc>();
 
     Future<void> onPickDirectory() async {
       final directory = await pickExistingDirectory();
       if (directory == null) return;
-      await projectStructureBloc.setProjectPath(directory);
+      await projectAnalysisBloc.setProjectPath(directory);
     }
 
     return Material(
@@ -57,11 +73,11 @@ class _TopView extends StatelessWidget {
             ),
             Expanded(
               child: Text(
-                projectStructureBloc.state.projectPath ?? '',
+                projectAnalysisBloc.state.projectPath ?? '',
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-            if (projectStructureBloc.state.isLoading)
+            if (projectAnalysisBloc.state.isLoading)
               const SizedBox(
                 width: 16,
                 height: 16,

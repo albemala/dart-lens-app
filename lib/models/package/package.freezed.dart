@@ -18,14 +18,30 @@ final _privateConstructorUsedError = UnsupportedError(
 mixin _$Package {
   DependencyType get dependencyType => throw _privateConstructorUsedError;
   PackageType get type => throw _privateConstructorUsedError;
+
+  /// The name of the package
   String get name => throw _privateConstructorUsedError;
+
+  /// The version that is currently installed
   String? get installedVersion => throw _privateConstructorUsedError;
+
+  /// The most recent version that can be installed
   String? get resolvableVersion => throw _privateConstructorUsedError;
+
+  /// The most recent version that is available on pub.dev
   PackageVersion? get latestVersion => throw _privateConstructorUsedError;
+
+  /// All versions that are available on pub.dev
   List<PackageVersion>? get availableVersions =>
       throw _privateConstructorUsedError;
+
+  /// The url to the pub.dev page of the package
   String? get url => throw _privateConstructorUsedError;
+
+  /// The url to the changelog of the package
   String? get changelogUrl => throw _privateConstructorUsedError;
+
+  /// The description of the package
   String? get description => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
@@ -225,15 +241,27 @@ class _$_Package implements _Package {
   final DependencyType dependencyType;
   @override
   final PackageType type;
+
+  /// The name of the package
   @override
   final String name;
+
+  /// The version that is currently installed
   @override
   final String? installedVersion;
+
+  /// The most recent version that can be installed
   @override
   final String? resolvableVersion;
+
+  /// The most recent version that is available on pub.dev
   @override
   final PackageVersion? latestVersion;
+
+  /// All versions that are available on pub.dev
   final List<PackageVersion>? _availableVersions;
+
+  /// All versions that are available on pub.dev
   @override
   List<PackageVersion>? get availableVersions {
     final value = _availableVersions;
@@ -244,10 +272,15 @@ class _$_Package implements _Package {
     return EqualUnmodifiableListView(value);
   }
 
+  /// The url to the pub.dev page of the package
   @override
   final String? url;
+
+  /// The url to the changelog of the package
   @override
   final String? changelogUrl;
+
+  /// The description of the package
   @override
   final String? description;
 
@@ -319,20 +352,36 @@ abstract class _Package implements Package {
   @override
   PackageType get type;
   @override
+
+  /// The name of the package
   String get name;
   @override
+
+  /// The version that is currently installed
   String? get installedVersion;
   @override
+
+  /// The most recent version that can be installed
   String? get resolvableVersion;
   @override
+
+  /// The most recent version that is available on pub.dev
   PackageVersion? get latestVersion;
   @override
+
+  /// All versions that are available on pub.dev
   List<PackageVersion>? get availableVersions;
   @override
+
+  /// The url to the pub.dev page of the package
   String? get url;
   @override
+
+  /// The url to the changelog of the package
   String? get changelogUrl;
   @override
+
+  /// The description of the package
   String? get description;
   @override
   @JsonKey(ignore: true)

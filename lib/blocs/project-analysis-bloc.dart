@@ -1,28 +1,31 @@
 import 'package:analyzer/dart/analysis/results.dart';
 import 'package:dart_lens/functions/project-packages-analysis.dart';
+import 'package:dart_lens/models/package/package.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-part 'project-structure-bloc.freezed.dart';
+part 'project-analysis-bloc.freezed.dart';
 
 @freezed
-class ProjectStructureBlocState with _$ProjectStructureBlocState {
-  const ProjectStructureBlocState._();
+class ProjectAnalysisBlocState with _$ProjectAnalysisBlocState {
+  const ProjectAnalysisBlocState._();
 
-  const factory ProjectStructureBlocState({
+  const factory ProjectAnalysisBlocState({
     required String? projectPath,
+    required List<Package>? packages,
     required List<ResolvedUnitResult>? resolvedUnitResults,
     required bool isLoading,
     required String? loadingError,
-  }) = _ProjectStructureBlocState;
+  }) = _ProjectAnalysisBlocState;
 }
 
-class ProjectStructureBloc extends Cubit<ProjectStructureBlocState> {
-  ProjectStructureBloc()
+class ProjectAnalysisBloc extends Cubit<ProjectAnalysisBlocState> {
+  ProjectAnalysisBloc()
       : super(
-          const ProjectStructureBlocState(
+          const ProjectAnalysisBlocState(
             projectPath: null,
+            packages: null,
             resolvedUnitResults: null,
             isLoading: false,
             loadingError: null,
@@ -42,10 +45,16 @@ class ProjectStructureBloc extends Cubit<ProjectStructureBlocState> {
       ),
     );
     try {
-      await compute(
+      final packages = await compute(
         getPackages,
         state.projectPath ?? '',
       );
+      emit(
+        state.copyWith(
+          packages: packages,
+        ),
+      );
+
 /*
       final resolvedUnitResults = await compute(
         getProjectStructure,

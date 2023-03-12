@@ -21,6 +21,7 @@ Future<List<Package>> getPackages(
   final pubspec = Pubspec.parse(pubspecFileContent);
 
   final outdatedPackages = await runFlutterPubOutdated(projectDirectoryPath);
+  print('Outdated packages: $outdatedPackages');
   if (outdatedPackages == null) return [];
 
   final packages = <Package>[];
@@ -96,14 +97,19 @@ Future<Package> _createHostedPackage(
 ) async {
   final client = PubClient();
   final info = await client.packageInfo(packageName);
+  final installedVersion = dependency.version.toString().replaceFirst('^', '');
+  final resolvableVersion = findResolvableVersion(
+    packageName,
+    outdatedPackages,
+  );
   return Package(
     type: PackageType.hosted,
     dependencyType: type,
     name: packageName,
-    installedVersion: dependency.version.toString(),
-    resolvableVersion: findResolvableVersion(packageName, outdatedPackages),
+    installedVersion: installedVersion,
+    resolvableVersion: resolvableVersion ?? installedVersion,
     latestVersion: info.latest,
-    availableVersions: info.versions,
+    availableVersions: info.versions.reversed.toList(),
     url: info.url,
     changelogUrl: info.changelogUrl,
     description: info.description,

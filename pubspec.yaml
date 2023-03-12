@@ -23,6 +23,8 @@ dependencies:
   path: ^1.8.2
   file_picker: ^5.2.5
 
+  url_launcher: ^6.1.10
+
   # UI
   google_fonts: ^4.0.3
   flex_color_scheme: ^6.1.2
@@ -31,6 +33,8 @@ dependencies:
   cupertino_icons: ^1.0.5
 
   analyzer: ^5.2.0
+
+  pub_semver: ^2.1.3
   pubspec_parse: ^1.2.2
   pub_api_client: # ^2.4.0
     git:
