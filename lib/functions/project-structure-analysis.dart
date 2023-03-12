@@ -17,9 +17,26 @@ Future<List<ResolvedUnitResult>> getProjectStructure(
 
   // detect dart sdk installation path
   // NOTE: on macOS, App Sandbox must be disabled for this to work
-  final whichDart = await Process.run('which', ['dart']);
-  final dartPath = whichDart.stdout.toString().trim();
-  final dartSdkPath = path.normalize(path.join(dartPath, '../cache/dart-sdk'));
+
+  // run `flutter doctor -v`
+  final flutterDoctorResult = await Process.run('flutter', ['doctor', '-v']);
+  // extract flutter sdk path from flutter doctor output
+  // example to look for: Flutter version <version> on channel <channel> at <path>
+  final flutterSdkPathRegex =
+      RegExp(r'\s+Flutter version [\d.]+ on channel \w+ at (.*)');
+  final flutterSdkPathMatch = flutterSdkPathRegex.firstMatch(
+    flutterDoctorResult.stdout.toString(),
+  );
+
+  final flutterSdkPath = flutterSdkPathMatch?.group(1);
+  print('flutterSdkPath: $flutterSdkPath');
+  if (flutterSdkPath == null) {
+    throw Exception('Could not detect flutter sdk path');
+  }
+
+  final dartSdkPath =
+      path.normalize(path.join(flutterSdkPath, 'bin/cache/dart-sdk'));
+  print('dartSdkPath: $dartSdkPath');
 
   final collection = AnalysisContextCollection(
     includedPaths: [projectDirectory.path],
