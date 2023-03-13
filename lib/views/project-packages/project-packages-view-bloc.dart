@@ -5,7 +5,7 @@ import 'package:dart_lens/models/package/package.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:pub_api_client/src/models/pub_package_model.dart';
+import 'package:pub_api_client/pub_api_client.dart';
 import 'package:pub_semver/pub_semver.dart';
 
 part 'project-packages-view-bloc.freezed.dart';
@@ -28,8 +28,6 @@ class PackageViewModel with _$PackageViewModel {
     required String name,
     required String? installedVersion,
     required String? installableVersion,
-    // required String? resolvableVersion,
-    // required PackageVersion? latestVersion,
     required List<PackageVersionViewModel>? availableVersions,
     required bool? isLatestVersionInstalled,
     required String? url,

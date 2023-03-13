@@ -185,9 +185,7 @@ abstract class _ProjectPackagesViewModel extends ProjectPackagesViewModel {
 mixin _$PackageViewModel {
   String get name => throw _privateConstructorUsedError;
   String? get installedVersion => throw _privateConstructorUsedError;
-  String? get installableVersion =>
-      throw _privateConstructorUsedError; // required String? resolvableVersion,
-// required PackageVersion? latestVersion,
+  String? get installableVersion => throw _privateConstructorUsedError;
   List<PackageVersionViewModel>? get availableVersions =>
       throw _privateConstructorUsedError;
   bool? get isLatestVersionInstalled => throw _privateConstructorUsedError;
@@ -373,11 +371,7 @@ class _$_PackageViewModel extends _PackageViewModel {
   final String? installedVersion;
   @override
   final String? installableVersion;
-// required String? resolvableVersion,
-// required PackageVersion? latestVersion,
   final List<PackageVersionViewModel>? _availableVersions;
-// required String? resolvableVersion,
-// required PackageVersion? latestVersion,
   @override
   List<PackageVersionViewModel>? get availableVersions {
     final value = _availableVersions;
@@ -461,8 +455,7 @@ abstract class _PackageViewModel extends PackageViewModel {
   String? get installedVersion;
   @override
   String? get installableVersion;
-  @override // required String? resolvableVersion,
-// required PackageVersion? latestVersion,
+  @override
   List<PackageVersionViewModel>? get availableVersions;
   @override
   bool? get isLatestVersionInstalled;
