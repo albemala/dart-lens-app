@@ -125,8 +125,10 @@ class _PackageNameView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Tooltip(
       message: dependency.description ?? '',
-      child:
-          Text(dependency.name, style: Theme.of(context).textTheme.bodyMedium),
+      child: Text(
+        dependency.name,
+        style: Theme.of(context).textTheme.bodyMedium,
+      ),
     );
   }
 }
@@ -161,9 +163,12 @@ class _PackageVersionView extends StatelessWidget {
           ),
         ),
         if (isLatestVersionNotInstalled)
-          Icon(
-            CupertinoIcons.arrow_up_circle_fill,
-            color: Theme.of(context).colorScheme.tertiary,
+          Tooltip(
+            message: 'New version: ${dependency.installableVersion}',
+            child: Icon(
+              CupertinoIcons.arrow_up_circle_fill,
+              color: Theme.of(context).colorScheme.tertiary,
+            ),
           ),
       ],
       separatorBuilder: () => const SizedBox(width: 2),
@@ -188,6 +193,7 @@ class _PackageVersionsDropdownView extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 4),
         child: PopupMenuButton(
+          tooltip: 'Select version',
           child: SeparatedRow(
             children: [
               Text(
@@ -255,12 +261,14 @@ class _PackageActionsView extends StatelessWidget {
         // url icon button
         if (dependency.url != null)
           IconButton(
+            tooltip: dependency.url,
             icon: const Icon(CupertinoIcons.link),
             onPressed: () => openUrl(dependency.url!),
           ),
         // changelog icon button
         if (dependency.changelogUrl != null)
           IconButton(
+            tooltip: 'Changelog',
             icon: const Icon(CupertinoIcons.doc_text),
             onPressed: () => openUrl(dependency.changelogUrl!),
           ),

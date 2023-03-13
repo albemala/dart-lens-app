@@ -27,6 +27,7 @@ class PackageViewModel with _$PackageViewModel {
   const factory PackageViewModel({
     required String name,
     required String? installedVersion,
+    required String? installableVersion,
     // required String? resolvableVersion,
     // required PackageVersion? latestVersion,
     required List<PackageVersionViewModel>? availableVersions,
@@ -57,6 +58,7 @@ PackageViewModel _createPackageViewModel(Package package) {
   return PackageViewModel(
     name: package.name,
     installedVersion: package.installedVersion,
+    installableVersion: package.resolvableVersion,
     availableVersions: availableVersions,
     isLatestVersionInstalled: isLatestVersionInstalled,
     url: package.url,

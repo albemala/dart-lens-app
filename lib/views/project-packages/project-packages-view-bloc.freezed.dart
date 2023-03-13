@@ -184,7 +184,8 @@ abstract class _ProjectPackagesViewModel extends ProjectPackagesViewModel {
 /// @nodoc
 mixin _$PackageViewModel {
   String get name => throw _privateConstructorUsedError;
-  String? get installedVersion =>
+  String? get installedVersion => throw _privateConstructorUsedError;
+  String? get installableVersion =>
       throw _privateConstructorUsedError; // required String? resolvableVersion,
 // required PackageVersion? latestVersion,
   List<PackageVersionViewModel>? get availableVersions =>
@@ -208,6 +209,7 @@ abstract class $PackageViewModelCopyWith<$Res> {
   $Res call(
       {String name,
       String? installedVersion,
+      String? installableVersion,
       List<PackageVersionViewModel>? availableVersions,
       bool? isLatestVersionInstalled,
       String? url,
@@ -230,6 +232,7 @@ class _$PackageViewModelCopyWithImpl<$Res, $Val extends PackageViewModel>
   $Res call({
     Object? name = null,
     Object? installedVersion = freezed,
+    Object? installableVersion = freezed,
     Object? availableVersions = freezed,
     Object? isLatestVersionInstalled = freezed,
     Object? url = freezed,
@@ -244,6 +247,10 @@ class _$PackageViewModelCopyWithImpl<$Res, $Val extends PackageViewModel>
       installedVersion: freezed == installedVersion
           ? _value.installedVersion
           : installedVersion // ignore: cast_nullable_to_non_nullable
+              as String?,
+      installableVersion: freezed == installableVersion
+          ? _value.installableVersion
+          : installableVersion // ignore: cast_nullable_to_non_nullable
               as String?,
       availableVersions: freezed == availableVersions
           ? _value.availableVersions
@@ -280,6 +287,7 @@ abstract class _$$_PackageViewModelCopyWith<$Res>
   $Res call(
       {String name,
       String? installedVersion,
+      String? installableVersion,
       List<PackageVersionViewModel>? availableVersions,
       bool? isLatestVersionInstalled,
       String? url,
@@ -300,6 +308,7 @@ class __$$_PackageViewModelCopyWithImpl<$Res>
   $Res call({
     Object? name = null,
     Object? installedVersion = freezed,
+    Object? installableVersion = freezed,
     Object? availableVersions = freezed,
     Object? isLatestVersionInstalled = freezed,
     Object? url = freezed,
@@ -314,6 +323,10 @@ class __$$_PackageViewModelCopyWithImpl<$Res>
       installedVersion: freezed == installedVersion
           ? _value.installedVersion
           : installedVersion // ignore: cast_nullable_to_non_nullable
+              as String?,
+      installableVersion: freezed == installableVersion
+          ? _value.installableVersion
+          : installableVersion // ignore: cast_nullable_to_non_nullable
               as String?,
       availableVersions: freezed == availableVersions
           ? _value._availableVersions
@@ -345,6 +358,7 @@ class _$_PackageViewModel extends _PackageViewModel {
   const _$_PackageViewModel(
       {required this.name,
       required this.installedVersion,
+      required this.installableVersion,
       required final List<PackageVersionViewModel>? availableVersions,
       required this.isLatestVersionInstalled,
       required this.url,
@@ -357,6 +371,8 @@ class _$_PackageViewModel extends _PackageViewModel {
   final String name;
   @override
   final String? installedVersion;
+  @override
+  final String? installableVersion;
 // required String? resolvableVersion,
 // required PackageVersion? latestVersion,
   final List<PackageVersionViewModel>? _availableVersions;
@@ -383,7 +399,7 @@ class _$_PackageViewModel extends _PackageViewModel {
 
   @override
   String toString() {
-    return 'PackageViewModel(name: $name, installedVersion: $installedVersion, availableVersions: $availableVersions, isLatestVersionInstalled: $isLatestVersionInstalled, url: $url, changelogUrl: $changelogUrl, description: $description)';
+    return 'PackageViewModel(name: $name, installedVersion: $installedVersion, installableVersion: $installableVersion, availableVersions: $availableVersions, isLatestVersionInstalled: $isLatestVersionInstalled, url: $url, changelogUrl: $changelogUrl, description: $description)';
   }
 
   @override
@@ -394,6 +410,8 @@ class _$_PackageViewModel extends _PackageViewModel {
             (identical(other.name, name) || other.name == name) &&
             (identical(other.installedVersion, installedVersion) ||
                 other.installedVersion == installedVersion) &&
+            (identical(other.installableVersion, installableVersion) ||
+                other.installableVersion == installableVersion) &&
             const DeepCollectionEquality()
                 .equals(other._availableVersions, _availableVersions) &&
             (identical(
@@ -411,6 +429,7 @@ class _$_PackageViewModel extends _PackageViewModel {
       runtimeType,
       name,
       installedVersion,
+      installableVersion,
       const DeepCollectionEquality().hash(_availableVersions),
       isLatestVersionInstalled,
       url,
@@ -428,6 +447,7 @@ abstract class _PackageViewModel extends PackageViewModel {
   const factory _PackageViewModel(
       {required final String name,
       required final String? installedVersion,
+      required final String? installableVersion,
       required final List<PackageVersionViewModel>? availableVersions,
       required final bool? isLatestVersionInstalled,
       required final String? url,
@@ -439,6 +459,8 @@ abstract class _PackageViewModel extends PackageViewModel {
   String get name;
   @override
   String? get installedVersion;
+  @override
+  String? get installableVersion;
   @override // required String? resolvableVersion,
 // required PackageVersion? latestVersion,
   List<PackageVersionViewModel>? get availableVersions;
