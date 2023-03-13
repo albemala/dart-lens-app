@@ -2,26 +2,25 @@ import 'package:dart_lens/views/project-structure/project-structure-view-bloc.da
 import 'package:flex_seed_scheme/flex_seed_scheme.dart';
 import 'package:flextras/flextras.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class ProjectStructureView extends HookWidget {
+class ProjectStructureView extends StatelessWidget {
   const ProjectStructureView({
     super.key,
   });
 
   @override
   Widget build(BuildContext context) {
-    final bloc = useState(ProjectStructureViewBloc(context));
-    useEffect(
-      () => bloc.value.close,
-      [bloc],
+    return BlocProvider(
+      create: ProjectStructureViewBloc.new,
+      child: BlocBuilder<ProjectStructureViewBloc, ProjectStructureViewModel>(
+        builder: _buildView,
+      ),
     );
-    final blocStream = useStream(bloc.value.stream);
-    final viewModel = blocStream.data ?? bloc.value.state;
+  }
 
-    // print('ProjectStructureView.build() viewModel: $viewModel');
-
+  Widget _buildView(BuildContext context, ProjectStructureViewModel viewModel) {
     if (viewModel.projectPath.isEmpty) return const SizedBox();
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -31,17 +30,17 @@ class ProjectStructureView extends HookWidget {
             horizontal: constraints.maxWidth,
             vertical: constraints.maxHeight,
           ),
-          child: ProjectStrructureElementView(viewModel: viewModel),
+          child: ProjectStructureElementView(viewModel: viewModel),
         );
       },
     );
   }
 }
 
-class ProjectStrructureElementView extends StatelessWidget {
+class ProjectStructureElementView extends StatelessWidget {
   final ProjectStructureViewModel viewModel;
 
-  const ProjectStrructureElementView({
+  const ProjectStructureElementView({
     super.key,
     required this.viewModel,
   });

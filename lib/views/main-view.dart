@@ -7,9 +7,8 @@ import 'package:flextras/flextras.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 
-class MainView extends HookWidget {
+class MainView extends StatelessWidget {
   const MainView({
     super.key,
   });
