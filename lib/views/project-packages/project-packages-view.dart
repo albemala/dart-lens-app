@@ -174,6 +174,9 @@ class _PackageVersionSelectorView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final roundedRectangleShape = RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(4),
+    );
     final textStyle = Theme.of(context).textTheme.bodyMedium;
     final selectVersionBackgroundColor =
         Theme.of(context).colorScheme.secondaryContainer;
@@ -187,37 +190,34 @@ class _PackageVersionSelectorView extends StatelessWidget {
         Theme.of(context).colorScheme.secondary;
     final changeToVersionTextColor = Theme.of(context).colorScheme.onSecondary;
 
-    final isLatestVersionNotInstalled =
-        dependency.isLatestVersionInstalled != null &&
-            !dependency.isLatestVersionInstalled!;
+    final isLatestVersionInstalled =
+        dependency.isLatestVersionInstalled ?? true;
 
     return SeparatedRow(
       children: [
-        DecoratedBox(
-          decoration: BoxDecoration(
-            color: selectVersionBackgroundColor,
-            borderRadius: BorderRadius.circular(4),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4),
-            child: PopupMenuButton<String>(
-              tooltip: 'Select version',
-              initialValue: dependency.installedVersion,
-              onSelected: (version) {
-                context
-                    .read<ProjectPackagesViewBloc>()
-                    .selectPackageVersion(dependency.name, version);
-              },
-              itemBuilder: (itemBuilderContext) {
-                return dependency.availableVersions?.map((version) {
-                      return PopupMenuItem<String>(
-                        value: version.version,
-                        enabled: version.isInstallable,
-                        child: _VersionMenuItemView(version: version),
-                      );
-                    }).toList() ??
-                    [];
-              },
+        Material(
+          shape: roundedRectangleShape,
+          color: selectVersionBackgroundColor,
+          child: PopupMenuButton<String>(
+            tooltip: 'Select version',
+            initialValue: dependency.installedVersion,
+            onSelected: (version) {
+              context
+                  .read<ProjectPackagesViewBloc>()
+                  .selectPackageVersion(dependency.name, version);
+            },
+            itemBuilder: (itemBuilderContext) {
+              return dependency.availableVersions?.map((version) {
+                    return PopupMenuItem<String>(
+                      value: version.version,
+                      enabled: version.isInstallable,
+                      child: _VersionMenuItemView(version: version),
+                    );
+                  }).toList() ??
+                  [];
+            },
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
               child: SeparatedRow(
                 children: [
                   Text(
@@ -237,60 +237,78 @@ class _PackageVersionSelectorView extends StatelessWidget {
             ),
           ),
         ),
-        if (isLatestVersionNotInstalled)
+        if (!isLatestVersionInstalled)
           Tooltip(
-            message: 'New version: ${dependency.installableVersion}',
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                color: newVersionBackgroundColor,
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                child: SeparatedRow(
-                  children: [
-                    Icon(
-                      CupertinoIcons.up_arrow,
-                      color: newVersionTextColor,
-                      size: 12,
-                    ),
-                    Text(
-                      dependency.installableVersion ?? '',
-                      style: textStyle?.copyWith(
+            message:
+                'Latest version: ${dependency.installableVersion}. Click to select.',
+            child: Material(
+              shape: roundedRectangleShape,
+              color: newVersionBackgroundColor,
+              child: InkWell(
+                onTap: () {
+                  context //
+                      .read<ProjectPackagesViewBloc>()
+                      .selectPackageVersion(
+                        dependency.name,
+                        dependency.installableVersion!,
+                      );
+                },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: SeparatedRow(
+                    children: [
+                      Icon(
+                        CupertinoIcons.up_arrow,
                         color: newVersionTextColor,
+                        size: 12,
                       ),
-                    ),
-                  ],
-                  separatorBuilder: () => const SizedBox(width: 2),
+                      Text(
+                        dependency.installableVersion ?? '',
+                        style: textStyle?.copyWith(
+                          color: newVersionTextColor,
+                        ),
+                      ),
+                    ],
+                    separatorBuilder: () => const SizedBox(width: 2),
+                  ),
                 ),
               ),
             ),
           ),
         if (dependency.changeToVersion != null)
           Tooltip(
-            message: 'Change to version: ${dependency.changeToVersion}',
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                color: changeToVersionBackgroundColor,
-                borderRadius: BorderRadius.circular(4),
-              ),
+            message:
+                'Change to version: ${dependency.changeToVersion}. Click to reset.',
+            child: Material(
+              shape: roundedRectangleShape,
+              color: changeToVersionBackgroundColor,
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 4),
-                child: SeparatedRow(
-                  children: [
-                    Icon(
-                      CupertinoIcons.arrow_2_squarepath,
-                      color: changeToVersionTextColor,
-                      size: 12,
-                    ),
-                    Text(
-                      dependency.changeToVersion ?? '',
-                      style: textStyle?.copyWith(
+                child: InkWell(
+                  onTap: () {
+                    context //
+                        .read<ProjectPackagesViewBloc>()
+                        .selectPackageVersion(
+                          dependency.name,
+                          dependency.installedVersion!,
+                        );
+                  },
+                  child: SeparatedRow(
+                    children: [
+                      Icon(
+                        CupertinoIcons.arrow_2_squarepath,
                         color: changeToVersionTextColor,
+                        size: 12,
                       ),
-                    ),
-                  ],
-                  separatorBuilder: () => const SizedBox(width: 2),
+                      Text(
+                        dependency.changeToVersion ?? '',
+                        style: textStyle?.copyWith(
+                          color: changeToVersionTextColor,
+                        ),
+                      ),
+                    ],
+                    separatorBuilder: () => const SizedBox(width: 2),
+                  ),
                 ),
               ),
             ),
@@ -312,9 +330,19 @@ class _VersionMenuItemView extends StatelessWidget {
   Widget build(BuildContext context) {
     return SeparatedRow(
       children: [
-        if (version.isInstalled)
+        if (version.isInstalled && !version.willBeUninstalled)
           const Icon(
-            CupertinoIcons.checkmark,
+            CupertinoIcons.arrow_right,
+            size: 12,
+          ),
+        if (version.willBeInstalled)
+          const Icon(
+            CupertinoIcons.checkmark_alt,
+            size: 12,
+          ),
+        if (version.willBeUninstalled)
+          const Icon(
+            CupertinoIcons.xmark,
             size: 12,
           ),
         Text(version.version),

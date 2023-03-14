@@ -15,7 +15,5 @@ bool isPackageInstallable(
 }
 
 bool isPackageLatestVersionInstalled(Package package) {
-  final isLatestVersionInstalled =
-      package.installedVersion == package.latestVersion?.version;
-  return isLatestVersionInstalled;
+  return package.installedVersion == package.resolvableVersion;
 }

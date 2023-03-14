@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:collection/collection.dart';
 import 'package:dart_lens/blocs/project-analysis-bloc.dart';
 import 'package:dart_lens/functions/package.dart';
 import 'package:dart_lens/models/package/package.dart';
@@ -90,14 +91,17 @@ IList<PackageViewModel> _updatePackagesToChangeVersion(
   String version,
 ) {
   return dependencies.map((packageViewModel) {
+    final isInstalledVersion = packageViewModel.installedVersion == version;
     if (packageViewModel.name == name) {
       return packageViewModel.copyWith(
-        changeToVersion: version,
+        changeToVersion: !isInstalledVersion ? version : null,
         availableVersions: packageViewModel.availableVersions?.map(
           (packageVersionViewModel) {
             return packageVersionViewModel.copyWith(
-              willBeInstalled: packageVersionViewModel.version == version,
-              willBeUninstalled: packageVersionViewModel.isInstalled &&
+              willBeInstalled: !isInstalledVersion &&
+                  packageVersionViewModel.version == version,
+              willBeUninstalled: !isInstalledVersion &&
+                  packageVersionViewModel.isInstalled &&
                   packageVersionViewModel.version != version,
             );
           },
@@ -173,17 +177,31 @@ class ProjectPackagesViewBloc extends Cubit<ProjectPackagesViewModel> {
       name,
       version,
     );
+
     final devDependencies = _updatePackagesToChangeVersion(
       state.devDependencies,
       name,
       version,
     );
-    final packageVersionsToChange = state.packageVersionsToChange.update(
-      name,
-      (value) => version,
-      ifAbsent: () => version,
-    );
-    print(packageVersionsToChange);
+
+    final installedVersion = state.dependencies
+            .firstWhereOrNull(
+              (packageViewModel) => packageViewModel.name == name,
+            )
+            ?.installedVersion ??
+        state.devDependencies
+            .firstWhereOrNull(
+              (packageViewModel) => packageViewModel.name == name,
+            )
+            ?.installedVersion;
+    final packageVersionsToChange = installedVersion == version
+        ? state.packageVersionsToChange.remove(name)
+        : state.packageVersionsToChange.update(
+            name,
+            (value) => version,
+            ifAbsent: () => version,
+          );
+
     emit(
       state.copyWith(
         dependencies: dependencies,
