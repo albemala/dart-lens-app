@@ -42,5 +42,5 @@ String? findResolvableVersion(
     (package) => package.package == packageName,
   );
   if (outdatedPackage == null) return null;
-  return outdatedPackage.resolvable.version;
+  return outdatedPackage.resolvable?.version;
 }

@@ -7,7 +7,9 @@ analyzer:
 
 linter:
   rules:
+    sort_pub_dependencies: false
+    file_names: false
     public_member_api_docs: false
     sort_constructors_first: false
-    file_names: false
     sort_unnamed_constructors_first: false
+    always_put_required_named_parameters_first: false

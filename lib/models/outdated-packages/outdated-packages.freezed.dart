@@ -166,10 +166,10 @@ OutdatedPackage _$OutdatedPackageFromJson(Map<String, dynamic> json) {
 mixin _$OutdatedPackage {
   String get package => throw _privateConstructorUsedError;
   bool get isDiscontinued => throw _privateConstructorUsedError;
-  PackageResolution get current => throw _privateConstructorUsedError;
-  PackageResolution get upgradable => throw _privateConstructorUsedError;
-  PackageResolution get resolvable => throw _privateConstructorUsedError;
-  PackageResolution get latest => throw _privateConstructorUsedError;
+  PackageResolution? get current => throw _privateConstructorUsedError;
+  PackageResolution? get upgradable => throw _privateConstructorUsedError;
+  PackageResolution? get resolvable => throw _privateConstructorUsedError;
+  PackageResolution? get latest => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
@@ -186,15 +186,15 @@ abstract class $OutdatedPackageCopyWith<$Res> {
   $Res call(
       {String package,
       bool isDiscontinued,
-      PackageResolution current,
-      PackageResolution upgradable,
-      PackageResolution resolvable,
-      PackageResolution latest});
+      PackageResolution? current,
+      PackageResolution? upgradable,
+      PackageResolution? resolvable,
+      PackageResolution? latest});
 
-  $PackageResolutionCopyWith<$Res> get current;
-  $PackageResolutionCopyWith<$Res> get upgradable;
-  $PackageResolutionCopyWith<$Res> get resolvable;
-  $PackageResolutionCopyWith<$Res> get latest;
+  $PackageResolutionCopyWith<$Res>? get current;
+  $PackageResolutionCopyWith<$Res>? get upgradable;
+  $PackageResolutionCopyWith<$Res>? get resolvable;
+  $PackageResolutionCopyWith<$Res>? get latest;
 }
 
 /// @nodoc
@@ -212,10 +212,10 @@ class _$OutdatedPackageCopyWithImpl<$Res, $Val extends OutdatedPackage>
   $Res call({
     Object? package = null,
     Object? isDiscontinued = null,
-    Object? current = null,
-    Object? upgradable = null,
-    Object? resolvable = null,
-    Object? latest = null,
+    Object? current = freezed,
+    Object? upgradable = freezed,
+    Object? resolvable = freezed,
+    Object? latest = freezed,
   }) {
     return _then(_value.copyWith(
       package: null == package
@@ -226,53 +226,69 @@ class _$OutdatedPackageCopyWithImpl<$Res, $Val extends OutdatedPackage>
           ? _value.isDiscontinued
           : isDiscontinued // ignore: cast_nullable_to_non_nullable
               as bool,
-      current: null == current
+      current: freezed == current
           ? _value.current
           : current // ignore: cast_nullable_to_non_nullable
-              as PackageResolution,
-      upgradable: null == upgradable
+              as PackageResolution?,
+      upgradable: freezed == upgradable
           ? _value.upgradable
           : upgradable // ignore: cast_nullable_to_non_nullable
-              as PackageResolution,
-      resolvable: null == resolvable
+              as PackageResolution?,
+      resolvable: freezed == resolvable
           ? _value.resolvable
           : resolvable // ignore: cast_nullable_to_non_nullable
-              as PackageResolution,
-      latest: null == latest
+              as PackageResolution?,
+      latest: freezed == latest
           ? _value.latest
           : latest // ignore: cast_nullable_to_non_nullable
-              as PackageResolution,
+              as PackageResolution?,
     ) as $Val);
   }
 
   @override
   @pragma('vm:prefer-inline')
-  $PackageResolutionCopyWith<$Res> get current {
-    return $PackageResolutionCopyWith<$Res>(_value.current, (value) {
+  $PackageResolutionCopyWith<$Res>? get current {
+    if (_value.current == null) {
+      return null;
+    }
+
+    return $PackageResolutionCopyWith<$Res>(_value.current!, (value) {
       return _then(_value.copyWith(current: value) as $Val);
     });
   }
 
   @override
   @pragma('vm:prefer-inline')
-  $PackageResolutionCopyWith<$Res> get upgradable {
-    return $PackageResolutionCopyWith<$Res>(_value.upgradable, (value) {
+  $PackageResolutionCopyWith<$Res>? get upgradable {
+    if (_value.upgradable == null) {
+      return null;
+    }
+
+    return $PackageResolutionCopyWith<$Res>(_value.upgradable!, (value) {
       return _then(_value.copyWith(upgradable: value) as $Val);
     });
   }
 
   @override
   @pragma('vm:prefer-inline')
-  $PackageResolutionCopyWith<$Res> get resolvable {
-    return $PackageResolutionCopyWith<$Res>(_value.resolvable, (value) {
+  $PackageResolutionCopyWith<$Res>? get resolvable {
+    if (_value.resolvable == null) {
+      return null;
+    }
+
+    return $PackageResolutionCopyWith<$Res>(_value.resolvable!, (value) {
       return _then(_value.copyWith(resolvable: value) as $Val);
     });
   }
 
   @override
   @pragma('vm:prefer-inline')
-  $PackageResolutionCopyWith<$Res> get latest {
-    return $PackageResolutionCopyWith<$Res>(_value.latest, (value) {
+  $PackageResolutionCopyWith<$Res>? get latest {
+    if (_value.latest == null) {
+      return null;
+    }
+
+    return $PackageResolutionCopyWith<$Res>(_value.latest!, (value) {
       return _then(_value.copyWith(latest: value) as $Val);
     });
   }
@@ -289,19 +305,19 @@ abstract class _$$_OutdatedPackageCopyWith<$Res>
   $Res call(
       {String package,
       bool isDiscontinued,
-      PackageResolution current,
-      PackageResolution upgradable,
-      PackageResolution resolvable,
-      PackageResolution latest});
+      PackageResolution? current,
+      PackageResolution? upgradable,
+      PackageResolution? resolvable,
+      PackageResolution? latest});
 
   @override
-  $PackageResolutionCopyWith<$Res> get current;
+  $PackageResolutionCopyWith<$Res>? get current;
   @override
-  $PackageResolutionCopyWith<$Res> get upgradable;
+  $PackageResolutionCopyWith<$Res>? get upgradable;
   @override
-  $PackageResolutionCopyWith<$Res> get resolvable;
+  $PackageResolutionCopyWith<$Res>? get resolvable;
   @override
-  $PackageResolutionCopyWith<$Res> get latest;
+  $PackageResolutionCopyWith<$Res>? get latest;
 }
 
 /// @nodoc
@@ -317,10 +333,10 @@ class __$$_OutdatedPackageCopyWithImpl<$Res>
   $Res call({
     Object? package = null,
     Object? isDiscontinued = null,
-    Object? current = null,
-    Object? upgradable = null,
-    Object? resolvable = null,
-    Object? latest = null,
+    Object? current = freezed,
+    Object? upgradable = freezed,
+    Object? resolvable = freezed,
+    Object? latest = freezed,
   }) {
     return _then(_$_OutdatedPackage(
       package: null == package
@@ -331,22 +347,22 @@ class __$$_OutdatedPackageCopyWithImpl<$Res>
           ? _value.isDiscontinued
           : isDiscontinued // ignore: cast_nullable_to_non_nullable
               as bool,
-      current: null == current
+      current: freezed == current
           ? _value.current
           : current // ignore: cast_nullable_to_non_nullable
-              as PackageResolution,
-      upgradable: null == upgradable
+              as PackageResolution?,
+      upgradable: freezed == upgradable
           ? _value.upgradable
           : upgradable // ignore: cast_nullable_to_non_nullable
-              as PackageResolution,
-      resolvable: null == resolvable
+              as PackageResolution?,
+      resolvable: freezed == resolvable
           ? _value.resolvable
           : resolvable // ignore: cast_nullable_to_non_nullable
-              as PackageResolution,
-      latest: null == latest
+              as PackageResolution?,
+      latest: freezed == latest
           ? _value.latest
           : latest // ignore: cast_nullable_to_non_nullable
-              as PackageResolution,
+              as PackageResolution?,
     ));
   }
 }
@@ -370,13 +386,13 @@ class _$_OutdatedPackage implements _OutdatedPackage {
   @override
   final bool isDiscontinued;
   @override
-  final PackageResolution current;
+  final PackageResolution? current;
   @override
-  final PackageResolution upgradable;
+  final PackageResolution? upgradable;
   @override
-  final PackageResolution resolvable;
+  final PackageResolution? resolvable;
   @override
-  final PackageResolution latest;
+  final PackageResolution? latest;
 
   @override
   String toString() {
@@ -422,10 +438,10 @@ abstract class _OutdatedPackage implements OutdatedPackage {
   const factory _OutdatedPackage(
       {required final String package,
       required final bool isDiscontinued,
-      required final PackageResolution current,
-      required final PackageResolution upgradable,
-      required final PackageResolution resolvable,
-      required final PackageResolution latest}) = _$_OutdatedPackage;
+      required final PackageResolution? current,
+      required final PackageResolution? upgradable,
+      required final PackageResolution? resolvable,
+      required final PackageResolution? latest}) = _$_OutdatedPackage;
 
   factory _OutdatedPackage.fromJson(Map<String, dynamic> json) =
       _$_OutdatedPackage.fromJson;
@@ -435,13 +451,13 @@ abstract class _OutdatedPackage implements OutdatedPackage {
   @override
   bool get isDiscontinued;
   @override
-  PackageResolution get current;
+  PackageResolution? get current;
   @override
-  PackageResolution get upgradable;
+  PackageResolution? get upgradable;
   @override
-  PackageResolution get resolvable;
+  PackageResolution? get resolvable;
   @override
-  PackageResolution get latest;
+  PackageResolution? get latest;
   @override
   @JsonKey(ignore: true)
   _$$_OutdatedPackageCopyWith<_$_OutdatedPackage> get copyWith =>

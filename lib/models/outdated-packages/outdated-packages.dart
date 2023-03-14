@@ -18,10 +18,10 @@ class OutdatedPackage with _$OutdatedPackage {
   const factory OutdatedPackage({
     required String package,
     required bool isDiscontinued,
-    required PackageResolution current,
-    required PackageResolution upgradable,
-    required PackageResolution resolvable,
-    required PackageResolution latest,
+    required PackageResolution? current,
+    required PackageResolution? upgradable,
+    required PackageResolution? resolvable,
+    required PackageResolution? latest,
   }) = _OutdatedPackage;
 
   factory OutdatedPackage.fromJson(Map<String, dynamic> json) =>
