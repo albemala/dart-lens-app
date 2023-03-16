@@ -10,12 +10,17 @@ DartLens will help you navigate your projects with ease.
 |:-----:|:-------:|:-----:|
 |   ✅   |    ✅    |   ✅   |
 
-<video width="540" controls>
-    <source src="screenshots/1.0/video-1.mp4" type="video/mp4">
-</video>
-<video width="540" controls>
-    <source src="screenshots/1.1/packages.mp4" type="video/mp4">
-</video>
+
+---
+
+https://user-images.githubusercontent.com/2332860/225592833-f351d00c-2582-4ee3-91ef-8795729a5c7c.mp4
+
+---
+
+https://user-images.githubusercontent.com/2332860/225593097-3298bebd-4fcf-4a2b-85a9-c066760522c4.mp4
+
+---
+
 <a href="screenshots/1.0/1.jpg">
     <img src="screenshots/1.0/1.jpg" alt="DartLens screenshot 1" width="320"/>
 </a>
