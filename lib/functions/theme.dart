@@ -20,6 +20,7 @@ ThemeData generateLightThemeData(
       scheme: flexScheme,
       surfaceMode: _surfaceMode,
       blendLevel: _blendLevel,
+      tabBarStyle: FlexTabBarStyle.forBackground,
       subThemesData: _subThemesData,
       visualDensity: _visualDensity,
       fontFamily: _fontFamily,
@@ -36,6 +37,7 @@ ThemeData generateDarkThemeData(
       scheme: flexScheme,
       surfaceMode: _surfaceMode,
       blendLevel: _blendLevel,
+      tabBarStyle: FlexTabBarStyle.forBackground,
       subThemesData: _subThemesData,
       visualDensity: _visualDensity,
       fontFamily: _fontFamily,
@@ -46,6 +48,11 @@ ThemeData generateDarkThemeData(
 
 ThemeData _setupThemeData(ThemeData themeData) {
   return themeData.copyWith(
-      // iconTheme: const IconThemeData(size: 21),
-      );
+    iconTheme: themeData.iconTheme.copyWith(
+      size: 18,
+    ),
+    dividerTheme: themeData.dividerTheme.copyWith(
+      space: 1,
+    ),
+  );
 }

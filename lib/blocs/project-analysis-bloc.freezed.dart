@@ -3,7 +3,7 @@
 // ignore_for_file: type=lint
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
-part of 'project-structure-bloc.dart';
+part of 'project-analysis-bloc.dart';
 
 // **************************************************************************
 // FreezedGenerator
@@ -15,36 +15,38 @@ final _privateConstructorUsedError = UnsupportedError(
     'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#custom-getters-and-methods');
 
 /// @nodoc
-mixin _$ProjectStructureBlocState {
+mixin _$ProjectAnalysisBlocState {
   String? get projectPath => throw _privateConstructorUsedError;
+  List<Package>? get packages => throw _privateConstructorUsedError;
   List<ResolvedUnitResult>? get resolvedUnitResults =>
       throw _privateConstructorUsedError;
   bool get isLoading => throw _privateConstructorUsedError;
   String? get loadingError => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
-  $ProjectStructureBlocStateCopyWith<ProjectStructureBlocState> get copyWith =>
+  $ProjectAnalysisBlocStateCopyWith<ProjectAnalysisBlocState> get copyWith =>
       throw _privateConstructorUsedError;
 }
 
 /// @nodoc
-abstract class $ProjectStructureBlocStateCopyWith<$Res> {
-  factory $ProjectStructureBlocStateCopyWith(ProjectStructureBlocState value,
-          $Res Function(ProjectStructureBlocState) then) =
-      _$ProjectStructureBlocStateCopyWithImpl<$Res, ProjectStructureBlocState>;
+abstract class $ProjectAnalysisBlocStateCopyWith<$Res> {
+  factory $ProjectAnalysisBlocStateCopyWith(ProjectAnalysisBlocState value,
+          $Res Function(ProjectAnalysisBlocState) then) =
+      _$ProjectAnalysisBlocStateCopyWithImpl<$Res, ProjectAnalysisBlocState>;
   @useResult
   $Res call(
       {String? projectPath,
+      List<Package>? packages,
       List<ResolvedUnitResult>? resolvedUnitResults,
       bool isLoading,
       String? loadingError});
 }
 
 /// @nodoc
-class _$ProjectStructureBlocStateCopyWithImpl<$Res,
-        $Val extends ProjectStructureBlocState>
-    implements $ProjectStructureBlocStateCopyWith<$Res> {
-  _$ProjectStructureBlocStateCopyWithImpl(this._value, this._then);
+class _$ProjectAnalysisBlocStateCopyWithImpl<$Res,
+        $Val extends ProjectAnalysisBlocState>
+    implements $ProjectAnalysisBlocStateCopyWith<$Res> {
+  _$ProjectAnalysisBlocStateCopyWithImpl(this._value, this._then);
 
   // ignore: unused_field
   final $Val _value;
@@ -55,6 +57,7 @@ class _$ProjectStructureBlocStateCopyWithImpl<$Res,
   @override
   $Res call({
     Object? projectPath = freezed,
+    Object? packages = freezed,
     Object? resolvedUnitResults = freezed,
     Object? isLoading = null,
     Object? loadingError = freezed,
@@ -64,6 +67,10 @@ class _$ProjectStructureBlocStateCopyWithImpl<$Res,
           ? _value.projectPath
           : projectPath // ignore: cast_nullable_to_non_nullable
               as String?,
+      packages: freezed == packages
+          ? _value.packages
+          : packages // ignore: cast_nullable_to_non_nullable
+              as List<Package>?,
       resolvedUnitResults: freezed == resolvedUnitResults
           ? _value.resolvedUnitResults
           : resolvedUnitResults // ignore: cast_nullable_to_non_nullable
@@ -81,44 +88,49 @@ class _$ProjectStructureBlocStateCopyWithImpl<$Res,
 }
 
 /// @nodoc
-abstract class _$$_ProjectStructureBlocStateCopyWith<$Res>
-    implements $ProjectStructureBlocStateCopyWith<$Res> {
-  factory _$$_ProjectStructureBlocStateCopyWith(
-          _$_ProjectStructureBlocState value,
-          $Res Function(_$_ProjectStructureBlocState) then) =
-      __$$_ProjectStructureBlocStateCopyWithImpl<$Res>;
+abstract class _$$_ProjectAnalysisBlocStateCopyWith<$Res>
+    implements $ProjectAnalysisBlocStateCopyWith<$Res> {
+  factory _$$_ProjectAnalysisBlocStateCopyWith(
+          _$_ProjectAnalysisBlocState value,
+          $Res Function(_$_ProjectAnalysisBlocState) then) =
+      __$$_ProjectAnalysisBlocStateCopyWithImpl<$Res>;
   @override
   @useResult
   $Res call(
       {String? projectPath,
+      List<Package>? packages,
       List<ResolvedUnitResult>? resolvedUnitResults,
       bool isLoading,
       String? loadingError});
 }
 
 /// @nodoc
-class __$$_ProjectStructureBlocStateCopyWithImpl<$Res>
-    extends _$ProjectStructureBlocStateCopyWithImpl<$Res,
-        _$_ProjectStructureBlocState>
-    implements _$$_ProjectStructureBlocStateCopyWith<$Res> {
-  __$$_ProjectStructureBlocStateCopyWithImpl(
-      _$_ProjectStructureBlocState _value,
-      $Res Function(_$_ProjectStructureBlocState) _then)
+class __$$_ProjectAnalysisBlocStateCopyWithImpl<$Res>
+    extends _$ProjectAnalysisBlocStateCopyWithImpl<$Res,
+        _$_ProjectAnalysisBlocState>
+    implements _$$_ProjectAnalysisBlocStateCopyWith<$Res> {
+  __$$_ProjectAnalysisBlocStateCopyWithImpl(_$_ProjectAnalysisBlocState _value,
+      $Res Function(_$_ProjectAnalysisBlocState) _then)
       : super(_value, _then);
 
   @pragma('vm:prefer-inline')
   @override
   $Res call({
     Object? projectPath = freezed,
+    Object? packages = freezed,
     Object? resolvedUnitResults = freezed,
     Object? isLoading = null,
     Object? loadingError = freezed,
   }) {
-    return _then(_$_ProjectStructureBlocState(
+    return _then(_$_ProjectAnalysisBlocState(
       projectPath: freezed == projectPath
           ? _value.projectPath
           : projectPath // ignore: cast_nullable_to_non_nullable
               as String?,
+      packages: freezed == packages
+          ? _value._packages
+          : packages // ignore: cast_nullable_to_non_nullable
+              as List<Package>?,
       resolvedUnitResults: freezed == resolvedUnitResults
           ? _value._resolvedUnitResults
           : resolvedUnitResults // ignore: cast_nullable_to_non_nullable
@@ -137,17 +149,30 @@ class __$$_ProjectStructureBlocStateCopyWithImpl<$Res>
 
 /// @nodoc
 
-class _$_ProjectStructureBlocState extends _ProjectStructureBlocState {
-  const _$_ProjectStructureBlocState(
+class _$_ProjectAnalysisBlocState extends _ProjectAnalysisBlocState
+    with DiagnosticableTreeMixin {
+  const _$_ProjectAnalysisBlocState(
       {required this.projectPath,
+      required final List<Package>? packages,
       required final List<ResolvedUnitResult>? resolvedUnitResults,
       required this.isLoading,
       required this.loadingError})
-      : _resolvedUnitResults = resolvedUnitResults,
+      : _packages = packages,
+        _resolvedUnitResults = resolvedUnitResults,
         super._();
 
   @override
   final String? projectPath;
+  final List<Package>? _packages;
+  @override
+  List<Package>? get packages {
+    final value = _packages;
+    if (value == null) return null;
+    if (_packages is EqualUnmodifiableListView) return _packages;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(value);
+  }
+
   final List<ResolvedUnitResult>? _resolvedUnitResults;
   @override
   List<ResolvedUnitResult>? get resolvedUnitResults {
@@ -165,17 +190,30 @@ class _$_ProjectStructureBlocState extends _ProjectStructureBlocState {
   final String? loadingError;
 
   @override
-  String toString() {
-    return 'ProjectStructureBlocState(projectPath: $projectPath, resolvedUnitResults: $resolvedUnitResults, isLoading: $isLoading, loadingError: $loadingError)';
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
+    return 'ProjectAnalysisBlocState(projectPath: $projectPath, packages: $packages, resolvedUnitResults: $resolvedUnitResults, isLoading: $isLoading, loadingError: $loadingError)';
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(DiagnosticsProperty('type', 'ProjectAnalysisBlocState'))
+      ..add(DiagnosticsProperty('projectPath', projectPath))
+      ..add(DiagnosticsProperty('packages', packages))
+      ..add(DiagnosticsProperty('resolvedUnitResults', resolvedUnitResults))
+      ..add(DiagnosticsProperty('isLoading', isLoading))
+      ..add(DiagnosticsProperty('loadingError', loadingError));
   }
 
   @override
   bool operator ==(dynamic other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _$_ProjectStructureBlocState &&
+            other is _$_ProjectAnalysisBlocState &&
             (identical(other.projectPath, projectPath) ||
                 other.projectPath == projectPath) &&
+            const DeepCollectionEquality().equals(other._packages, _packages) &&
             const DeepCollectionEquality()
                 .equals(other._resolvedUnitResults, _resolvedUnitResults) &&
             (identical(other.isLoading, isLoading) ||
@@ -188,6 +226,7 @@ class _$_ProjectStructureBlocState extends _ProjectStructureBlocState {
   int get hashCode => Object.hash(
       runtimeType,
       projectPath,
+      const DeepCollectionEquality().hash(_packages),
       const DeepCollectionEquality().hash(_resolvedUnitResults),
       isLoading,
       loadingError);
@@ -195,21 +234,24 @@ class _$_ProjectStructureBlocState extends _ProjectStructureBlocState {
   @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
-  _$$_ProjectStructureBlocStateCopyWith<_$_ProjectStructureBlocState>
-      get copyWith => __$$_ProjectStructureBlocStateCopyWithImpl<
-          _$_ProjectStructureBlocState>(this, _$identity);
+  _$$_ProjectAnalysisBlocStateCopyWith<_$_ProjectAnalysisBlocState>
+      get copyWith => __$$_ProjectAnalysisBlocStateCopyWithImpl<
+          _$_ProjectAnalysisBlocState>(this, _$identity);
 }
 
-abstract class _ProjectStructureBlocState extends ProjectStructureBlocState {
-  const factory _ProjectStructureBlocState(
+abstract class _ProjectAnalysisBlocState extends ProjectAnalysisBlocState {
+  const factory _ProjectAnalysisBlocState(
       {required final String? projectPath,
+      required final List<Package>? packages,
       required final List<ResolvedUnitResult>? resolvedUnitResults,
       required final bool isLoading,
-      required final String? loadingError}) = _$_ProjectStructureBlocState;
-  const _ProjectStructureBlocState._() : super._();
+      required final String? loadingError}) = _$_ProjectAnalysisBlocState;
+  const _ProjectAnalysisBlocState._() : super._();
 
   @override
   String? get projectPath;
+  @override
+  List<Package>? get packages;
   @override
   List<ResolvedUnitResult>? get resolvedUnitResults;
   @override
@@ -218,6 +260,6 @@ abstract class _ProjectStructureBlocState extends ProjectStructureBlocState {
   String? get loadingError;
   @override
   @JsonKey(ignore: true)
-  _$$_ProjectStructureBlocStateCopyWith<_$_ProjectStructureBlocState>
+  _$$_ProjectAnalysisBlocStateCopyWith<_$_ProjectAnalysisBlocState>
       get copyWith => throw _privateConstructorUsedError;
 }

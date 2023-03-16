@@ -6,8 +6,22 @@ packages, and more. The app gives you an overview of all the files, classes, and
 concise UML diagram of your project. Whether you're a seasoned developer or just starting with Dart and Flutter,
 DartLens will help you navigate your projects with ease.
 
-<img src="screenshots/1.0/1.jpg" alt="DartLens screenshot 1" width="540"/>
-<img src="screenshots/1.0/2.jpg" alt="DartLens screenshot 2" width="540"/>
+| macOS | Windows | Linux |
+|:-----:|:-------:|:-----:|
+|   ✅   |    ✅    |   ✅   |
+
+<video width="540" controls>
+    <source src="screenshots/1.0/video-1.mp4" type="video/mp4">
+</video>
+<video width="540" controls>
+    <source src="screenshots/1.1/packages.mp4" type="video/mp4">
+</video>
+<a href="screenshots/1.0/1.jpg">
+    <img src="screenshots/1.0/1.jpg" alt="DartLens screenshot 1" width="320"/>
+</a>
+<a href="screenshots/1.0/2.jpg">
+    <img src="screenshots/1.0/2.jpg" alt="DartLens screenshot 2" width="320"/>
+</a>
 
 ## How to run it
 
@@ -17,7 +31,7 @@ There are no official releases yet. You can run the app from source code with `f
 
 DartLens is developed in Flutter. It works on all desktop operating systems (macOS, Windows, Linux).
 
-**Note**: The app was developed and tested with **Flutter 3.3**.
+**Note**: The app was developed and tested with **Flutter 3.7**.
 
 Setup, how to run and build: https://docs.flutter.dev/desktop
 

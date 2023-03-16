@@ -3,44 +3,56 @@ description: An intuitive and powerful tool for exploring and managing Dart and 
 
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
-version: 1.0.0+1
+version: 1.1.0+2
 
 environment:
-  sdk: '>=2.18.6 <3.0.0'
+  sdk: '>=2.19.4 <3.0.0'
 
 dependencies:
   flutter:
     sdk: flutter
 
-  collection: ^1.16.0
+  collection: ^1.17.0
 
   # state management
   flutter_bloc: ^8.1.2
+  json_annotation: ^4.8.0
   freezed_annotation: ^2.2.0
   flutter_hooks: ^0.18.6
+  fast_immutable_collections: ^9.0.0
 
   path: ^1.8.2
-  file_picker: ^5.2.5
+  file_picker: ^5.2.6
+
+  url_launcher: ^6.1.10
 
   # UI
   google_fonts: ^4.0.3
   flex_color_scheme: ^6.1.2
-  flex_seed_scheme: ^1.1.0
+  flex_seed_scheme: ^1.2.2
   flextras: ^1.0.0
   cupertino_icons: ^1.0.5
 
-  analyzer: ^5.2.0
+  analyzer: ^5.7.1
+
+  pub_semver: ^2.1.3
+  pubspec_parse: ^1.2.2
+  pub_api_client: # ^2.4.0
+    git:
+      url: https://github.com/fluttertools/pub_api_client.git
+      ref: 10e90ad7436843a1cb224a477e22fda35be5cd77
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
   build_runner: ^2.3.3
+  json_serializable: ^6.6.1
   freezed: ^2.3.2
 
-  very_good_analysis: ^3.1.0
+  very_good_analysis: ^4.0.0+1
 
-  package_rename: ^1.0.0+1
+  package_rename: ^1.1.0
 
 flutter:
   uses-material-design: true
