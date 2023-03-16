@@ -21,7 +21,7 @@ Future<List<Package>> getPackages(
   final pubspec = Pubspec.parse(pubspecFileContent);
 
   final outdatedPackages = await runFlutterPubOutdated(projectDirectoryPath);
-  print('Outdated packages: $outdatedPackages');
+  // print('Outdated packages: $outdatedPackages');
   if (outdatedPackages == null) return [];
 
   final packages = <Package>[];
@@ -46,9 +46,6 @@ Future<List<Package>> getPackages(
       outdatedPackages,
     );
     packages.add(package);
-  }
-  for (final package in packages) {
-    print('Package: $package');
   }
   return packages;
 }

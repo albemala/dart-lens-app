@@ -15,14 +15,17 @@ class MainView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final projectAnalysisBloc = context.watch<ProjectAnalysisBloc>();
+
     return DefaultTabController(
       length: 2,
       child: Scaffold(
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: const [
-            _TopView(),
-            TabBar(
+          children: [
+            const _TopView(),
+            const Divider(),
+            const TabBar(
               isScrollable: true,
               tabs: [
                 Tab(text: 'Packages'),
@@ -30,14 +33,33 @@ class MainView extends StatelessWidget {
               ],
             ),
             Expanded(
-              child: TabBarView(
+              child: Stack(
                 children: [
-                  ProjectPackagesView(),
-                  ProjectStructureView(),
+                  const TabBarView(
+                    children: [
+                      ProjectPackagesView(),
+                      ProjectStructureView(),
+                    ],
+                  ),
+                  if (projectAnalysisBloc.state.isLoading)
+                    ColoredBox(
+                      color: Theme.of(context)
+                          .colorScheme
+                          .inverseSurface
+                          .withOpacity(0.3),
+                      child: const Center(
+                        child: SizedBox(
+                          width: 32,
+                          height: 32,
+                          child: CircularProgressIndicator(),
+                        ),
+                      ),
+                    ),
                 ],
               ),
             ),
-            _BottomView(),
+            const Divider(),
+            const _BottomView(),
           ],
         ),
       ),
@@ -59,8 +81,9 @@ class _TopView extends StatelessWidget {
     }
 
     return Material(
+      color: Theme.of(context).colorScheme.surfaceVariant,
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         child: SeparatedRow(
           children: [
             const Text(
@@ -82,6 +105,13 @@ class _TopView extends StatelessWidget {
                 height: 16,
                 child: CircularProgressIndicator(),
               ),
+            if (projectAnalysisBloc.state.projectPath != null &&
+                projectAnalysisBloc.state.projectPath!.isNotEmpty)
+              // button to reload the project
+              IconButton(
+                onPressed: projectAnalysisBloc.reloadProject,
+                icon: const Icon(CupertinoIcons.arrow_clockwise),
+              ),
           ],
           separatorBuilder: () => const SizedBox(width: 8),
         ),
@@ -98,6 +128,7 @@ class _BottomView extends StatelessWidget {
     final preferencesBloc = context.watch<PreferencesBloc>();
 
     return Material(
+      color: Theme.of(context).colorScheme.surfaceVariant,
       child: Padding(
         padding: const EdgeInsets.all(8),
         child: Row(

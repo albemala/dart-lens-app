@@ -24,23 +24,24 @@ class ProjectPackagesView extends StatelessWidget {
   Widget _buildView(BuildContext context, ProjectPackagesViewModel viewModel) {
     return Column(
       children: [
+        const Divider(),
         if (viewModel.packageVersionsToChange.isNotEmpty)
           Material(
-            color: Theme.of(context).colorScheme.surfaceVariant,
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: SeparatedRow(
                 children: [
-                  ElevatedButton(
-                    onPressed: () {
-/*
-                              context
-                                  .read<ProjectPackagesViewBloc>()
-                                  .changePackageVersions();
-*/
-                    },
-                    child: const Text('Apply changes'),
-                  ),
+                  if (viewModel.isApplyingChanges)
+                    const CircularProgressIndicator(),
+                  if (!viewModel.isApplyingChanges)
+                    ElevatedButton(
+                      onPressed: () {
+                        context //
+                            .read<ProjectPackagesViewBloc>()
+                            .applyPackageVersionChanges();
+                      },
+                      child: const Text('Apply changes'),
+                    ),
                   Text(
                     'You have changed ${viewModel.packageVersionsToChange.length} package(s)',
                   ),
@@ -202,15 +203,17 @@ class _PackageVersionSelectorView extends StatelessWidget {
             tooltip: 'Select version',
             initialValue: dependency.installedVersion,
             onSelected: (version) {
-              context
+              context //
                   .read<ProjectPackagesViewBloc>()
-                  .selectPackageVersion(dependency.name, version);
+                  .selectPackageVersion(
+                    dependency.name,
+                    version,
+                  );
             },
             itemBuilder: (itemBuilderContext) {
               return dependency.availableVersions?.map((version) {
                     return PopupMenuItem<String>(
                       value: version.version,
-                      enabled: version.isInstallable,
                       child: _VersionMenuItemView(version: version),
                     );
                   }).toList() ??
@@ -330,20 +333,37 @@ class _VersionMenuItemView extends StatelessWidget {
   Widget build(BuildContext context) {
     return SeparatedRow(
       children: [
+        if (!version.isInstallable)
+          const Tooltip(
+            message: 'Version might not be installable',
+            child: Icon(
+              CupertinoIcons.exclamationmark_triangle,
+              size: 12,
+            ),
+          ),
         if (version.isInstalled && !version.willBeUninstalled)
-          const Icon(
-            CupertinoIcons.arrow_right,
-            size: 12,
+          const Tooltip(
+            message: 'Version is installed',
+            child: Icon(
+              CupertinoIcons.arrow_right,
+              size: 12,
+            ),
           ),
         if (version.willBeInstalled)
-          const Icon(
-            CupertinoIcons.checkmark_alt,
-            size: 12,
+          const Tooltip(
+            message: 'Version will be installed',
+            child: Icon(
+              CupertinoIcons.checkmark_alt,
+              size: 12,
+            ),
           ),
         if (version.willBeUninstalled)
-          const Icon(
-            CupertinoIcons.xmark,
-            size: 12,
+          const Tooltip(
+            message: 'Version will be uninstalled',
+            child: Icon(
+              CupertinoIcons.xmark,
+              size: 12,
+            ),
           ),
         Text(version.version),
       ],

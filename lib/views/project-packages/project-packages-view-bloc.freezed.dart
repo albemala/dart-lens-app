@@ -22,6 +22,7 @@ mixin _$ProjectPackagesViewModel {
       throw _privateConstructorUsedError;
   IMap<String, String> get packageVersionsToChange =>
       throw _privateConstructorUsedError;
+  bool get isApplyingChanges => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
   $ProjectPackagesViewModelCopyWith<ProjectPackagesViewModel> get copyWith =>
@@ -37,7 +38,8 @@ abstract class $ProjectPackagesViewModelCopyWith<$Res> {
   $Res call(
       {IList<PackageViewModel> dependencies,
       IList<PackageViewModel> devDependencies,
-      IMap<String, String> packageVersionsToChange});
+      IMap<String, String> packageVersionsToChange,
+      bool isApplyingChanges});
 }
 
 /// @nodoc
@@ -57,6 +59,7 @@ class _$ProjectPackagesViewModelCopyWithImpl<$Res,
     Object? dependencies = null,
     Object? devDependencies = null,
     Object? packageVersionsToChange = null,
+    Object? isApplyingChanges = null,
   }) {
     return _then(_value.copyWith(
       dependencies: null == dependencies
@@ -71,6 +74,10 @@ class _$ProjectPackagesViewModelCopyWithImpl<$Res,
           ? _value.packageVersionsToChange
           : packageVersionsToChange // ignore: cast_nullable_to_non_nullable
               as IMap<String, String>,
+      isApplyingChanges: null == isApplyingChanges
+          ? _value.isApplyingChanges
+          : isApplyingChanges // ignore: cast_nullable_to_non_nullable
+              as bool,
     ) as $Val);
   }
 }
@@ -87,7 +94,8 @@ abstract class _$$_ProjectPackagesViewModelCopyWith<$Res>
   $Res call(
       {IList<PackageViewModel> dependencies,
       IList<PackageViewModel> devDependencies,
-      IMap<String, String> packageVersionsToChange});
+      IMap<String, String> packageVersionsToChange,
+      bool isApplyingChanges});
 }
 
 /// @nodoc
@@ -105,6 +113,7 @@ class __$$_ProjectPackagesViewModelCopyWithImpl<$Res>
     Object? dependencies = null,
     Object? devDependencies = null,
     Object? packageVersionsToChange = null,
+    Object? isApplyingChanges = null,
   }) {
     return _then(_$_ProjectPackagesViewModel(
       dependencies: null == dependencies
@@ -119,6 +128,10 @@ class __$$_ProjectPackagesViewModelCopyWithImpl<$Res>
           ? _value.packageVersionsToChange
           : packageVersionsToChange // ignore: cast_nullable_to_non_nullable
               as IMap<String, String>,
+      isApplyingChanges: null == isApplyingChanges
+          ? _value.isApplyingChanges
+          : isApplyingChanges // ignore: cast_nullable_to_non_nullable
+              as bool,
     ));
   }
 }
@@ -129,7 +142,8 @@ class _$_ProjectPackagesViewModel extends _ProjectPackagesViewModel {
   const _$_ProjectPackagesViewModel(
       {required this.dependencies,
       required this.devDependencies,
-      required this.packageVersionsToChange})
+      required this.packageVersionsToChange,
+      required this.isApplyingChanges})
       : super._();
 
   @override
@@ -138,10 +152,12 @@ class _$_ProjectPackagesViewModel extends _ProjectPackagesViewModel {
   final IList<PackageViewModel> devDependencies;
   @override
   final IMap<String, String> packageVersionsToChange;
+  @override
+  final bool isApplyingChanges;
 
   @override
   String toString() {
-    return 'ProjectPackagesViewModel(dependencies: $dependencies, devDependencies: $devDependencies, packageVersionsToChange: $packageVersionsToChange)';
+    return 'ProjectPackagesViewModel(dependencies: $dependencies, devDependencies: $devDependencies, packageVersionsToChange: $packageVersionsToChange, isApplyingChanges: $isApplyingChanges)';
   }
 
   @override
@@ -155,7 +171,9 @@ class _$_ProjectPackagesViewModel extends _ProjectPackagesViewModel {
                 .equals(other.devDependencies, devDependencies) &&
             (identical(
                     other.packageVersionsToChange, packageVersionsToChange) ||
-                other.packageVersionsToChange == packageVersionsToChange));
+                other.packageVersionsToChange == packageVersionsToChange) &&
+            (identical(other.isApplyingChanges, isApplyingChanges) ||
+                other.isApplyingChanges == isApplyingChanges));
   }
 
   @override
@@ -163,7 +181,8 @@ class _$_ProjectPackagesViewModel extends _ProjectPackagesViewModel {
       runtimeType,
       const DeepCollectionEquality().hash(dependencies),
       const DeepCollectionEquality().hash(devDependencies),
-      packageVersionsToChange);
+      packageVersionsToChange,
+      isApplyingChanges);
 
   @JsonKey(ignore: true)
   @override
@@ -175,10 +194,10 @@ class _$_ProjectPackagesViewModel extends _ProjectPackagesViewModel {
 
 abstract class _ProjectPackagesViewModel extends ProjectPackagesViewModel {
   const factory _ProjectPackagesViewModel(
-          {required final IList<PackageViewModel> dependencies,
-          required final IList<PackageViewModel> devDependencies,
-          required final IMap<String, String> packageVersionsToChange}) =
-      _$_ProjectPackagesViewModel;
+      {required final IList<PackageViewModel> dependencies,
+      required final IList<PackageViewModel> devDependencies,
+      required final IMap<String, String> packageVersionsToChange,
+      required final bool isApplyingChanges}) = _$_ProjectPackagesViewModel;
   const _ProjectPackagesViewModel._() : super._();
 
   @override
@@ -187,6 +206,8 @@ abstract class _ProjectPackagesViewModel extends ProjectPackagesViewModel {
   IList<PackageViewModel> get devDependencies;
   @override
   IMap<String, String> get packageVersionsToChange;
+  @override
+  bool get isApplyingChanges;
   @override
   @JsonKey(ignore: true)
   _$$_ProjectPackagesViewModelCopyWith<_$_ProjectPackagesViewModel>

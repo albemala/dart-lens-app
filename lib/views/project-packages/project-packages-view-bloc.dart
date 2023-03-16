@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:collection/collection.dart';
 import 'package:dart_lens/blocs/project-analysis-bloc.dart';
-import 'package:dart_lens/functions/package.dart';
+import 'package:dart_lens/functions/installed-packages.dart';
 import 'package:dart_lens/models/package/package.dart';
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:flutter/material.dart';
@@ -20,6 +20,7 @@ class ProjectPackagesViewModel with _$ProjectPackagesViewModel {
     required IList<PackageViewModel> dependencies,
     required IList<PackageViewModel> devDependencies,
     required IMap<String, String> packageVersionsToChange,
+    required bool isApplyingChanges,
   }) = _ProjectPackagesViewModel;
 }
 
@@ -123,6 +124,7 @@ class ProjectPackagesViewBloc extends Cubit<ProjectPackagesViewModel> {
             dependencies: <PackageViewModel>[].lock,
             devDependencies: <PackageViewModel>[].lock,
             packageVersionsToChange: <String, String>{}.lock,
+            isApplyingChanges: false,
           ),
         ) {
     projectAnalysisBlocListener = context //
@@ -209,5 +211,23 @@ class ProjectPackagesViewBloc extends Cubit<ProjectPackagesViewModel> {
         packageVersionsToChange: packageVersionsToChange,
       ),
     );
+  }
+
+  Future<void> applyPackageVersionChanges() async {
+    emit(
+      state.copyWith(isApplyingChanges: true),
+    );
+    await context //
+        .read<ProjectAnalysisBloc>()
+        .applyPackageVersionChangesToProject(
+          state.packageVersionsToChange.unlock,
+        );
+    emit(
+      state.copyWith(isApplyingChanges: false),
+    );
+
+    await context //
+        .read<ProjectAnalysisBloc>()
+        .reloadProject();
   }
 }
