@@ -26,6 +26,7 @@ class ProjectStructureView extends StatelessWidget {
       builder: (context, constraints) {
         return InteractiveViewer(
           constrained: false,
+          minScale: 0.1,
           boundaryMargin: EdgeInsets.symmetric(
             horizontal: constraints.maxWidth,
             vertical: constraints.maxHeight,
