@@ -138,9 +138,10 @@ class FunctionViewModel with _$FunctionViewModel implements EntityViewModel {
 }
 
 class ProjectStructureViewBloc extends Cubit<ProjectStructureViewModel> {
+  final BuildContext context;
   late StreamSubscription<ProjectAnalysisBlocState> projectAnalysisBlocListener;
 
-  ProjectStructureViewBloc(BuildContext context)
+  ProjectStructureViewBloc(this.context)
       : super(
           const ProjectStructureViewModel(
             projectPath: '',
@@ -151,71 +152,77 @@ class ProjectStructureViewBloc extends Cubit<ProjectStructureViewModel> {
         .read<ProjectAnalysisBloc>()
         .stream
         .listen((projectAnalysisBlocState) {
-      final projectPath = projectAnalysisBlocState.projectPath ?? '';
+      _updateState();
+    });
+    _updateState();
+  }
 
-      final directories = <String, List<FileViewModel>>{};
-      projectAnalysisBlocState.resolvedUnitResults
-          ?.forEach((resolvedUnitResult) {
-        final filePath = relative(
-          resolvedUnitResult.path,
-          from: projectPath,
-        );
-        final directoryPath = dirname(filePath);
-        final fileName = basename(filePath);
+  void _updateState() {
+    final projectAnalysisBlocState = context.read<ProjectAnalysisBloc>().state;
 
-        final imports = resolvedUnitResult.libraryElement.importedLibraries
-            .map((importElement) => importElement.identifier)
-            .toList();
+    final projectPath = projectAnalysisBlocState.projectPath ?? '';
 
-        final entities = resolvedUnitResult //
-            .unit
-            .declarations
-            .map((declaration) {
-              if (declaration is ClassDeclaration) {
-                return createClassViewModel(declaration);
-              } else if (declaration is FunctionDeclaration) {
-                return createFunctionViewModel(declaration);
-              } else if (declaration is EnumDeclaration) {
-                return createEnumViewModel(declaration);
-              } else {
-                return null;
-              }
-            })
-            .whereNotNull()
-            .toList();
+    final directories = <String, List<FileViewModel>>{};
+    projectAnalysisBlocState.resolvedUnitResults?.forEach((resolvedUnitResult) {
+      final filePath = relative(
+        resolvedUnitResult.path,
+        from: projectPath,
+      );
+      final directoryPath = dirname(filePath);
+      final fileName = basename(filePath);
 
-        final fileViewModel = FileViewModel(
-          name: fileName,
-          entities: entities,
-          imports: imports,
-        );
-
-        directories.update(
-          directoryPath,
-          (directoryViewModel) => [
-            ...directoryViewModel,
-            fileViewModel,
-          ],
-          ifAbsent: () => [fileViewModel],
-        );
-      });
-
-      final directoryViewModels = directories.entries
-          .map(
-            (directory) => DirectoryViewModel(
-              path: directory.key,
-              files: directory.value,
-            ),
-          )
+      final imports = resolvedUnitResult.libraryElement.importedLibraries
+          .map((importElement) => importElement.identifier)
           .toList();
 
-      emit(
-        state.copyWith(
-          projectPath: projectPath,
-          directories: directoryViewModels,
-        ),
+      final entities = resolvedUnitResult //
+          .unit
+          .declarations
+          .map((declaration) {
+            if (declaration is ClassDeclaration) {
+              return createClassViewModel(declaration);
+            } else if (declaration is FunctionDeclaration) {
+              return createFunctionViewModel(declaration);
+            } else if (declaration is EnumDeclaration) {
+              return createEnumViewModel(declaration);
+            } else {
+              return null;
+            }
+          })
+          .whereNotNull()
+          .toList();
+
+      final fileViewModel = FileViewModel(
+        name: fileName,
+        entities: entities,
+        imports: imports,
+      );
+
+      directories.update(
+        directoryPath,
+        (directoryViewModel) => [
+          ...directoryViewModel,
+          fileViewModel,
+        ],
+        ifAbsent: () => [fileViewModel],
       );
     });
+
+    final directoryViewModels = directories.entries
+        .map(
+          (directory) => DirectoryViewModel(
+            path: directory.key,
+            files: directory.value,
+          ),
+        )
+        .toList();
+
+    emit(
+      state.copyWith(
+        projectPath: projectPath,
+        directories: directoryViewModels,
+      ),
+    );
   }
 
   @override
