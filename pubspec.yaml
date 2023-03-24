@@ -42,6 +42,8 @@ dependencies:
       url: https://github.com/fluttertools/pub_api_client.git
       ref: 10e90ad7436843a1cb224a477e22fda35be5cd77
 
+  clipboard: ^0.1.3
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

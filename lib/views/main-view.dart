@@ -3,6 +3,7 @@ import 'package:dart_lens/blocs/project-analysis-bloc.dart';
 import 'package:dart_lens/functions/fs.dart';
 import 'package:dart_lens/views/project-packages/project-packages-view.dart';
 import 'package:dart_lens/views/project-structure/project-structure-view.dart';
+import 'package:dart_lens/views/string-literals/string-literals-view.dart';
 import 'package:flextras/flextras.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -18,7 +19,7 @@ class MainView extends StatelessWidget {
     final projectAnalysisBloc = context.watch<ProjectAnalysisBloc>();
 
     return DefaultTabController(
-      length: 2,
+      length: 3,
       child: Scaffold(
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -30,15 +31,18 @@ class MainView extends StatelessWidget {
               tabs: [
                 Tab(text: 'Packages'),
                 Tab(text: 'Project structure'),
+                Tab(text: 'String literals'),
               ],
             ),
             Expanded(
               child: Stack(
                 children: [
                   const TabBarView(
+                    physics: NeverScrollableScrollPhysics(),
                     children: [
                       ProjectPackagesView(),
                       ProjectStructureView(),
+                      StringLiteralsView(),
                     ],
                   ),
                   if (projectAnalysisBloc.state.isLoading)
