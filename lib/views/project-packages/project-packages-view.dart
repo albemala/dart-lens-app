@@ -1,5 +1,6 @@
 import 'package:dart_lens/functions/url.dart';
 import 'package:dart_lens/views/project-packages/project-packages-view-bloc.dart';
+import 'package:dart_lens/widgets/button.dart';
 import 'package:flextras/flextras.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -175,9 +176,6 @@ class _PackageVersionSelectorView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final roundedRectangleShape = RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(4),
-    );
     final textStyle = Theme.of(context).textTheme.bodyMedium;
     final selectVersionBackgroundColor =
         Theme.of(context).colorScheme.secondaryContainer;
@@ -197,7 +195,9 @@ class _PackageVersionSelectorView extends StatelessWidget {
     return SeparatedRow(
       children: [
         Material(
-          shape: roundedRectangleShape,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(4),
+          ),
           color: selectVersionBackgroundColor,
           child: PopupMenuButton<String>(
             tooltip: 'Select version',
@@ -244,37 +244,31 @@ class _PackageVersionSelectorView extends StatelessWidget {
           Tooltip(
             message:
                 'Latest version: ${dependency.installableVersion}. Click to select.',
-            child: Material(
-              shape: roundedRectangleShape,
-              color: newVersionBackgroundColor,
-              child: InkWell(
-                onTap: () {
-                  context //
-                      .read<ProjectPackagesViewBloc>()
-                      .selectPackageVersion(
-                        dependency.name,
-                        dependency.installableVersion!,
-                      );
-                },
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4),
-                  child: SeparatedRow(
-                    children: [
-                      Icon(
-                        CupertinoIcons.up_arrow,
-                        color: newVersionTextColor,
-                        size: 12,
-                      ),
-                      Text(
-                        dependency.installableVersion ?? '',
-                        style: textStyle?.copyWith(
-                          color: newVersionTextColor,
-                        ),
-                      ),
-                    ],
-                    separatorBuilder: () => const SizedBox(width: 2),
+            child: SmallButtonWidget(
+              backgroundColor: newVersionBackgroundColor,
+              onPressed: () {
+                context //
+                    .read<ProjectPackagesViewBloc>()
+                    .selectPackageVersion(
+                      dependency.name,
+                      dependency.installableVersion!,
+                    );
+              },
+              child: SeparatedRow(
+                children: [
+                  Icon(
+                    CupertinoIcons.up_arrow,
+                    color: newVersionTextColor,
+                    size: 12,
                   ),
-                ),
+                  Text(
+                    dependency.installableVersion ?? '',
+                    style: textStyle?.copyWith(
+                      color: newVersionTextColor,
+                    ),
+                  ),
+                ],
+                separatorBuilder: () => const SizedBox(width: 2),
               ),
             ),
           ),
@@ -282,37 +276,31 @@ class _PackageVersionSelectorView extends StatelessWidget {
           Tooltip(
             message:
                 'Change to version: ${dependency.changeToVersion}. Click to reset.',
-            child: Material(
-              shape: roundedRectangleShape,
-              color: changeToVersionBackgroundColor,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                child: InkWell(
-                  onTap: () {
-                    context //
-                        .read<ProjectPackagesViewBloc>()
-                        .selectPackageVersion(
-                          dependency.name,
-                          dependency.installedVersion!,
-                        );
-                  },
-                  child: SeparatedRow(
-                    children: [
-                      Icon(
-                        CupertinoIcons.arrow_2_squarepath,
-                        color: changeToVersionTextColor,
-                        size: 12,
-                      ),
-                      Text(
-                        dependency.changeToVersion ?? '',
-                        style: textStyle?.copyWith(
-                          color: changeToVersionTextColor,
-                        ),
-                      ),
-                    ],
-                    separatorBuilder: () => const SizedBox(width: 2),
+            child: SmallButtonWidget(
+              backgroundColor: changeToVersionBackgroundColor,
+              onPressed: () {
+                context //
+                    .read<ProjectPackagesViewBloc>()
+                    .selectPackageVersion(
+                      dependency.name,
+                      dependency.installedVersion!,
+                    );
+              },
+              child: SeparatedRow(
+                children: [
+                  Icon(
+                    CupertinoIcons.arrow_2_squarepath,
+                    color: changeToVersionTextColor,
+                    size: 12,
                   ),
-                ),
+                  Text(
+                    dependency.changeToVersion ?? '',
+                    style: textStyle?.copyWith(
+                      color: changeToVersionTextColor,
+                    ),
+                  ),
+                ],
+                separatorBuilder: () => const SizedBox(width: 2),
               ),
             ),
           ),
