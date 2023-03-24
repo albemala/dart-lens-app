@@ -15,6 +15,14 @@ Future<List<ResolvedUnitResult>> getProjectStructure(
     throw Exception('Project directory does not exist');
   }
 
+  final excludedPaths = <String>[];
+  for (final entity in projectDirectory.listSync(recursive: true)) {
+    if (entity is Directory) {
+      // exclude generated subdirectories
+      if (entity.path.contains('generated')) excludedPaths.add(entity.path);
+    }
+  }
+
   // detect dart sdk installation path
   // NOTE: on macOS, App Sandbox must be disabled for this to work
 
@@ -40,6 +48,7 @@ Future<List<ResolvedUnitResult>> getProjectStructure(
 
   final collection = AnalysisContextCollection(
     includedPaths: [projectDirectory.path],
+    excludedPaths: excludedPaths,
     resourceProvider: PhysicalResourceProvider.INSTANCE,
     sdkPath: dartSdkPath,
   );
