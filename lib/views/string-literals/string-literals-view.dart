@@ -32,7 +32,7 @@ class StringLiteralsView extends StatelessWidget {
           children: [
             SmallButtonWidget(
               onPressed: () {
-                copyToClipboard(context, dependency.string);
+                copyToClipboard(context, dependency.path);
               },
               backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
               tooltip: 'Click to copy',
