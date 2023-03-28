@@ -9,8 +9,9 @@ import 'package:dart_lens/models/outdated-packages/outdated-packages.dart';
 Future<OutdatedPackages?> runFlutterPubOutdated(
   String projectDirectoryPath,
 ) async {
+  final flutterCmd = Platform.isWindows ? 'flutter.bat' : 'flutter';
   final flutterPubOutdatedResult = await Process.run(
-    'flutter',
+    flutterCmd,
     [
       'pub',
       'outdated',

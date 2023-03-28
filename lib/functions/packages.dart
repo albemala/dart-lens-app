@@ -44,8 +44,9 @@ Future<void> applyPackageVersionChanges(
 }
 
 Future<void> runFlutterPubGet(String directoryPath) async {
+  final flutterCmd = Platform.isWindows ? 'flutter.bat' : 'flutter';
   final flutterPubGetProcess = await Process.run(
-    'flutter',
+    flutterCmd,
     ['pub', 'get'],
     workingDirectory: directoryPath,
   );
