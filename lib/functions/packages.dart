@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:collection/collection.dart';
+import 'package:dart_lens/functions/commands.dart';
 import 'package:dart_lens/models/package/package.dart';
 import 'package:path/path.dart' as path;
 
@@ -44,7 +45,6 @@ Future<void> applyPackageVersionChanges(
 }
 
 Future<void> runFlutterPubGet(String directoryPath) async {
-  final flutterCmd = Platform.isWindows ? 'flutter.bat' : 'flutter';
   final flutterPubGetProcess = await Process.run(
     flutterCmd,
     ['pub', 'get'],

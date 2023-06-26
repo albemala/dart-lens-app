@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:analyzer/dart/analysis/analysis_context_collection.dart';
 import 'package:analyzer/dart/analysis/results.dart';
 import 'package:analyzer/file_system/physical_file_system.dart';
+import 'package:dart_lens/functions/commands.dart';
 import 'package:path/path.dart' as path;
 
 Future<List<ResolvedUnitResult>> getProjectStructure(
@@ -27,7 +28,6 @@ Future<List<ResolvedUnitResult>> getProjectStructure(
   // NOTE: on macOS, App Sandbox must be disabled for this to work
 
   // run `flutter doctor -v`
-  final flutterCmd = Platform.isWindows ? 'flutter.bat' : 'flutter';
   final flutterDoctorResult = await Process.run(flutterCmd, ['doctor', '-v']);
   // extract flutter sdk path from flutter doctor output
   // example to look for: Flutter version <version> on channel <channel> at <path>

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:collection/collection.dart';
+import 'package:dart_lens/functions/commands.dart';
 import 'package:dart_lens/models/outdated-packages/outdated-packages.dart';
 
 /// Runs `flutter pub outdated --json` on [projectDirectoryPath]
@@ -9,14 +10,9 @@ import 'package:dart_lens/models/outdated-packages/outdated-packages.dart';
 Future<OutdatedPackages?> runFlutterPubOutdated(
   String projectDirectoryPath,
 ) async {
-  final flutterCmd = Platform.isWindows ? 'flutter.bat' : 'flutter';
   final flutterPubOutdatedResult = await Process.run(
     flutterCmd,
-    [
-      'pub',
-      'outdated',
-      '--json',
-    ],
+    ['pub', 'outdated', '--json'],
     workingDirectory: projectDirectoryPath,
   );
   final flutterPubOutdatedJson = flutterPubOutdatedResult.stdout.toString();
