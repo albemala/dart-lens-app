@@ -1,8 +1,11 @@
 import 'dart:async';
+import 'dart:isolate';
 
 import 'package:analyzer/dart/ast/ast.dart';
 import 'package:collection/collection.dart';
 import 'package:dart_lens/blocs/project-analysis-bloc.dart';
+import 'package:dart_lens/functions/project-structure-analysis.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -15,6 +18,7 @@ class ProjectStructureViewModel with _$ProjectStructureViewModel {
   const ProjectStructureViewModel._();
 
   const factory ProjectStructureViewModel({
+    required bool isLoading,
     required String projectPath,
     required List<DirectoryViewModel> directories,
   }) = _ProjectStructureViewModel;
@@ -141,9 +145,15 @@ class ProjectStructureViewBloc extends Cubit<ProjectStructureViewModel> {
   final BuildContext context;
   late StreamSubscription<ProjectAnalysisBlocState> projectAnalysisBlocListener;
 
+  String? get _projectPath {
+    final projectAnalysisBlocState = context.read<ProjectAnalysisBloc>().state;
+    return projectAnalysisBlocState.projectPath;
+  }
+
   ProjectStructureViewBloc(this.context)
       : super(
           const ProjectStructureViewModel(
+            isLoading: false,
             projectPath: '',
             directories: [],
           ),
@@ -152,70 +162,37 @@ class ProjectStructureViewBloc extends Cubit<ProjectStructureViewModel> {
         .read<ProjectAnalysisBloc>()
         .stream
         .listen((projectAnalysisBlocState) {
+      emit(
+        state.copyWith(
+          projectPath: '',
+          directories: [],
+        ),
+      );
       _updateState();
     });
     _updateState();
   }
 
-  void _updateState() {
-    final projectAnalysisBlocState = context.read<ProjectAnalysisBloc>().state;
+  @override
+  Future<void> close() {
+    projectAnalysisBlocListener.cancel();
+    return super.close();
+  }
 
-    final projectPath = projectAnalysisBlocState.projectPath ?? '';
+  void reload() {
+    _updateState();
+  }
 
-    final directories = <String, List<FileViewModel>>{};
-    projectAnalysisBlocState.resolvedUnitResults?.forEach((resolvedUnitResult) {
-      final filePath = relative(
-        resolvedUnitResult.path,
-        from: projectPath,
-      );
-      final directoryPath = dirname(filePath);
-      final fileName = basename(filePath);
+  Future<void> _updateState() async {
+    final projectPath = _projectPath ?? '';
 
-      final imports = resolvedUnitResult.libraryElement.importedLibraries
-          .map((importElement) => importElement.identifier)
-          .toList();
-
-      final entities = resolvedUnitResult //
-          .unit
-          .declarations
-          .map((declaration) {
-            if (declaration is ClassDeclaration) {
-              return createClassViewModel(declaration);
-            } else if (declaration is FunctionDeclaration) {
-              return createFunctionViewModel(declaration);
-            } else if (declaration is EnumDeclaration) {
-              return createEnumViewModel(declaration);
-            } else {
-              return null;
-            }
-          })
-          .whereNotNull()
-          .toList();
-
-      final fileViewModel = FileViewModel(
-        name: fileName,
-        entities: entities,
-        imports: imports,
-      );
-
-      directories.update(
-        directoryPath,
-        (directoryViewModel) => [
-          ...directoryViewModel,
-          fileViewModel,
-        ],
-        ifAbsent: () => [fileViewModel],
-      );
-    });
-
-    final directoryViewModels = directories.entries
-        .map(
-          (directory) => DirectoryViewModel(
-            path: directory.key,
-            files: directory.value,
-          ),
-        )
-        .toList();
+    emit(
+      state.copyWith(isLoading: true),
+    );
+    final directoryViewModels = await _updateDirectoryViewModels();
+    emit(
+      state.copyWith(isLoading: false),
+    );
 
     emit(
       state.copyWith(
@@ -225,14 +202,85 @@ class ProjectStructureViewBloc extends Cubit<ProjectStructureViewModel> {
     );
   }
 
-  @override
-  Future<void> close() {
-    projectAnalysisBlocListener.cancel();
-    return super.close();
+  Future<List<DirectoryViewModel>> _updateDirectoryViewModels() async {
+    final projectPath = _projectPath;
+    if (projectPath == null || projectPath.isEmpty) return [];
+
+    try {
+      return await Isolate.run(
+        () => _createDirectoryViewModels(projectPath),
+      );
+    } catch (exception) {
+      print(exception);
+      return [];
+    }
   }
 }
 
-ClassViewModel createClassViewModel(ClassDeclaration declaration) {
+Future<List<DirectoryViewModel>> _createDirectoryViewModels(
+  String projectPath,
+) async {
+  final directories = <String, List<FileViewModel>>{};
+
+  final resolvedUnitResults = await getProjectStructure(projectPath);
+  for (final resolvedUnitResult in resolvedUnitResults) {
+    final filePath = relative(
+      resolvedUnitResult.path,
+      from: projectPath,
+    );
+    final directoryPath = dirname(filePath);
+    final fileName = basename(filePath);
+
+    final imports = resolvedUnitResult.libraryElement.importedLibraries
+        .map((importElement) => importElement.identifier)
+        .toList();
+
+    final entities = resolvedUnitResult //
+        .unit
+        .declarations
+        .map((declaration) {
+          if (declaration is ClassDeclaration) {
+            return _createClassViewModel(declaration);
+          } else if (declaration is FunctionDeclaration) {
+            return _createFunctionViewModel(declaration);
+          } else if (declaration is EnumDeclaration) {
+            return _createEnumViewModel(declaration);
+          } else {
+            return null;
+          }
+        })
+        .whereNotNull()
+        .toList();
+
+    final fileViewModel = FileViewModel(
+      name: fileName,
+      entities: entities,
+      imports: imports,
+    );
+
+    directories.update(
+      directoryPath,
+      (directoryViewModel) => [
+        ...directoryViewModel,
+        fileViewModel,
+      ],
+      ifAbsent: () => [fileViewModel],
+    );
+  }
+
+  final directoryViewModels = directories.entries
+      .map(
+        (directory) => DirectoryViewModel(
+          path: directory.key,
+          files: directory.value,
+        ),
+      )
+      .toList();
+
+  return directoryViewModels;
+}
+
+ClassViewModel _createClassViewModel(ClassDeclaration declaration) {
   final properties = declaration.members //
       .whereType<FieldDeclaration>()
       .map((fieldDeclaration) {
@@ -283,7 +331,7 @@ ClassViewModel createClassViewModel(ClassDeclaration declaration) {
   );
 }
 
-FunctionViewModel createFunctionViewModel(FunctionDeclaration declaration) {
+FunctionViewModel _createFunctionViewModel(FunctionDeclaration declaration) {
   final parameters = declaration
           .functionExpression.parameters?.parameterElements
           .map((parameter) {
@@ -300,7 +348,7 @@ FunctionViewModel createFunctionViewModel(FunctionDeclaration declaration) {
   );
 }
 
-EnumViewModel createEnumViewModel(EnumDeclaration declaration) {
+EnumViewModel _createEnumViewModel(EnumDeclaration declaration) {
   final values = declaration.constants
       .map(
         (enumConstantDeclaration) => enumConstantDeclaration.name.toString(),

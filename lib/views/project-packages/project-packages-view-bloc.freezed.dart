@@ -16,13 +16,13 @@ final _privateConstructorUsedError = UnsupportedError(
 
 /// @nodoc
 mixin _$ProjectPackagesViewModel {
+  bool get isLoading => throw _privateConstructorUsedError;
   IList<PackageViewModel> get dependencies =>
       throw _privateConstructorUsedError;
   IList<PackageViewModel> get devDependencies =>
       throw _privateConstructorUsedError;
   IMap<String, String> get packageVersionsToChange =>
       throw _privateConstructorUsedError;
-  bool get isApplyingChanges => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
   $ProjectPackagesViewModelCopyWith<ProjectPackagesViewModel> get copyWith =>
@@ -36,10 +36,10 @@ abstract class $ProjectPackagesViewModelCopyWith<$Res> {
       _$ProjectPackagesViewModelCopyWithImpl<$Res, ProjectPackagesViewModel>;
   @useResult
   $Res call(
-      {IList<PackageViewModel> dependencies,
+      {bool isLoading,
+      IList<PackageViewModel> dependencies,
       IList<PackageViewModel> devDependencies,
-      IMap<String, String> packageVersionsToChange,
-      bool isApplyingChanges});
+      IMap<String, String> packageVersionsToChange});
 }
 
 /// @nodoc
@@ -56,12 +56,16 @@ class _$ProjectPackagesViewModelCopyWithImpl<$Res,
   @pragma('vm:prefer-inline')
   @override
   $Res call({
+    Object? isLoading = null,
     Object? dependencies = null,
     Object? devDependencies = null,
     Object? packageVersionsToChange = null,
-    Object? isApplyingChanges = null,
   }) {
     return _then(_value.copyWith(
+      isLoading: null == isLoading
+          ? _value.isLoading
+          : isLoading // ignore: cast_nullable_to_non_nullable
+              as bool,
       dependencies: null == dependencies
           ? _value.dependencies
           : dependencies // ignore: cast_nullable_to_non_nullable
@@ -74,10 +78,6 @@ class _$ProjectPackagesViewModelCopyWithImpl<$Res,
           ? _value.packageVersionsToChange
           : packageVersionsToChange // ignore: cast_nullable_to_non_nullable
               as IMap<String, String>,
-      isApplyingChanges: null == isApplyingChanges
-          ? _value.isApplyingChanges
-          : isApplyingChanges // ignore: cast_nullable_to_non_nullable
-              as bool,
     ) as $Val);
   }
 }
@@ -92,10 +92,10 @@ abstract class _$$_ProjectPackagesViewModelCopyWith<$Res>
   @override
   @useResult
   $Res call(
-      {IList<PackageViewModel> dependencies,
+      {bool isLoading,
+      IList<PackageViewModel> dependencies,
       IList<PackageViewModel> devDependencies,
-      IMap<String, String> packageVersionsToChange,
-      bool isApplyingChanges});
+      IMap<String, String> packageVersionsToChange});
 }
 
 /// @nodoc
@@ -110,12 +110,16 @@ class __$$_ProjectPackagesViewModelCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
+    Object? isLoading = null,
     Object? dependencies = null,
     Object? devDependencies = null,
     Object? packageVersionsToChange = null,
-    Object? isApplyingChanges = null,
   }) {
     return _then(_$_ProjectPackagesViewModel(
+      isLoading: null == isLoading
+          ? _value.isLoading
+          : isLoading // ignore: cast_nullable_to_non_nullable
+              as bool,
       dependencies: null == dependencies
           ? _value.dependencies
           : dependencies // ignore: cast_nullable_to_non_nullable
@@ -128,36 +132,45 @@ class __$$_ProjectPackagesViewModelCopyWithImpl<$Res>
           ? _value.packageVersionsToChange
           : packageVersionsToChange // ignore: cast_nullable_to_non_nullable
               as IMap<String, String>,
-      isApplyingChanges: null == isApplyingChanges
-          ? _value.isApplyingChanges
-          : isApplyingChanges // ignore: cast_nullable_to_non_nullable
-              as bool,
     ));
   }
 }
 
 /// @nodoc
 
-class _$_ProjectPackagesViewModel extends _ProjectPackagesViewModel {
+class _$_ProjectPackagesViewModel extends _ProjectPackagesViewModel
+    with DiagnosticableTreeMixin {
   const _$_ProjectPackagesViewModel(
-      {required this.dependencies,
+      {required this.isLoading,
+      required this.dependencies,
       required this.devDependencies,
-      required this.packageVersionsToChange,
-      required this.isApplyingChanges})
+      required this.packageVersionsToChange})
       : super._();
 
+  @override
+  final bool isLoading;
   @override
   final IList<PackageViewModel> dependencies;
   @override
   final IList<PackageViewModel> devDependencies;
   @override
   final IMap<String, String> packageVersionsToChange;
-  @override
-  final bool isApplyingChanges;
 
   @override
-  String toString() {
-    return 'ProjectPackagesViewModel(dependencies: $dependencies, devDependencies: $devDependencies, packageVersionsToChange: $packageVersionsToChange, isApplyingChanges: $isApplyingChanges)';
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
+    return 'ProjectPackagesViewModel(isLoading: $isLoading, dependencies: $dependencies, devDependencies: $devDependencies, packageVersionsToChange: $packageVersionsToChange)';
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(DiagnosticsProperty('type', 'ProjectPackagesViewModel'))
+      ..add(DiagnosticsProperty('isLoading', isLoading))
+      ..add(DiagnosticsProperty('dependencies', dependencies))
+      ..add(DiagnosticsProperty('devDependencies', devDependencies))
+      ..add(DiagnosticsProperty(
+          'packageVersionsToChange', packageVersionsToChange));
   }
 
   @override
@@ -165,24 +178,24 @@ class _$_ProjectPackagesViewModel extends _ProjectPackagesViewModel {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$_ProjectPackagesViewModel &&
+            (identical(other.isLoading, isLoading) ||
+                other.isLoading == isLoading) &&
             const DeepCollectionEquality()
                 .equals(other.dependencies, dependencies) &&
             const DeepCollectionEquality()
                 .equals(other.devDependencies, devDependencies) &&
             (identical(
                     other.packageVersionsToChange, packageVersionsToChange) ||
-                other.packageVersionsToChange == packageVersionsToChange) &&
-            (identical(other.isApplyingChanges, isApplyingChanges) ||
-                other.isApplyingChanges == isApplyingChanges));
+                other.packageVersionsToChange == packageVersionsToChange));
   }
 
   @override
   int get hashCode => Object.hash(
       runtimeType,
+      isLoading,
       const DeepCollectionEquality().hash(dependencies),
       const DeepCollectionEquality().hash(devDependencies),
-      packageVersionsToChange,
-      isApplyingChanges);
+      packageVersionsToChange);
 
   @JsonKey(ignore: true)
   @override
@@ -194,20 +207,21 @@ class _$_ProjectPackagesViewModel extends _ProjectPackagesViewModel {
 
 abstract class _ProjectPackagesViewModel extends ProjectPackagesViewModel {
   const factory _ProjectPackagesViewModel(
-      {required final IList<PackageViewModel> dependencies,
-      required final IList<PackageViewModel> devDependencies,
-      required final IMap<String, String> packageVersionsToChange,
-      required final bool isApplyingChanges}) = _$_ProjectPackagesViewModel;
+          {required final bool isLoading,
+          required final IList<PackageViewModel> dependencies,
+          required final IList<PackageViewModel> devDependencies,
+          required final IMap<String, String> packageVersionsToChange}) =
+      _$_ProjectPackagesViewModel;
   const _ProjectPackagesViewModel._() : super._();
 
+  @override
+  bool get isLoading;
   @override
   IList<PackageViewModel> get dependencies;
   @override
   IList<PackageViewModel> get devDependencies;
   @override
   IMap<String, String> get packageVersionsToChange;
-  @override
-  bool get isApplyingChanges;
   @override
   @JsonKey(ignore: true)
   _$$_ProjectPackagesViewModelCopyWith<_$_ProjectPackagesViewModel>
@@ -398,7 +412,8 @@ class __$$_PackageViewModelCopyWithImpl<$Res>
 
 /// @nodoc
 
-class _$_PackageViewModel extends _PackageViewModel {
+class _$_PackageViewModel extends _PackageViewModel
+    with DiagnosticableTreeMixin {
   const _$_PackageViewModel(
       {required this.name,
       required this.installedVersion,
@@ -431,8 +446,25 @@ class _$_PackageViewModel extends _PackageViewModel {
   final String? description;
 
   @override
-  String toString() {
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
     return 'PackageViewModel(name: $name, installedVersion: $installedVersion, installableVersion: $installableVersion, changeToVersion: $changeToVersion, availableVersions: $availableVersions, isLatestVersionInstalled: $isLatestVersionInstalled, url: $url, changelogUrl: $changelogUrl, description: $description)';
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(DiagnosticsProperty('type', 'PackageViewModel'))
+      ..add(DiagnosticsProperty('name', name))
+      ..add(DiagnosticsProperty('installedVersion', installedVersion))
+      ..add(DiagnosticsProperty('installableVersion', installableVersion))
+      ..add(DiagnosticsProperty('changeToVersion', changeToVersion))
+      ..add(DiagnosticsProperty('availableVersions', availableVersions))
+      ..add(DiagnosticsProperty(
+          'isLatestVersionInstalled', isLatestVersionInstalled))
+      ..add(DiagnosticsProperty('url', url))
+      ..add(DiagnosticsProperty('changelogUrl', changelogUrl))
+      ..add(DiagnosticsProperty('description', description));
   }
 
   @override
@@ -649,7 +681,8 @@ class __$$_PackageVersionViewModelCopyWithImpl<$Res>
 
 /// @nodoc
 
-class _$_PackageVersionViewModel extends _PackageVersionViewModel {
+class _$_PackageVersionViewModel extends _PackageVersionViewModel
+    with DiagnosticableTreeMixin {
   const _$_PackageVersionViewModel(
       {required this.version,
       required this.isInstalled,
@@ -670,8 +703,20 @@ class _$_PackageVersionViewModel extends _PackageVersionViewModel {
   final bool willBeUninstalled;
 
   @override
-  String toString() {
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
     return 'PackageVersionViewModel(version: $version, isInstalled: $isInstalled, isInstallable: $isInstallable, willBeInstalled: $willBeInstalled, willBeUninstalled: $willBeUninstalled)';
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(DiagnosticsProperty('type', 'PackageVersionViewModel'))
+      ..add(DiagnosticsProperty('version', version))
+      ..add(DiagnosticsProperty('isInstalled', isInstalled))
+      ..add(DiagnosticsProperty('isInstallable', isInstallable))
+      ..add(DiagnosticsProperty('willBeInstalled', willBeInstalled))
+      ..add(DiagnosticsProperty('willBeUninstalled', willBeUninstalled));
   }
 
   @override

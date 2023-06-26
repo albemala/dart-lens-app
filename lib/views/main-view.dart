@@ -16,17 +16,15 @@ class MainView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final projectAnalysisBloc = context.watch<ProjectAnalysisBloc>();
-
-    return DefaultTabController(
+    return const DefaultTabController(
       length: 3,
       child: Scaffold(
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const _TopView(),
-            const Divider(),
-            const TabBar(
+            _TopView(),
+            Divider(),
+            TabBar(
               isScrollable: true,
               tabs: [
                 Tab(text: 'Packages'),
@@ -35,35 +33,17 @@ class MainView extends StatelessWidget {
               ],
             ),
             Expanded(
-              child: Stack(
+              child: TabBarView(
+                physics: NeverScrollableScrollPhysics(),
                 children: [
-                  const TabBarView(
-                    physics: NeverScrollableScrollPhysics(),
-                    children: [
-                      ProjectPackagesView(),
-                      ProjectStructureView(),
-                      StringLiteralsView(),
-                    ],
-                  ),
-                  if (projectAnalysisBloc.state.isLoading)
-                    ColoredBox(
-                      color: Theme.of(context)
-                          .colorScheme
-                          .inverseSurface
-                          .withOpacity(0.3),
-                      child: const Center(
-                        child: SizedBox(
-                          width: 32,
-                          height: 32,
-                          child: CircularProgressIndicator(),
-                        ),
-                      ),
-                    ),
+                  ProjectPackagesView(),
+                  ProjectStructureView(),
+                  StringLiteralsView(),
                 ],
               ),
             ),
-            const Divider(),
-            const _BottomView(),
+            Divider(),
+            _BottomView(),
           ],
         ),
       ),
@@ -89,32 +69,35 @@ class _TopView extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         child: SeparatedRow(
+          crossAxisAlignment: CrossAxisAlignment.baseline,
           children: [
             const Text(
               'Project directory:',
             ),
-            ElevatedButton(
-              onPressed: onPickDirectory,
-              child: const Text('Select'),
-            ),
             Expanded(
-              child: Text(
-                projectAnalysisBloc.state.projectPath ?? '',
-                overflow: TextOverflow.ellipsis,
-              ),
+              child: projectAnalysisBloc.state.projectPath == null ||
+                      projectAnalysisBloc.state.projectPath!.isEmpty
+                  ? const Opacity(
+                      opacity: 0.7,
+                      child: Text(
+                        'No project selected',
+                      ),
+                    )
+                  : Text(
+                      projectAnalysisBloc.state.projectPath ?? '',
+                      overflow: TextOverflow.ellipsis,
+                    ),
             ),
-            if (projectAnalysisBloc.state.isLoading)
-              const SizedBox(
-                width: 16,
-                height: 16,
-                child: CircularProgressIndicator(),
-              ),
-            if (projectAnalysisBloc.state.projectPath != null &&
-                projectAnalysisBloc.state.projectPath!.isNotEmpty)
-              // button to reload the project
-              IconButton(
-                onPressed: projectAnalysisBloc.reloadProject,
-                icon: const Icon(CupertinoIcons.arrow_clockwise),
+            if (projectAnalysisBloc.state.projectPath == null ||
+                projectAnalysisBloc.state.projectPath!.isEmpty)
+              ElevatedButton(
+                onPressed: onPickDirectory,
+                child: const Text('Select'),
+              )
+            else
+              OutlinedButton(
+                onPressed: onPickDirectory,
+                child: const Text('Select'),
               ),
           ],
           separatorBuilder: () => const SizedBox(width: 8),

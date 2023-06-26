@@ -1,10 +1,14 @@
 import 'dart:async';
+import 'dart:isolate';
 
 import 'package:collection/collection.dart';
 import 'package:dart_lens/blocs/project-analysis-bloc.dart';
 import 'package:dart_lens/functions/installed-packages.dart';
+import 'package:dart_lens/functions/packages.dart';
+import 'package:dart_lens/functions/project-packages-analysis.dart';
 import 'package:dart_lens/models/package/package.dart';
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -17,10 +21,10 @@ class ProjectPackagesViewModel with _$ProjectPackagesViewModel {
   const ProjectPackagesViewModel._();
 
   const factory ProjectPackagesViewModel({
+    required bool isLoading,
     required IList<PackageViewModel> dependencies,
     required IList<PackageViewModel> devDependencies,
     required IMap<String, String> packageVersionsToChange,
-    required bool isApplyingChanges,
   }) = _ProjectPackagesViewModel;
 }
 
@@ -118,19 +122,33 @@ class ProjectPackagesViewBloc extends Cubit<ProjectPackagesViewModel> {
   final BuildContext context;
   late StreamSubscription<ProjectAnalysisBlocState> projectAnalysisBlocListener;
 
+  List<Package> packages = [];
+
+  String? get _projectPath {
+    final projectAnalysisBlocState = context.read<ProjectAnalysisBloc>().state;
+    return projectAnalysisBlocState.projectPath;
+  }
+
   ProjectPackagesViewBloc(this.context)
       : super(
           ProjectPackagesViewModel(
+            isLoading: false,
             dependencies: <PackageViewModel>[].lock,
             devDependencies: <PackageViewModel>[].lock,
             packageVersionsToChange: <String, String>{}.lock,
-            isApplyingChanges: false,
           ),
         ) {
     projectAnalysisBlocListener = context //
         .read<ProjectAnalysisBloc>()
         .stream
         .listen((projectAnalysisBlocState) {
+      emit(
+        state.copyWith(
+          dependencies: <PackageViewModel>[].lock,
+          devDependencies: <PackageViewModel>[].lock,
+          packageVersionsToChange: <String, String>{}.lock,
+        ),
+      );
       _updateState();
     });
     _updateState();
@@ -140,37 +158,6 @@ class ProjectPackagesViewBloc extends Cubit<ProjectPackagesViewModel> {
   Future<void> close() {
     projectAnalysisBlocListener.cancel();
     return super.close();
-  }
-
-  void _updateState() {
-    final projectAnalysisBlocState = context.read<ProjectAnalysisBloc>().state;
-    final dependencies = projectAnalysisBlocState.packages
-            ?.where((package) {
-              return package.dependencyType == DependencyType.dependency &&
-                  // filter out sdk dependencies
-                  package.type != PackageType.sdk;
-            })
-            .map(_createPackageViewModel)
-            .toIList() ??
-        <PackageViewModel>[].lock;
-    final devDependencies = projectAnalysisBlocState.packages
-            ?.where((package) {
-              return package.dependencyType == DependencyType.devDependency &&
-                  // filter out sdk dependencies
-                  package.type != PackageType.sdk;
-            })
-            .map(_createPackageViewModel)
-            .toIList() ??
-        <PackageViewModel>[].lock;
-    // reset packageVersionsToChange
-    final packageVersionsToChange = <String, String>{}.lock;
-    emit(
-      state.copyWith(
-        dependencies: dependencies,
-        devDependencies: devDependencies,
-        packageVersionsToChange: packageVersionsToChange,
-      ),
-    );
   }
 
   void selectPackageVersion(String name, String version) {
@@ -196,6 +183,7 @@ class ProjectPackagesViewBloc extends Cubit<ProjectPackagesViewModel> {
               (packageViewModel) => packageViewModel.name == name,
             )
             ?.installedVersion;
+
     final packageVersionsToChange = installedVersion == version
         ? state.packageVersionsToChange.remove(name)
         : state.packageVersionsToChange.update(
@@ -213,21 +201,94 @@ class ProjectPackagesViewBloc extends Cubit<ProjectPackagesViewModel> {
     );
   }
 
-  Future<void> applyPackageVersionChanges() async {
-    emit(
-      state.copyWith(isApplyingChanges: true),
-    );
-    await context //
-        .read<ProjectAnalysisBloc>()
-        .applyPackageVersionChangesToProject(
-          state.packageVersionsToChange.unlock,
-        );
-    emit(
-      state.copyWith(isApplyingChanges: false),
-    );
+  Future<void> applyChanges() async {
+    await _applyPackageVersionChangesToProject();
+    await _updateState();
+  }
 
-    await context //
-        .read<ProjectAnalysisBloc>()
-        .reloadProject();
+  void reload() {
+    _updateState();
+  }
+
+  Future<void> _updateState() async {
+    await _loadProjectPackages();
+
+    final dependencies = packages
+        .where((package) {
+          return package.dependencyType == DependencyType.dependency &&
+              // filter out sdk dependencies
+              package.type != PackageType.sdk;
+        })
+        .map(_createPackageViewModel)
+        .toIList();
+
+    final devDependencies = packages
+        .where((package) {
+          return package.dependencyType == DependencyType.devDependency &&
+              // filter out sdk dependencies
+              package.type != PackageType.sdk;
+        })
+        .map(_createPackageViewModel)
+        .toIList();
+
+    // reset packageVersionsToChange
+    final packageVersionsToChange = <String, String>{}.lock;
+
+    emit(
+      state.copyWith(
+        dependencies: dependencies,
+        devDependencies: devDependencies,
+        packageVersionsToChange: packageVersionsToChange,
+      ),
+    );
+  }
+
+  Future<void> _loadProjectPackages() async {
+    final projectPath = _projectPath;
+    if (projectPath == null || projectPath.isEmpty) return;
+
+    emit(
+      state.copyWith(isLoading: true),
+    );
+    try {
+      packages = await Isolate.run(
+        () => getPackages(projectPath),
+      );
+    } catch (exception) {
+      print(exception);
+    }
+    emit(
+      state.copyWith(isLoading: false),
+    );
+  }
+
+  Future<void> _applyPackageVersionChangesToProject() async {
+    final projectPath = _projectPath;
+    if (projectPath == null || projectPath.isEmpty) return;
+
+    if (packages.isEmpty) return;
+
+    final packageVersionsToChange = state.packageVersionsToChange.unlock;
+    if (packageVersionsToChange.isEmpty) return;
+
+    emit(
+      state.copyWith(isLoading: true),
+    );
+    try {
+      await Isolate.run(
+        () {
+          return applyPackageVersionChanges(
+            projectPath,
+            packages,
+            packageVersionsToChange,
+          );
+        },
+      );
+    } catch (exception) {
+      print(exception);
+    }
+    emit(
+      state.copyWith(isLoading: false),
+    );
   }
 }

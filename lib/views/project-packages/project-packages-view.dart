@@ -26,33 +26,48 @@ class ProjectPackagesView extends StatelessWidget {
     return Column(
       children: [
         const Divider(),
-        if (viewModel.packageVersionsToChange.isNotEmpty)
-          Material(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: SeparatedRow(
-                children: [
-                  if (viewModel.isApplyingChanges)
-                    const CircularProgressIndicator(),
-                  if (!viewModel.isApplyingChanges)
-                    ElevatedButton(
-                      onPressed: () {
-                        context //
-                            .read<ProjectPackagesViewBloc>()
-                            .applyPackageVersionChanges();
-                      },
-                      child: const Text('Apply changes'),
-                    ),
+        Material(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            child: SeparatedRow(
+              children: [
+                if (viewModel.packageVersionsToChange.isNotEmpty)
+                  ElevatedButton(
+                    onPressed: () {
+                      context //
+                          .read<ProjectPackagesViewBloc>()
+                          .applyChanges();
+                    },
+                    child: const Text('Apply changes'),
+                  ),
+                if (viewModel.packageVersionsToChange.isNotEmpty)
                   Text(
                     'You have changed ${viewModel.packageVersionsToChange.length} package(s)',
                   ),
-                ],
-                separatorBuilder: () => const SizedBox(width: 8),
-              ),
+                const Spacer(),
+                if (viewModel.isLoading) //
+                  const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                    ),
+                  ),
+                // button to reload the project
+                IconButton(
+                  onPressed: () {
+                    context //
+                        .read<ProjectPackagesViewBloc>()
+                        .reload();
+                  },
+                  icon: const Icon(CupertinoIcons.arrow_clockwise),
+                ),
+              ],
+              separatorBuilder: () => const SizedBox(width: 8),
             ),
           ),
-        if (viewModel.packageVersionsToChange.isNotEmpty) //
-          const Divider(),
+        ),
+        const Divider(),
         Expanded(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(16),

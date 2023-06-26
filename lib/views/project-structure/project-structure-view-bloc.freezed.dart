@@ -16,6 +16,7 @@ final _privateConstructorUsedError = UnsupportedError(
 
 /// @nodoc
 mixin _$ProjectStructureViewModel {
+  bool get isLoading => throw _privateConstructorUsedError;
   String get projectPath => throw _privateConstructorUsedError;
   List<DirectoryViewModel> get directories =>
       throw _privateConstructorUsedError;
@@ -31,7 +32,10 @@ abstract class $ProjectStructureViewModelCopyWith<$Res> {
           $Res Function(ProjectStructureViewModel) then) =
       _$ProjectStructureViewModelCopyWithImpl<$Res, ProjectStructureViewModel>;
   @useResult
-  $Res call({String projectPath, List<DirectoryViewModel> directories});
+  $Res call(
+      {bool isLoading,
+      String projectPath,
+      List<DirectoryViewModel> directories});
 }
 
 /// @nodoc
@@ -48,10 +52,15 @@ class _$ProjectStructureViewModelCopyWithImpl<$Res,
   @pragma('vm:prefer-inline')
   @override
   $Res call({
+    Object? isLoading = null,
     Object? projectPath = null,
     Object? directories = null,
   }) {
     return _then(_value.copyWith(
+      isLoading: null == isLoading
+          ? _value.isLoading
+          : isLoading // ignore: cast_nullable_to_non_nullable
+              as bool,
       projectPath: null == projectPath
           ? _value.projectPath
           : projectPath // ignore: cast_nullable_to_non_nullable
@@ -73,7 +82,10 @@ abstract class _$$_ProjectStructureViewModelCopyWith<$Res>
       __$$_ProjectStructureViewModelCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({String projectPath, List<DirectoryViewModel> directories});
+  $Res call(
+      {bool isLoading,
+      String projectPath,
+      List<DirectoryViewModel> directories});
 }
 
 /// @nodoc
@@ -89,10 +101,15 @@ class __$$_ProjectStructureViewModelCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
+    Object? isLoading = null,
     Object? projectPath = null,
     Object? directories = null,
   }) {
     return _then(_$_ProjectStructureViewModel(
+      isLoading: null == isLoading
+          ? _value.isLoading
+          : isLoading // ignore: cast_nullable_to_non_nullable
+              as bool,
       projectPath: null == projectPath
           ? _value.projectPath
           : projectPath // ignore: cast_nullable_to_non_nullable
@@ -107,13 +124,17 @@ class __$$_ProjectStructureViewModelCopyWithImpl<$Res>
 
 /// @nodoc
 
-class _$_ProjectStructureViewModel extends _ProjectStructureViewModel {
+class _$_ProjectStructureViewModel extends _ProjectStructureViewModel
+    with DiagnosticableTreeMixin {
   const _$_ProjectStructureViewModel(
-      {required this.projectPath,
+      {required this.isLoading,
+      required this.projectPath,
       required final List<DirectoryViewModel> directories})
       : _directories = directories,
         super._();
 
+  @override
+  final bool isLoading;
   @override
   final String projectPath;
   final List<DirectoryViewModel> _directories;
@@ -125,8 +146,18 @@ class _$_ProjectStructureViewModel extends _ProjectStructureViewModel {
   }
 
   @override
-  String toString() {
-    return 'ProjectStructureViewModel(projectPath: $projectPath, directories: $directories)';
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
+    return 'ProjectStructureViewModel(isLoading: $isLoading, projectPath: $projectPath, directories: $directories)';
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(DiagnosticsProperty('type', 'ProjectStructureViewModel'))
+      ..add(DiagnosticsProperty('isLoading', isLoading))
+      ..add(DiagnosticsProperty('projectPath', projectPath))
+      ..add(DiagnosticsProperty('directories', directories));
   }
 
   @override
@@ -134,6 +165,8 @@ class _$_ProjectStructureViewModel extends _ProjectStructureViewModel {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$_ProjectStructureViewModel &&
+            (identical(other.isLoading, isLoading) ||
+                other.isLoading == isLoading) &&
             (identical(other.projectPath, projectPath) ||
                 other.projectPath == projectPath) &&
             const DeepCollectionEquality()
@@ -141,7 +174,7 @@ class _$_ProjectStructureViewModel extends _ProjectStructureViewModel {
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, projectPath,
+  int get hashCode => Object.hash(runtimeType, isLoading, projectPath,
       const DeepCollectionEquality().hash(_directories));
 
   @JsonKey(ignore: true)
@@ -154,11 +187,14 @@ class _$_ProjectStructureViewModel extends _ProjectStructureViewModel {
 
 abstract class _ProjectStructureViewModel extends ProjectStructureViewModel {
   const factory _ProjectStructureViewModel(
-          {required final String projectPath,
+          {required final bool isLoading,
+          required final String projectPath,
           required final List<DirectoryViewModel> directories}) =
       _$_ProjectStructureViewModel;
   const _ProjectStructureViewModel._() : super._();
 
+  @override
+  bool get isLoading;
   @override
   String get projectPath;
   @override
@@ -257,7 +293,8 @@ class __$$_DirectoryViewModelCopyWithImpl<$Res>
 
 /// @nodoc
 
-class _$_DirectoryViewModel extends _DirectoryViewModel {
+class _$_DirectoryViewModel extends _DirectoryViewModel
+    with DiagnosticableTreeMixin {
   const _$_DirectoryViewModel(
       {required this.path, required final List<FileViewModel> files})
       : _files = files,
@@ -274,8 +311,17 @@ class _$_DirectoryViewModel extends _DirectoryViewModel {
   }
 
   @override
-  String toString() {
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
     return 'DirectoryViewModel(path: $path, files: $files)';
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(DiagnosticsProperty('type', 'DirectoryViewModel'))
+      ..add(DiagnosticsProperty('path', path))
+      ..add(DiagnosticsProperty('files', files));
   }
 
   @override
@@ -416,7 +462,7 @@ class __$$_FileViewModelCopyWithImpl<$Res>
 
 /// @nodoc
 
-class _$_FileViewModel extends _FileViewModel {
+class _$_FileViewModel extends _FileViewModel with DiagnosticableTreeMixin {
   const _$_FileViewModel(
       {required this.name,
       required final List<EntityViewModel> entities,
@@ -444,8 +490,18 @@ class _$_FileViewModel extends _FileViewModel {
   }
 
   @override
-  String toString() {
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
     return 'FileViewModel(name: $name, entities: $entities, imports: $imports)';
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(DiagnosticsProperty('type', 'FileViewModel'))
+      ..add(DiagnosticsProperty('name', name))
+      ..add(DiagnosticsProperty('entities', entities))
+      ..add(DiagnosticsProperty('imports', imports));
   }
 
   @override
@@ -579,7 +635,8 @@ class __$$_ParameterViewModelCopyWithImpl<$Res>
 
 /// @nodoc
 
-class _$_ParameterViewModel extends _ParameterViewModel {
+class _$_ParameterViewModel extends _ParameterViewModel
+    with DiagnosticableTreeMixin {
   const _$_ParameterViewModel({required this.name, required this.type})
       : super._();
 
@@ -589,8 +646,17 @@ class _$_ParameterViewModel extends _ParameterViewModel {
   final String type;
 
   @override
-  String toString() {
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
     return 'ParameterViewModel(name: $name, type: $type)';
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(DiagnosticsProperty('type', 'ParameterViewModel'))
+      ..add(DiagnosticsProperty('name', name))
+      ..add(DiagnosticsProperty('type', type));
   }
 
   @override
@@ -749,7 +815,7 @@ class __$$_ClassViewModelCopyWithImpl<$Res>
 
 /// @nodoc
 
-class _$_ClassViewModel extends _ClassViewModel {
+class _$_ClassViewModel extends _ClassViewModel with DiagnosticableTreeMixin {
   const _$_ClassViewModel(
       {required this.name,
       required final List<ClassPropertyViewModel> properties,
@@ -787,8 +853,19 @@ class _$_ClassViewModel extends _ClassViewModel {
   }
 
   @override
-  String toString() {
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
     return 'ClassViewModel(name: $name, properties: $properties, constructors: $constructors, methods: $methods)';
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(DiagnosticsProperty('type', 'ClassViewModel'))
+      ..add(DiagnosticsProperty('name', name))
+      ..add(DiagnosticsProperty('properties', properties))
+      ..add(DiagnosticsProperty('constructors', constructors))
+      ..add(DiagnosticsProperty('methods', methods));
   }
 
   @override
@@ -931,7 +1008,8 @@ class __$$_ClassPropertyViewModelCopyWithImpl<$Res>
 
 /// @nodoc
 
-class _$_ClassPropertyViewModel extends _ClassPropertyViewModel {
+class _$_ClassPropertyViewModel extends _ClassPropertyViewModel
+    with DiagnosticableTreeMixin {
   const _$_ClassPropertyViewModel({required this.name, required this.type})
       : super._();
 
@@ -941,8 +1019,17 @@ class _$_ClassPropertyViewModel extends _ClassPropertyViewModel {
   final String type;
 
   @override
-  String toString() {
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
     return 'ClassPropertyViewModel(name: $name, type: $type)';
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(DiagnosticsProperty('type', 'ClassPropertyViewModel'))
+      ..add(DiagnosticsProperty('name', name))
+      ..add(DiagnosticsProperty('type', type));
   }
 
   @override
@@ -1073,7 +1160,8 @@ class __$$_ClassConstructorViewModelCopyWithImpl<$Res>
 
 /// @nodoc
 
-class _$_ClassConstructorViewModel extends _ClassConstructorViewModel {
+class _$_ClassConstructorViewModel extends _ClassConstructorViewModel
+    with DiagnosticableTreeMixin {
   const _$_ClassConstructorViewModel(
       {required this.name, required final List<ParameterViewModel> parameters})
       : _parameters = parameters,
@@ -1090,8 +1178,17 @@ class _$_ClassConstructorViewModel extends _ClassConstructorViewModel {
   }
 
   @override
-  String toString() {
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
     return 'ClassConstructorViewModel(name: $name, parameters: $parameters)';
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(DiagnosticsProperty('type', 'ClassConstructorViewModel'))
+      ..add(DiagnosticsProperty('name', name))
+      ..add(DiagnosticsProperty('parameters', parameters));
   }
 
   @override
@@ -1235,7 +1332,8 @@ class __$$_ClassMethodViewModelCopyWithImpl<$Res>
 
 /// @nodoc
 
-class _$_ClassMethodViewModel extends _ClassMethodViewModel {
+class _$_ClassMethodViewModel extends _ClassMethodViewModel
+    with DiagnosticableTreeMixin {
   const _$_ClassMethodViewModel(
       {required this.name,
       required this.returnType,
@@ -1256,8 +1354,18 @@ class _$_ClassMethodViewModel extends _ClassMethodViewModel {
   }
 
   @override
-  String toString() {
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
     return 'ClassMethodViewModel(name: $name, returnType: $returnType, parameters: $parameters)';
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(DiagnosticsProperty('type', 'ClassMethodViewModel'))
+      ..add(DiagnosticsProperty('name', name))
+      ..add(DiagnosticsProperty('returnType', returnType))
+      ..add(DiagnosticsProperty('parameters', parameters));
   }
 
   @override
@@ -1392,7 +1500,7 @@ class __$$_EnumViewModelCopyWithImpl<$Res>
 
 /// @nodoc
 
-class _$_EnumViewModel extends _EnumViewModel {
+class _$_EnumViewModel extends _EnumViewModel with DiagnosticableTreeMixin {
   const _$_EnumViewModel(
       {required this.name, required final List<String> values})
       : _values = values,
@@ -1409,8 +1517,17 @@ class _$_EnumViewModel extends _EnumViewModel {
   }
 
   @override
-  String toString() {
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
     return 'EnumViewModel(name: $name, values: $values)';
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(DiagnosticsProperty('type', 'EnumViewModel'))
+      ..add(DiagnosticsProperty('name', name))
+      ..add(DiagnosticsProperty('values', values));
   }
 
   @override
@@ -1550,7 +1667,8 @@ class __$$_FunctionViewModelCopyWithImpl<$Res>
 
 /// @nodoc
 
-class _$_FunctionViewModel extends _FunctionViewModel {
+class _$_FunctionViewModel extends _FunctionViewModel
+    with DiagnosticableTreeMixin {
   const _$_FunctionViewModel(
       {required this.name,
       required this.returnType,
@@ -1571,8 +1689,18 @@ class _$_FunctionViewModel extends _FunctionViewModel {
   }
 
   @override
-  String toString() {
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
     return 'FunctionViewModel(name: $name, returnType: $returnType, parameters: $parameters)';
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(DiagnosticsProperty('type', 'FunctionViewModel'))
+      ..add(DiagnosticsProperty('name', name))
+      ..add(DiagnosticsProperty('returnType', returnType))
+      ..add(DiagnosticsProperty('parameters', parameters));
   }
 
   @override

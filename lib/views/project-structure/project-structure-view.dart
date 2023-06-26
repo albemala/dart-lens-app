@@ -1,6 +1,7 @@
 import 'package:dart_lens/views/project-structure/project-structure-view-bloc.dart';
 import 'package:flex_seed_scheme/flex_seed_scheme.dart';
 import 'package:flextras/flextras.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -21,19 +22,54 @@ class ProjectStructureView extends StatelessWidget {
   }
 
   Widget _buildView(BuildContext context, ProjectStructureViewModel viewModel) {
-    if (viewModel.projectPath.isEmpty) return const SizedBox();
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return InteractiveViewer(
-          constrained: false,
-          minScale: 0.1,
-          boundaryMargin: EdgeInsets.symmetric(
-            horizontal: constraints.maxWidth,
-            vertical: constraints.maxHeight,
+    return Column(
+      children: [
+        const Divider(),
+        Material(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            child: SeparatedRow(
+              children: [
+                const Spacer(),
+                if (viewModel.isLoading) //
+                  const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                    ),
+                  ),
+                // button to reload the project
+                IconButton(
+                  onPressed: () {
+                    context //
+                        .read<ProjectStructureViewBloc>()
+                        .reload();
+                  },
+                  icon: const Icon(CupertinoIcons.arrow_clockwise),
+                ),
+              ],
+              separatorBuilder: () => const SizedBox(width: 8),
+            ),
           ),
-          child: ProjectStructureElementView(viewModel: viewModel),
-        );
-      },
+        ),
+        const Divider(),
+        Expanded(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return InteractiveViewer(
+                constrained: false,
+                minScale: 0.1,
+                boundaryMargin: EdgeInsets.symmetric(
+                  horizontal: constraints.maxWidth,
+                  vertical: constraints.maxHeight,
+                ),
+                child: ProjectStructureElementView(viewModel: viewModel),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 }

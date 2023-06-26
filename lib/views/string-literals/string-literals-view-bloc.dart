@@ -1,8 +1,11 @@
 import 'dart:async';
+import 'dart:isolate';
 
 import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:dart_lens/blocs/project-analysis-bloc.dart';
+import 'package:dart_lens/functions/project-structure-analysis.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -21,6 +24,7 @@ class StringLiteralsViewModel with _$StringLiteralsViewModel {
   const StringLiteralsViewModel._();
 
   const factory StringLiteralsViewModel({
+    required bool isLoading,
     required List<StringLiteralViewModel> stringLiterals,
   }) = _StringLiteralsViewModel;
 }
@@ -79,9 +83,15 @@ class StringLiteralsViewBloc extends Cubit<StringLiteralsViewModel> {
   final BuildContext context;
   late StreamSubscription<ProjectAnalysisBlocState> projectAnalysisBlocListener;
 
+  String? get _projectPath {
+    final projectAnalysisBlocState = context.read<ProjectAnalysisBloc>().state;
+    return projectAnalysisBlocState.projectPath;
+  }
+
   StringLiteralsViewBloc(this.context)
       : super(
           const StringLiteralsViewModel(
+            isLoading: false,
             stringLiterals: [],
           ),
         ) {
@@ -89,34 +99,34 @@ class StringLiteralsViewBloc extends Cubit<StringLiteralsViewModel> {
         .read<ProjectAnalysisBloc>()
         .stream
         .listen((projectAnalysisBlocState) {
+      emit(
+        state.copyWith(
+          stringLiterals: [],
+        ),
+      );
       _updateState();
     });
     _updateState();
   }
 
-  void _updateState() {
-    final projectAnalysisBlocState = context.read<ProjectAnalysisBloc>().state;
+  @override
+  Future<void> close() {
+    projectAnalysisBlocListener.cancel();
+    return super.close();
+  }
 
-    final projectPath = projectAnalysisBlocState.projectPath ?? '';
+  void reload() {
+    _updateState();
+  }
 
-    final stringLiterals = <StringLiteralViewModel>[];
-    projectAnalysisBlocState.resolvedUnitResults?.forEach((resolvedUnitResult) {
-      final filePath = relative(
-        resolvedUnitResult.path,
-        from: projectPath,
-      );
-
-      // iterate over all declarations in this unit and find all string literals
-      final visitor = StringLiteralVisitor();
-      resolvedUnitResult.unit.visitChildren(visitor);
-      for (final string in visitor.strings) {
-        stringLiterals.add(
-          string.copyWith(
-            path: filePath,
-          ),
-        );
-      }
-    });
+  Future<void> _updateState() async {
+    emit(
+      state.copyWith(isLoading: true),
+    );
+    final stringLiterals = await _updateStringLiteralViewModels();
+    emit(
+      state.copyWith(isLoading: false),
+    );
 
     emit(
       state.copyWith(
@@ -125,9 +135,44 @@ class StringLiteralsViewBloc extends Cubit<StringLiteralsViewModel> {
     );
   }
 
-  @override
-  Future<void> close() {
-    projectAnalysisBlocListener.cancel();
-    return super.close();
+  Future<List<StringLiteralViewModel>> _updateStringLiteralViewModels() async {
+    final projectPath = _projectPath;
+    if (projectPath == null || projectPath.isEmpty) return [];
+
+    try {
+      return await Isolate.run(
+        () => _createStringLiteralViewModels(projectPath),
+      );
+    } catch (exception) {
+      print(exception);
+      return [];
+    }
   }
+}
+
+Future<List<StringLiteralViewModel>> _createStringLiteralViewModels(
+  String projectPath,
+) async {
+  final stringLiterals = <StringLiteralViewModel>[];
+
+  final resolvedUnitResults = await getProjectStructure(projectPath);
+  for (final resolvedUnitResult in resolvedUnitResults) {
+    final filePath = relative(
+      resolvedUnitResult.path,
+      from: projectPath,
+    );
+
+    // iterate over all declarations in this unit and find all string literals
+    final visitor = StringLiteralVisitor();
+    resolvedUnitResult.unit.visitChildren(visitor);
+    for (final string in visitor.strings) {
+      stringLiterals.add(
+        string.copyWith(
+          path: filePath,
+        ),
+      );
+    }
+  }
+
+  return stringLiterals;
 }

@@ -16,6 +16,7 @@ final _privateConstructorUsedError = UnsupportedError(
 
 /// @nodoc
 mixin _$StringLiteralsViewModel {
+  bool get isLoading => throw _privateConstructorUsedError;
   List<StringLiteralViewModel> get stringLiterals =>
       throw _privateConstructorUsedError;
 
@@ -30,7 +31,7 @@ abstract class $StringLiteralsViewModelCopyWith<$Res> {
           $Res Function(StringLiteralsViewModel) then) =
       _$StringLiteralsViewModelCopyWithImpl<$Res, StringLiteralsViewModel>;
   @useResult
-  $Res call({List<StringLiteralViewModel> stringLiterals});
+  $Res call({bool isLoading, List<StringLiteralViewModel> stringLiterals});
 }
 
 /// @nodoc
@@ -47,9 +48,14 @@ class _$StringLiteralsViewModelCopyWithImpl<$Res,
   @pragma('vm:prefer-inline')
   @override
   $Res call({
+    Object? isLoading = null,
     Object? stringLiterals = null,
   }) {
     return _then(_value.copyWith(
+      isLoading: null == isLoading
+          ? _value.isLoading
+          : isLoading // ignore: cast_nullable_to_non_nullable
+              as bool,
       stringLiterals: null == stringLiterals
           ? _value.stringLiterals
           : stringLiterals // ignore: cast_nullable_to_non_nullable
@@ -66,7 +72,7 @@ abstract class _$$_StringLiteralsViewModelCopyWith<$Res>
       __$$_StringLiteralsViewModelCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({List<StringLiteralViewModel> stringLiterals});
+  $Res call({bool isLoading, List<StringLiteralViewModel> stringLiterals});
 }
 
 /// @nodoc
@@ -81,9 +87,14 @@ class __$$_StringLiteralsViewModelCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
+    Object? isLoading = null,
     Object? stringLiterals = null,
   }) {
     return _then(_$_StringLiteralsViewModel(
+      isLoading: null == isLoading
+          ? _value.isLoading
+          : isLoading // ignore: cast_nullable_to_non_nullable
+              as bool,
       stringLiterals: null == stringLiterals
           ? _value._stringLiterals
           : stringLiterals // ignore: cast_nullable_to_non_nullable
@@ -94,12 +105,16 @@ class __$$_StringLiteralsViewModelCopyWithImpl<$Res>
 
 /// @nodoc
 
-class _$_StringLiteralsViewModel extends _StringLiteralsViewModel {
+class _$_StringLiteralsViewModel extends _StringLiteralsViewModel
+    with DiagnosticableTreeMixin {
   const _$_StringLiteralsViewModel(
-      {required final List<StringLiteralViewModel> stringLiterals})
+      {required this.isLoading,
+      required final List<StringLiteralViewModel> stringLiterals})
       : _stringLiterals = stringLiterals,
         super._();
 
+  @override
+  final bool isLoading;
   final List<StringLiteralViewModel> _stringLiterals;
   @override
   List<StringLiteralViewModel> get stringLiterals {
@@ -109,8 +124,17 @@ class _$_StringLiteralsViewModel extends _StringLiteralsViewModel {
   }
 
   @override
-  String toString() {
-    return 'StringLiteralsViewModel(stringLiterals: $stringLiterals)';
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
+    return 'StringLiteralsViewModel(isLoading: $isLoading, stringLiterals: $stringLiterals)';
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(DiagnosticsProperty('type', 'StringLiteralsViewModel'))
+      ..add(DiagnosticsProperty('isLoading', isLoading))
+      ..add(DiagnosticsProperty('stringLiterals', stringLiterals));
   }
 
   @override
@@ -118,13 +142,15 @@ class _$_StringLiteralsViewModel extends _StringLiteralsViewModel {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$_StringLiteralsViewModel &&
+            (identical(other.isLoading, isLoading) ||
+                other.isLoading == isLoading) &&
             const DeepCollectionEquality()
                 .equals(other._stringLiterals, _stringLiterals));
   }
 
   @override
-  int get hashCode => Object.hash(
-      runtimeType, const DeepCollectionEquality().hash(_stringLiterals));
+  int get hashCode => Object.hash(runtimeType, isLoading,
+      const DeepCollectionEquality().hash(_stringLiterals));
 
   @JsonKey(ignore: true)
   @override
@@ -137,10 +163,13 @@ class _$_StringLiteralsViewModel extends _StringLiteralsViewModel {
 
 abstract class _StringLiteralsViewModel extends StringLiteralsViewModel {
   const factory _StringLiteralsViewModel(
-          {required final List<StringLiteralViewModel> stringLiterals}) =
+          {required final bool isLoading,
+          required final List<StringLiteralViewModel> stringLiterals}) =
       _$_StringLiteralsViewModel;
   const _StringLiteralsViewModel._() : super._();
 
+  @override
+  bool get isLoading;
   @override
   List<StringLiteralViewModel> get stringLiterals;
   @override
@@ -269,7 +298,8 @@ class __$$_StringLiteralViewModelCopyWithImpl<$Res>
 
 /// @nodoc
 
-class _$_StringLiteralViewModel extends _StringLiteralViewModel {
+class _$_StringLiteralViewModel extends _StringLiteralViewModel
+    with DiagnosticableTreeMixin {
   const _$_StringLiteralViewModel(
       {required this.string,
       required this.path,
@@ -287,8 +317,19 @@ class _$_StringLiteralViewModel extends _StringLiteralViewModel {
   final StringLiteralContext context;
 
   @override
-  String toString() {
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
     return 'StringLiteralViewModel(string: $string, path: $path, lineNumber: $lineNumber, context: $context)';
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(DiagnosticsProperty('type', 'StringLiteralViewModel'))
+      ..add(DiagnosticsProperty('string', string))
+      ..add(DiagnosticsProperty('path', path))
+      ..add(DiagnosticsProperty('lineNumber', lineNumber))
+      ..add(DiagnosticsProperty('context', context));
   }
 
   @override
