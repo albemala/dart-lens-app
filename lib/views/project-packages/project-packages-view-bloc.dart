@@ -17,8 +17,8 @@ import 'package:pub_api_client/pub_api_client.dart';
 part 'project-packages-view-bloc.freezed.dart';
 
 enum PackageFilter {
-  all(title: 'All packages'),
-  upgradable(title: 'Upgradable packages');
+  all(title: 'All'),
+  upgradable(title: 'Upgradable');
 
   final String title;
 

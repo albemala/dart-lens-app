@@ -31,40 +31,48 @@ class ProjectPackagesView extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
             child: SeparatedRow(
               children: [
-                if (viewModel.dependencies.isNotEmpty &&
+                if (viewModel.dependencies.isNotEmpty ||
                     viewModel.devDependencies.isNotEmpty)
-                  // dropdown to display all packages or only upgradable ones
-                  DropdownButton<PackageFilter>(
-                    isDense: true,
-                    items: PackageFilter.values.map(
-                      (filter) {
-                        return DropdownMenuItem<PackageFilter>(
-                          value: filter,
-                          child: Text(filter.title),
-                        );
-                      },
-                    ).toList(),
-                    value: viewModel.packageFilter,
-                    onChanged: (filter) {
-                      if (filter == null) return;
-                      context //
-                          .read<ProjectPackagesViewBloc>()
-                          .setPackageFilter(filter);
-                    },
+                  SeparatedRow(
+                    children: [
+                      PopupMenuButton<PackageFilter>(
+                        tooltip: 'Filter packages',
+                        icon: const Icon(CupertinoIcons.cube_box),
+                        itemBuilder: (context) {
+                          return PackageFilter.values.map(
+                            (filter) {
+                              return PopupMenuItem<PackageFilter>(
+                                value: filter,
+                                child: Text(filter.title),
+                                onTap: () {
+                                  context //
+                                      .read<ProjectPackagesViewBloc>()
+                                      .setPackageFilter(filter);
+                                },
+                              );
+                            },
+                          ).toList();
+                        },
+                      ),
+                      Text(
+                        viewModel.packageFilter.title,
+                      ),
+                    ],
+                    separatorBuilder: () => const SizedBox(width: 4),
                   ),
                 Tooltip(
-                  message: 'Select to install all upgrades',
-                  child: OutlinedButton(
+                  message: 'Select all package upgrades',
+                  child: IconButton(
                     onPressed: () {
                       context //
                           .read<ProjectPackagesViewBloc>()
                           .upgradeAllPackages();
                     },
-                    child: const Text('Select all upgrades'),
+                    icon: const Icon(CupertinoIcons.arrow_up_to_line),
                   ),
                 ),
                 if (viewModel.packageVersionsToChangeCount > 0)
-                  SeparatedRow(
+                  Row(
                     children: [
                       ElevatedButton(
                         onPressed: () {
@@ -74,6 +82,7 @@ class ProjectPackagesView extends StatelessWidget {
                         },
                         child: const Text('Apply changes'),
                       ),
+                      const SizedBox(width: 8),
                       Text(
                         'You have changed ${viewModel.packageVersionsToChangeCount} package(s)',
                       ),
@@ -90,7 +99,6 @@ class ProjectPackagesView extends StatelessWidget {
                         ),
                       ),
                     ],
-                    separatorBuilder: () => const SizedBox(width: 8),
                   ),
                 const Spacer(),
                 if (viewModel.isLoading) //
@@ -101,14 +109,16 @@ class ProjectPackagesView extends StatelessWidget {
                       strokeWidth: 2,
                     ),
                   ),
-                // button to reload the project
-                IconButton(
-                  onPressed: () {
-                    context //
-                        .read<ProjectPackagesViewBloc>()
-                        .reload();
-                  },
-                  icon: const Icon(CupertinoIcons.arrow_clockwise),
+                Tooltip(
+                  message: 'Reload project',
+                  child: IconButton(
+                    onPressed: () {
+                      context //
+                          .read<ProjectPackagesViewBloc>()
+                          .reload();
+                    },
+                    icon: const Icon(CupertinoIcons.arrow_clockwise),
+                  ),
                 ),
               ],
               separatorBuilder: () => const SizedBox(width: 16),

@@ -40,14 +40,16 @@ class StringLiteralsView extends StatelessWidget {
                       strokeWidth: 2,
                     ),
                   ),
-                // button to reload the project
-                IconButton(
-                  onPressed: () {
-                    context //
-                        .read<StringLiteralsViewBloc>()
-                        .reload();
-                  },
-                  icon: const Icon(CupertinoIcons.arrow_clockwise),
+                Tooltip(
+                  message: 'Reload project',
+                  child: IconButton(
+                    onPressed: () {
+                      context //
+                          .read<StringLiteralsViewBloc>()
+                          .reload();
+                    },
+                    icon: const Icon(CupertinoIcons.arrow_clockwise),
+                  ),
                 ),
               ],
               separatorBuilder: () => const SizedBox(width: 8),
