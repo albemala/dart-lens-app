@@ -16,15 +16,27 @@ import 'package:pub_api_client/pub_api_client.dart';
 
 part 'project-packages-view-bloc.freezed.dart';
 
+enum PackageFilter {
+  all(title: 'All packages'),
+  upgradable(title: 'Upgradable packages');
+
+  final String title;
+
+  const PackageFilter({
+    required this.title,
+  });
+}
+
 @freezed
 class ProjectPackagesViewModel with _$ProjectPackagesViewModel {
   const ProjectPackagesViewModel._();
 
   const factory ProjectPackagesViewModel({
     required bool isLoading,
+    required PackageFilter packageFilter,
+    required int packageVersionsToChangeCount,
     required IList<PackageViewModel> dependencies,
     required IList<PackageViewModel> devDependencies,
-    required IMap<String, String> packageVersionsToChange,
   }) = _ProjectPackagesViewModel;
 }
 
@@ -38,7 +50,7 @@ class PackageViewModel with _$PackageViewModel {
     required String? installableVersion,
     required String? changeToVersion,
     required IList<PackageVersionViewModel>? availableVersions,
-    required bool? isLatestVersionInstalled,
+    required bool isLatestVersionInstalled,
     required String? url,
     required String? changelogUrl,
     required String? description,
@@ -58,18 +70,25 @@ class PackageVersionViewModel with _$PackageVersionViewModel {
   }) = _PackageVersionViewModel;
 }
 
-PackageViewModel _createPackageViewModel(Package package) {
+PackageViewModel _createPackageViewModel(
+  Package package,
+  IMap<String, String> packageVersionsToChange,
+) {
+  final changeToVersion = packageVersionsToChange[package.name];
   final availableVersions = package.availableVersions?.map((availableVersion) {
-    return _createPackageVersionViewModel(package, availableVersion);
+    return _createPackageVersionViewModel(
+      package,
+      availableVersion,
+      changeToVersion,
+    );
   }).toIList();
-  final isLatestVersionInstalled = isPackageLatestVersionInstalled(package);
   return PackageViewModel(
     name: package.name,
     installedVersion: package.installedVersion,
     installableVersion: package.resolvableVersion,
-    changeToVersion: null,
+    changeToVersion: changeToVersion,
     availableVersions: availableVersions,
-    isLatestVersionInstalled: isLatestVersionInstalled,
+    isLatestVersionInstalled: isPackageLatestVersionInstalled(package),
     url: package.url,
     changelogUrl: package.changelogUrl,
     description: package.description,
@@ -79,43 +98,20 @@ PackageViewModel _createPackageViewModel(Package package) {
 PackageVersionViewModel _createPackageVersionViewModel(
   Package package,
   PackageVersion availableVersion,
+  String? changeToVersion,
 ) {
-  final isInstallable = isPackageInstallable(package, availableVersion);
+  final isInstalled = package.installedVersion == availableVersion.version;
   return PackageVersionViewModel(
     version: availableVersion.version,
-    isInstalled: availableVersion.version == package.installedVersion,
-    isInstallable: isInstallable,
-    willBeInstalled: false,
-    willBeUninstalled: false,
+    isInstalled: isInstalled,
+    isInstallable: isPackageInstallable(package, availableVersion),
+    willBeInstalled: !isInstalled &&
+        changeToVersion != null &&
+        changeToVersion == availableVersion.version,
+    willBeUninstalled: isInstalled &&
+        changeToVersion != null &&
+        changeToVersion != availableVersion.version,
   );
-}
-
-IList<PackageViewModel> _updatePackagesToChangeVersion(
-  IList<PackageViewModel> dependencies,
-  String name,
-  String version,
-) {
-  return dependencies.map((packageViewModel) {
-    final isInstalledVersion = packageViewModel.installedVersion == version;
-    if (packageViewModel.name == name) {
-      return packageViewModel.copyWith(
-        changeToVersion: !isInstalledVersion ? version : null,
-        availableVersions: packageViewModel.availableVersions?.map(
-          (packageVersionViewModel) {
-            return packageVersionViewModel.copyWith(
-              willBeInstalled: !isInstalledVersion &&
-                  packageVersionViewModel.version == version,
-              willBeUninstalled: !isInstalledVersion &&
-                  packageVersionViewModel.isInstalled &&
-                  packageVersionViewModel.version != version,
-            );
-          },
-        ).toIList(),
-      );
-    } else {
-      return packageViewModel;
-    }
-  }).toIList();
 }
 
 class ProjectPackagesViewBloc extends Cubit<ProjectPackagesViewModel> {
@@ -123,6 +119,7 @@ class ProjectPackagesViewBloc extends Cubit<ProjectPackagesViewModel> {
   late StreamSubscription<ProjectAnalysisBlocState> projectAnalysisBlocListener;
 
   List<Package> packages = [];
+  IMap<String, String> packageVersionsToChange = <String, String>{}.lock;
 
   String? get _projectPath {
     final projectAnalysisBlocState = context.read<ProjectAnalysisBloc>().state;
@@ -133,25 +130,19 @@ class ProjectPackagesViewBloc extends Cubit<ProjectPackagesViewModel> {
       : super(
           ProjectPackagesViewModel(
             isLoading: false,
+            packageFilter: PackageFilter.all,
+            packageVersionsToChangeCount: 0,
             dependencies: <PackageViewModel>[].lock,
             devDependencies: <PackageViewModel>[].lock,
-            packageVersionsToChange: <String, String>{}.lock,
           ),
         ) {
     projectAnalysisBlocListener = context //
         .read<ProjectAnalysisBloc>()
         .stream
         .listen((projectAnalysisBlocState) {
-      emit(
-        state.copyWith(
-          dependencies: <PackageViewModel>[].lock,
-          devDependencies: <PackageViewModel>[].lock,
-          packageVersionsToChange: <String, String>{}.lock,
-        ),
-      );
-      _updateState();
+      reload();
     });
-    _updateState();
+    reload();
   }
 
   @override
@@ -160,19 +151,16 @@ class ProjectPackagesViewBloc extends Cubit<ProjectPackagesViewModel> {
     return super.close();
   }
 
+  void setPackageFilter(PackageFilter filter) {
+    emit(
+      state.copyWith(
+        packageFilter: filter,
+      ),
+    );
+    _updateState();
+  }
+
   void selectPackageVersion(String name, String version) {
-    final dependencies = _updatePackagesToChangeVersion(
-      state.dependencies,
-      name,
-      version,
-    );
-
-    final devDependencies = _updatePackagesToChangeVersion(
-      state.devDependencies,
-      name,
-      version,
-    );
-
     final installedVersion = state.dependencies
             .firstWhereOrNull(
               (packageViewModel) => packageViewModel.name == name,
@@ -184,63 +172,78 @@ class ProjectPackagesViewBloc extends Cubit<ProjectPackagesViewModel> {
             )
             ?.installedVersion;
 
-    final packageVersionsToChange = installedVersion == version
-        ? state.packageVersionsToChange.remove(name)
-        : state.packageVersionsToChange.update(
+    packageVersionsToChange = installedVersion == version
+        ? packageVersionsToChange.remove(name)
+        : packageVersionsToChange.update(
             name,
             (value) => version,
             ifAbsent: () => version,
           );
 
-    emit(
-      state.copyWith(
-        dependencies: dependencies,
-        devDependencies: devDependencies,
-        packageVersionsToChange: packageVersionsToChange,
-      ),
-    );
+    _updateState();
   }
 
   Future<void> applyChanges() async {
     await _applyPackageVersionChangesToProject();
+    await reload();
+  }
+
+  Future<void> reload() async {
+    packages = [];
+    packageVersionsToChange = <String, String>{}.lock;
+    await _updateState();
+
+    await _loadProjectPackages();
     await _updateState();
   }
 
-  void reload() {
-    _updateState();
-  }
-
   Future<void> _updateState() async {
-    await _loadProjectPackages();
-
     final dependencies = packages
         .where((package) {
-          return package.dependencyType == DependencyType.dependency &&
-              // filter out sdk dependencies
-              package.type != PackageType.sdk;
+          return package.dependencyType == DependencyType.dependency;
         })
-        .map(_createPackageViewModel)
+        .where(_isNotSdkDependency)
+        .where(_applyPackageFilter)
+        .map((package) {
+          return _createPackageViewModel(
+            package,
+            packageVersionsToChange,
+          );
+        })
         .toIList();
 
     final devDependencies = packages
         .where((package) {
-          return package.dependencyType == DependencyType.devDependency &&
-              // filter out sdk dependencies
-              package.type != PackageType.sdk;
+          return package.dependencyType == DependencyType.devDependency;
         })
-        .map(_createPackageViewModel)
+        .where(_isNotSdkDependency)
+        .where(_applyPackageFilter)
+        .map((package) {
+          return _createPackageViewModel(
+            package,
+            packageVersionsToChange,
+          );
+        })
         .toIList();
-
-    // reset packageVersionsToChange
-    final packageVersionsToChange = <String, String>{}.lock;
 
     emit(
       state.copyWith(
+        packageVersionsToChangeCount: packageVersionsToChange.length,
         dependencies: dependencies,
         devDependencies: devDependencies,
-        packageVersionsToChange: packageVersionsToChange,
       ),
     );
+  }
+
+  bool _isNotSdkDependency(Package package) => package.type != PackageType.sdk;
+
+  bool _applyPackageFilter(Package package) {
+    switch (state.packageFilter) {
+      case PackageFilter.all:
+        return true;
+      case PackageFilter.upgradable:
+        return !isPackageLatestVersionInstalled(package);
+    }
   }
 
   Future<void> _loadProjectPackages() async {
@@ -268,7 +271,6 @@ class ProjectPackagesViewBloc extends Cubit<ProjectPackagesViewModel> {
 
     if (packages.isEmpty) return;
 
-    final packageVersionsToChange = state.packageVersionsToChange.unlock;
     if (packageVersionsToChange.isEmpty) return;
 
     emit(
@@ -280,7 +282,7 @@ class ProjectPackagesViewBloc extends Cubit<ProjectPackagesViewModel> {
           return applyPackageVersionChanges(
             projectPath,
             packages,
-            packageVersionsToChange,
+            packageVersionsToChange.unlock,
           );
         },
       );

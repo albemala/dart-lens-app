@@ -17,11 +17,11 @@ final _privateConstructorUsedError = UnsupportedError(
 /// @nodoc
 mixin _$ProjectPackagesViewModel {
   bool get isLoading => throw _privateConstructorUsedError;
+  PackageFilter get packageFilter => throw _privateConstructorUsedError;
+  int get packageVersionsToChangeCount => throw _privateConstructorUsedError;
   IList<PackageViewModel> get dependencies =>
       throw _privateConstructorUsedError;
   IList<PackageViewModel> get devDependencies =>
-      throw _privateConstructorUsedError;
-  IMap<String, String> get packageVersionsToChange =>
       throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
@@ -37,9 +37,10 @@ abstract class $ProjectPackagesViewModelCopyWith<$Res> {
   @useResult
   $Res call(
       {bool isLoading,
+      PackageFilter packageFilter,
+      int packageVersionsToChangeCount,
       IList<PackageViewModel> dependencies,
-      IList<PackageViewModel> devDependencies,
-      IMap<String, String> packageVersionsToChange});
+      IList<PackageViewModel> devDependencies});
 }
 
 /// @nodoc
@@ -57,15 +58,24 @@ class _$ProjectPackagesViewModelCopyWithImpl<$Res,
   @override
   $Res call({
     Object? isLoading = null,
+    Object? packageFilter = null,
+    Object? packageVersionsToChangeCount = null,
     Object? dependencies = null,
     Object? devDependencies = null,
-    Object? packageVersionsToChange = null,
   }) {
     return _then(_value.copyWith(
       isLoading: null == isLoading
           ? _value.isLoading
           : isLoading // ignore: cast_nullable_to_non_nullable
               as bool,
+      packageFilter: null == packageFilter
+          ? _value.packageFilter
+          : packageFilter // ignore: cast_nullable_to_non_nullable
+              as PackageFilter,
+      packageVersionsToChangeCount: null == packageVersionsToChangeCount
+          ? _value.packageVersionsToChangeCount
+          : packageVersionsToChangeCount // ignore: cast_nullable_to_non_nullable
+              as int,
       dependencies: null == dependencies
           ? _value.dependencies
           : dependencies // ignore: cast_nullable_to_non_nullable
@@ -74,10 +84,6 @@ class _$ProjectPackagesViewModelCopyWithImpl<$Res,
           ? _value.devDependencies
           : devDependencies // ignore: cast_nullable_to_non_nullable
               as IList<PackageViewModel>,
-      packageVersionsToChange: null == packageVersionsToChange
-          ? _value.packageVersionsToChange
-          : packageVersionsToChange // ignore: cast_nullable_to_non_nullable
-              as IMap<String, String>,
     ) as $Val);
   }
 }
@@ -93,9 +99,10 @@ abstract class _$$_ProjectPackagesViewModelCopyWith<$Res>
   @useResult
   $Res call(
       {bool isLoading,
+      PackageFilter packageFilter,
+      int packageVersionsToChangeCount,
       IList<PackageViewModel> dependencies,
-      IList<PackageViewModel> devDependencies,
-      IMap<String, String> packageVersionsToChange});
+      IList<PackageViewModel> devDependencies});
 }
 
 /// @nodoc
@@ -111,15 +118,24 @@ class __$$_ProjectPackagesViewModelCopyWithImpl<$Res>
   @override
   $Res call({
     Object? isLoading = null,
+    Object? packageFilter = null,
+    Object? packageVersionsToChangeCount = null,
     Object? dependencies = null,
     Object? devDependencies = null,
-    Object? packageVersionsToChange = null,
   }) {
     return _then(_$_ProjectPackagesViewModel(
       isLoading: null == isLoading
           ? _value.isLoading
           : isLoading // ignore: cast_nullable_to_non_nullable
               as bool,
+      packageFilter: null == packageFilter
+          ? _value.packageFilter
+          : packageFilter // ignore: cast_nullable_to_non_nullable
+              as PackageFilter,
+      packageVersionsToChangeCount: null == packageVersionsToChangeCount
+          ? _value.packageVersionsToChangeCount
+          : packageVersionsToChangeCount // ignore: cast_nullable_to_non_nullable
+              as int,
       dependencies: null == dependencies
           ? _value.dependencies
           : dependencies // ignore: cast_nullable_to_non_nullable
@@ -128,10 +144,6 @@ class __$$_ProjectPackagesViewModelCopyWithImpl<$Res>
           ? _value.devDependencies
           : devDependencies // ignore: cast_nullable_to_non_nullable
               as IList<PackageViewModel>,
-      packageVersionsToChange: null == packageVersionsToChange
-          ? _value.packageVersionsToChange
-          : packageVersionsToChange // ignore: cast_nullable_to_non_nullable
-              as IMap<String, String>,
     ));
   }
 }
@@ -142,23 +154,26 @@ class _$_ProjectPackagesViewModel extends _ProjectPackagesViewModel
     with DiagnosticableTreeMixin {
   const _$_ProjectPackagesViewModel(
       {required this.isLoading,
+      required this.packageFilter,
+      required this.packageVersionsToChangeCount,
       required this.dependencies,
-      required this.devDependencies,
-      required this.packageVersionsToChange})
+      required this.devDependencies})
       : super._();
 
   @override
   final bool isLoading;
   @override
+  final PackageFilter packageFilter;
+  @override
+  final int packageVersionsToChangeCount;
+  @override
   final IList<PackageViewModel> dependencies;
   @override
   final IList<PackageViewModel> devDependencies;
-  @override
-  final IMap<String, String> packageVersionsToChange;
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
-    return 'ProjectPackagesViewModel(isLoading: $isLoading, dependencies: $dependencies, devDependencies: $devDependencies, packageVersionsToChange: $packageVersionsToChange)';
+    return 'ProjectPackagesViewModel(isLoading: $isLoading, packageFilter: $packageFilter, packageVersionsToChangeCount: $packageVersionsToChangeCount, dependencies: $dependencies, devDependencies: $devDependencies)';
   }
 
   @override
@@ -167,10 +182,11 @@ class _$_ProjectPackagesViewModel extends _ProjectPackagesViewModel
     properties
       ..add(DiagnosticsProperty('type', 'ProjectPackagesViewModel'))
       ..add(DiagnosticsProperty('isLoading', isLoading))
-      ..add(DiagnosticsProperty('dependencies', dependencies))
-      ..add(DiagnosticsProperty('devDependencies', devDependencies))
+      ..add(DiagnosticsProperty('packageFilter', packageFilter))
       ..add(DiagnosticsProperty(
-          'packageVersionsToChange', packageVersionsToChange));
+          'packageVersionsToChangeCount', packageVersionsToChangeCount))
+      ..add(DiagnosticsProperty('dependencies', dependencies))
+      ..add(DiagnosticsProperty('devDependencies', devDependencies));
   }
 
   @override
@@ -180,22 +196,26 @@ class _$_ProjectPackagesViewModel extends _ProjectPackagesViewModel
             other is _$_ProjectPackagesViewModel &&
             (identical(other.isLoading, isLoading) ||
                 other.isLoading == isLoading) &&
+            (identical(other.packageFilter, packageFilter) ||
+                other.packageFilter == packageFilter) &&
+            (identical(other.packageVersionsToChangeCount,
+                    packageVersionsToChangeCount) ||
+                other.packageVersionsToChangeCount ==
+                    packageVersionsToChangeCount) &&
             const DeepCollectionEquality()
                 .equals(other.dependencies, dependencies) &&
             const DeepCollectionEquality()
-                .equals(other.devDependencies, devDependencies) &&
-            (identical(
-                    other.packageVersionsToChange, packageVersionsToChange) ||
-                other.packageVersionsToChange == packageVersionsToChange));
+                .equals(other.devDependencies, devDependencies));
   }
 
   @override
   int get hashCode => Object.hash(
       runtimeType,
       isLoading,
+      packageFilter,
+      packageVersionsToChangeCount,
       const DeepCollectionEquality().hash(dependencies),
-      const DeepCollectionEquality().hash(devDependencies),
-      packageVersionsToChange);
+      const DeepCollectionEquality().hash(devDependencies));
 
   @JsonKey(ignore: true)
   @override
@@ -208,20 +228,23 @@ class _$_ProjectPackagesViewModel extends _ProjectPackagesViewModel
 abstract class _ProjectPackagesViewModel extends ProjectPackagesViewModel {
   const factory _ProjectPackagesViewModel(
           {required final bool isLoading,
+          required final PackageFilter packageFilter,
+          required final int packageVersionsToChangeCount,
           required final IList<PackageViewModel> dependencies,
-          required final IList<PackageViewModel> devDependencies,
-          required final IMap<String, String> packageVersionsToChange}) =
+          required final IList<PackageViewModel> devDependencies}) =
       _$_ProjectPackagesViewModel;
   const _ProjectPackagesViewModel._() : super._();
 
   @override
   bool get isLoading;
   @override
+  PackageFilter get packageFilter;
+  @override
+  int get packageVersionsToChangeCount;
+  @override
   IList<PackageViewModel> get dependencies;
   @override
   IList<PackageViewModel> get devDependencies;
-  @override
-  IMap<String, String> get packageVersionsToChange;
   @override
   @JsonKey(ignore: true)
   _$$_ProjectPackagesViewModelCopyWith<_$_ProjectPackagesViewModel>
@@ -236,7 +259,7 @@ mixin _$PackageViewModel {
   String? get changeToVersion => throw _privateConstructorUsedError;
   IList<PackageVersionViewModel>? get availableVersions =>
       throw _privateConstructorUsedError;
-  bool? get isLatestVersionInstalled => throw _privateConstructorUsedError;
+  bool get isLatestVersionInstalled => throw _privateConstructorUsedError;
   String? get url => throw _privateConstructorUsedError;
   String? get changelogUrl => throw _privateConstructorUsedError;
   String? get description => throw _privateConstructorUsedError;
@@ -258,7 +281,7 @@ abstract class $PackageViewModelCopyWith<$Res> {
       String? installableVersion,
       String? changeToVersion,
       IList<PackageVersionViewModel>? availableVersions,
-      bool? isLatestVersionInstalled,
+      bool isLatestVersionInstalled,
       String? url,
       String? changelogUrl,
       String? description});
@@ -282,7 +305,7 @@ class _$PackageViewModelCopyWithImpl<$Res, $Val extends PackageViewModel>
     Object? installableVersion = freezed,
     Object? changeToVersion = freezed,
     Object? availableVersions = freezed,
-    Object? isLatestVersionInstalled = freezed,
+    Object? isLatestVersionInstalled = null,
     Object? url = freezed,
     Object? changelogUrl = freezed,
     Object? description = freezed,
@@ -308,10 +331,10 @@ class _$PackageViewModelCopyWithImpl<$Res, $Val extends PackageViewModel>
           ? _value.availableVersions
           : availableVersions // ignore: cast_nullable_to_non_nullable
               as IList<PackageVersionViewModel>?,
-      isLatestVersionInstalled: freezed == isLatestVersionInstalled
+      isLatestVersionInstalled: null == isLatestVersionInstalled
           ? _value.isLatestVersionInstalled
           : isLatestVersionInstalled // ignore: cast_nullable_to_non_nullable
-              as bool?,
+              as bool,
       url: freezed == url
           ? _value.url
           : url // ignore: cast_nullable_to_non_nullable
@@ -342,7 +365,7 @@ abstract class _$$_PackageViewModelCopyWith<$Res>
       String? installableVersion,
       String? changeToVersion,
       IList<PackageVersionViewModel>? availableVersions,
-      bool? isLatestVersionInstalled,
+      bool isLatestVersionInstalled,
       String? url,
       String? changelogUrl,
       String? description});
@@ -364,7 +387,7 @@ class __$$_PackageViewModelCopyWithImpl<$Res>
     Object? installableVersion = freezed,
     Object? changeToVersion = freezed,
     Object? availableVersions = freezed,
-    Object? isLatestVersionInstalled = freezed,
+    Object? isLatestVersionInstalled = null,
     Object? url = freezed,
     Object? changelogUrl = freezed,
     Object? description = freezed,
@@ -390,10 +413,10 @@ class __$$_PackageViewModelCopyWithImpl<$Res>
           ? _value.availableVersions
           : availableVersions // ignore: cast_nullable_to_non_nullable
               as IList<PackageVersionViewModel>?,
-      isLatestVersionInstalled: freezed == isLatestVersionInstalled
+      isLatestVersionInstalled: null == isLatestVersionInstalled
           ? _value.isLatestVersionInstalled
           : isLatestVersionInstalled // ignore: cast_nullable_to_non_nullable
-              as bool?,
+              as bool,
       url: freezed == url
           ? _value.url
           : url // ignore: cast_nullable_to_non_nullable
@@ -437,7 +460,7 @@ class _$_PackageViewModel extends _PackageViewModel
   @override
   final IList<PackageVersionViewModel>? availableVersions;
   @override
-  final bool? isLatestVersionInstalled;
+  final bool isLatestVersionInstalled;
   @override
   final String? url;
   @override
@@ -518,7 +541,7 @@ abstract class _PackageViewModel extends PackageViewModel {
       required final String? installableVersion,
       required final String? changeToVersion,
       required final IList<PackageVersionViewModel>? availableVersions,
-      required final bool? isLatestVersionInstalled,
+      required final bool isLatestVersionInstalled,
       required final String? url,
       required final String? changelogUrl,
       required final String? description}) = _$_PackageViewModel;
@@ -535,7 +558,7 @@ abstract class _PackageViewModel extends PackageViewModel {
   @override
   IList<PackageVersionViewModel>? get availableVersions;
   @override
-  bool? get isLatestVersionInstalled;
+  bool get isLatestVersionInstalled;
   @override
   String? get url;
   @override

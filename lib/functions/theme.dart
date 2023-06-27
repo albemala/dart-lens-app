@@ -54,5 +54,8 @@ ThemeData _setupThemeData(ThemeData themeData) {
     dividerTheme: themeData.dividerTheme.copyWith(
       space: 1,
     ),
+    buttonTheme: themeData.buttonTheme.copyWith(
+      alignedDropdown: true,
+    ),
   );
 }

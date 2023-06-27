@@ -31,18 +31,43 @@ class ProjectPackagesView extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
             child: SeparatedRow(
               children: [
-                if (viewModel.packageVersionsToChange.isNotEmpty)
-                  ElevatedButton(
-                    onPressed: () {
+                if (viewModel.dependencies.isNotEmpty &&
+                    viewModel.devDependencies.isNotEmpty)
+                  // dropdown to display all packages or only upgradable ones
+                  DropdownButton<PackageFilter>(
+                    isDense: true,
+                    items: PackageFilter.values.map(
+                      (filter) {
+                        return DropdownMenuItem<PackageFilter>(
+                          value: filter,
+                          child: Text(filter.title),
+                        );
+                      },
+                    ).toList(),
+                    value: viewModel.packageFilter,
+                    onChanged: (filter) {
+                      if (filter == null) return;
                       context //
                           .read<ProjectPackagesViewBloc>()
-                          .applyChanges();
+                          .setPackageFilter(filter);
                     },
-                    child: const Text('Apply changes'),
                   ),
-                if (viewModel.packageVersionsToChange.isNotEmpty)
-                  Text(
-                    'You have changed ${viewModel.packageVersionsToChange.length} package(s)',
+                if (viewModel.packageVersionsToChangeCount > 0)
+                  SeparatedRow(
+                    children: [
+                      ElevatedButton(
+                        onPressed: () {
+                          context //
+                              .read<ProjectPackagesViewBloc>()
+                              .applyChanges();
+                        },
+                        child: const Text('Apply changes'),
+                      ),
+                      Text(
+                        'You have changed ${viewModel.packageVersionsToChangeCount} package(s)',
+                      ),
+                    ],
+                    separatorBuilder: () => const SizedBox(width: 8),
                   ),
                 const Spacer(),
                 if (viewModel.isLoading) //
@@ -63,7 +88,7 @@ class ProjectPackagesView extends StatelessWidget {
                   icon: const Icon(CupertinoIcons.arrow_clockwise),
                 ),
               ],
-              separatorBuilder: () => const SizedBox(width: 8),
+              separatorBuilder: () => const SizedBox(width: 16),
             ),
           ),
         ),
@@ -204,9 +229,6 @@ class _PackageVersionSelectorView extends StatelessWidget {
         Theme.of(context).colorScheme.secondary;
     final changeToVersionTextColor = Theme.of(context).colorScheme.onSecondary;
 
-    final isLatestVersionInstalled =
-        dependency.isLatestVersionInstalled ?? true;
-
     return SeparatedRow(
       children: [
         Material(
@@ -255,7 +277,8 @@ class _PackageVersionSelectorView extends StatelessWidget {
             ),
           ),
         ),
-        if (!isLatestVersionInstalled)
+        if (!dependency.isLatestVersionInstalled &&
+            dependency.installableVersion != null)
           Tooltip(
             message:
                 'Latest version: ${dependency.installableVersion}. Click to select.',
@@ -277,7 +300,7 @@ class _PackageVersionSelectorView extends StatelessWidget {
                     size: 12,
                   ),
                   Text(
-                    dependency.installableVersion ?? '',
+                    dependency.installableVersion!,
                     style: textStyle?.copyWith(
                       color: newVersionTextColor,
                     ),
@@ -287,7 +310,8 @@ class _PackageVersionSelectorView extends StatelessWidget {
               ),
             ),
           ),
-        if (dependency.changeToVersion != null)
+        if (dependency.changeToVersion != null &&
+            dependency.installedVersion != null)
           Tooltip(
             message:
                 'Change to version: ${dependency.changeToVersion}. Click to reset.',
@@ -309,7 +333,7 @@ class _PackageVersionSelectorView extends StatelessWidget {
                     size: 12,
                   ),
                   Text(
-                    dependency.changeToVersion ?? '',
+                    dependency.changeToVersion!,
                     style: textStyle?.copyWith(
                       color: changeToVersionTextColor,
                     ),
@@ -337,40 +361,44 @@ class _VersionMenuItemView extends StatelessWidget {
     return SeparatedRow(
       children: [
         if (!version.isInstallable)
-          const Tooltip(
+          Tooltip(
             message: 'Version might not be installable',
             child: Icon(
               CupertinoIcons.exclamationmark_triangle,
-              size: 12,
+              size: 14,
+              color: Theme.of(context).colorScheme.error,
             ),
           ),
         if (version.isInstalled && !version.willBeUninstalled)
-          const Tooltip(
+          Tooltip(
             message: 'Version is installed',
             child: Icon(
               CupertinoIcons.arrow_right,
-              size: 12,
-            ),
-          ),
-        if (version.willBeInstalled)
-          const Tooltip(
-            message: 'Version will be installed',
-            child: Icon(
-              CupertinoIcons.checkmark_alt,
-              size: 12,
+              size: 14,
+              color: Theme.of(context).colorScheme.primary,
             ),
           ),
         if (version.willBeUninstalled)
-          const Tooltip(
+          Tooltip(
             message: 'Version will be uninstalled',
             child: Icon(
               CupertinoIcons.xmark,
-              size: 12,
+              size: 14,
+              color: Theme.of(context).colorScheme.error,
+            ),
+          ),
+        if (version.willBeInstalled)
+          Tooltip(
+            message: 'Version will be installed',
+            child: Icon(
+              CupertinoIcons.checkmark_alt,
+              size: 14,
+              color: Theme.of(context).colorScheme.primary,
             ),
           ),
         Text(version.version),
       ],
-      separatorBuilder: () => const SizedBox(width: 2),
+      separatorBuilder: () => const SizedBox(width: 4),
     );
   }
 }
