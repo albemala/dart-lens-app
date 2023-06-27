@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:collection/collection.dart';
 import 'package:dart_lens/functions/commands.dart';
@@ -7,14 +6,11 @@ import 'package:dart_lens/models/outdated-packages/outdated-packages.dart';
 
 /// Runs `flutter pub outdated --json` on [projectDirectoryPath]
 /// and parses the output
-Future<OutdatedPackages?> runFlutterPubOutdated(
+Future<OutdatedPackages?> getOutdatedPackages(
   String projectDirectoryPath,
 ) async {
-  final flutterPubOutdatedResult = await Process.run(
-    flutterCmd,
-    ['pub', 'outdated', '--json'],
-    workingDirectory: projectDirectoryPath,
-  );
+  final flutterPubOutdatedResult =
+      await runFlutterPubOutdated(projectDirectoryPath);
   final flutterPubOutdatedJson = flutterPubOutdatedResult.stdout.toString();
   try {
     final flutterPubOutdatedMap = jsonDecode(flutterPubOutdatedJson) as Map;

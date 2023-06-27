@@ -43,13 +43,3 @@ Future<void> applyPackageVersionChanges(
   // run `flutter pub get` to update the lock file
   await runFlutterPubGet(projectDirectoryPath);
 }
-
-Future<void> runFlutterPubGet(String directoryPath) async {
-  final flutterPubGetProcess = await Process.run(
-    flutterCmd,
-    ['pub', 'get'],
-    workingDirectory: directoryPath,
-  );
-  print('flutter pub get output: ${flutterPubGetProcess.stdout}');
-  print('flutter pub get error: ${flutterPubGetProcess.stderr}');
-}

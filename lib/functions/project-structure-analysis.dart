@@ -28,7 +28,7 @@ Future<List<ResolvedUnitResult>> getProjectStructure(
   // NOTE: on macOS, App Sandbox must be disabled for this to work
 
   // run `flutter doctor -v`
-  final flutterDoctorResult = await Process.run(flutterCmd, ['doctor', '-v']);
+  final flutterDoctorResult = await runFlutterDoctor();
   // extract flutter sdk path from flutter doctor output
   // example to look for: Flutter version <version> on channel <channel> at <path>
   final flutterSdkPathRegex =

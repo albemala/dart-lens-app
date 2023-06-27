@@ -20,7 +20,7 @@ Future<List<Package>> getPackages(
   final pubspecFileContent = pubspecFile.readAsStringSync();
   final pubspec = Pubspec.parse(pubspecFileContent);
 
-  final outdatedPackages = await runFlutterPubOutdated(projectDirectoryPath);
+  final outdatedPackages = await getOutdatedPackages(projectDirectoryPath);
   // print('Outdated packages: $outdatedPackages');
   if (outdatedPackages == null) return [];
 
