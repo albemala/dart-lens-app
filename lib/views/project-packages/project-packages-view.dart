@@ -52,6 +52,17 @@ class ProjectPackagesView extends StatelessWidget {
                           .setPackageFilter(filter);
                     },
                   ),
+                Tooltip(
+                  message: 'Select to install all upgrades',
+                  child: OutlinedButton(
+                    onPressed: () {
+                      context //
+                          .read<ProjectPackagesViewBloc>()
+                          .upgradeAllPackages();
+                    },
+                    child: const Text('Select all upgrades'),
+                  ),
+                ),
                 if (viewModel.packageVersionsToChangeCount > 0)
                   SeparatedRow(
                     children: [
@@ -65,6 +76,18 @@ class ProjectPackagesView extends StatelessWidget {
                       ),
                       Text(
                         'You have changed ${viewModel.packageVersionsToChangeCount} package(s)',
+                      ),
+                      // button to clear all changes
+                      Tooltip(
+                        message: 'Clear all changes',
+                        child: IconButton(
+                          onPressed: () {
+                            context //
+                                .read<ProjectPackagesViewBloc>()
+                                .clearChanges();
+                          },
+                          icon: const Icon(CupertinoIcons.clear),
+                        ),
                       ),
                     ],
                     separatorBuilder: () => const SizedBox(width: 8),

@@ -183,9 +183,30 @@ class ProjectPackagesViewBloc extends Cubit<ProjectPackagesViewModel> {
     _updateState();
   }
 
+  Future<void> upgradeAllPackages() async {
+    packages
+        .where(_isNotSdkDependency)
+        .whereNot(isPackageLatestVersionInstalled)
+        .forEach((package) {
+      if (package.resolvableVersion == null) return;
+      packageVersionsToChange = packageVersionsToChange.update(
+        package.name,
+        (value) => package.resolvableVersion!,
+        ifAbsent: () => package.resolvableVersion!,
+      );
+    });
+
+    await _updateState();
+  }
+
   Future<void> applyChanges() async {
     await _applyPackageVersionChangesToProject();
     await reload();
+  }
+
+  Future<void> clearChanges() async {
+    packageVersionsToChange = <String, String>{}.lock;
+    await _updateState();
   }
 
   Future<void> reload() async {
