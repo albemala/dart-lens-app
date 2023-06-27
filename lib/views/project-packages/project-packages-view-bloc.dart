@@ -293,19 +293,17 @@ class ProjectPackagesViewBloc extends Cubit<ProjectPackagesViewModel> {
     if (packages.isEmpty) return;
 
     if (packageVersionsToChange.isEmpty) return;
+    final packageVersionsToChangeMap = packageVersionsToChange.unlock;
 
     emit(
       state.copyWith(isLoading: true),
     );
     try {
       await Isolate.run(
-        () {
-          return applyPackageVersionChanges(
-            projectPath,
-            packages,
-            packageVersionsToChange.unlock,
-          );
-        },
+        () => applyPackageVersionChanges(
+          projectPath,
+          packageVersionsToChangeMap,
+        ),
       );
     } catch (exception) {
       print(exception);
