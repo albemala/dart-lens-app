@@ -65,7 +65,7 @@ class _TopView extends StatelessWidget {
     }
 
     return Material(
-      color: Theme.of(context).colorScheme.surfaceVariant,
+      color: Theme.of(context).colorScheme.surface,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         child: SeparatedRow(
@@ -90,7 +90,7 @@ class _TopView extends StatelessWidget {
             ),
             if (projectAnalysisBloc.state.projectPath == null ||
                 projectAnalysisBloc.state.projectPath!.isEmpty)
-              ElevatedButton(
+              FilledButton(
                 onPressed: onPickDirectory,
                 child: const Text('Select'),
               )
@@ -115,7 +115,7 @@ class _BottomView extends StatelessWidget {
     final preferencesBloc = context.watch<PreferencesBloc>();
 
     return Material(
-      color: Theme.of(context).colorScheme.surfaceVariant,
+      color: Theme.of(context).colorScheme.surface,
       child: Padding(
         padding: const EdgeInsets.all(8),
         child: Row(

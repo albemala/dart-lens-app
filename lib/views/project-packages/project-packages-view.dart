@@ -76,7 +76,7 @@ class ProjectPackagesView extends StatelessWidget {
                 if (viewModel.packageVersionsToChangeCount > 0)
                   Row(
                     children: [
-                      ElevatedButton(
+                      FilledButton(
                         onPressed: () {
                           context //
                               .read<ProjectPackagesViewBloc>()

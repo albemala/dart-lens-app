@@ -63,32 +63,36 @@ class StringLiteralsView extends StatelessWidget {
             itemCount: viewModel.stringLiterals.length,
             itemBuilder: (context, index) {
               final dependency = viewModel.stringLiterals[index];
-              return SeparatedRow(
-                padding: const EdgeInsets.symmetric(vertical: 4),
-                children: [
-                  SmallButtonWidget(
-                    onPressed: () {
-                      copyToClipboard(context, dependency.path);
-                    },
-                    backgroundColor:
-                        Theme.of(context).colorScheme.surfaceVariant,
-                    tooltip: 'Click to copy',
-                    child: Text(
-                      dependency.path,
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                  ),
-                  Flexible(
-                    child: Text(
-                      dependency.string,
-                      style: GoogleFonts.firaCode(
-                        textStyle: Theme.of(context).textTheme.bodyMedium,
+              return Builder(
+                builder: (context) {
+                  return SeparatedRow(
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    children: [
+                      SmallButtonWidget(
+                        onPressed: () {
+                          copyToClipboard(context, dependency.path);
+                        },
+                        backgroundColor:
+                            Theme.of(context).colorScheme.surfaceVariant,
+                        tooltip: 'Click to copy',
+                        child: Text(
+                          dependency.path,
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
                       ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
-                separatorBuilder: () => const SizedBox(width: 8),
+                      Flexible(
+                        child: Text(
+                          dependency.string,
+                          style: GoogleFonts.firaCode(
+                            textStyle: Theme.of(context).textTheme.bodyMedium,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                    separatorBuilder: () => const SizedBox(width: 8),
+                  );
+                },
               );
             },
             separatorBuilder: (context, index) => const Divider(),
