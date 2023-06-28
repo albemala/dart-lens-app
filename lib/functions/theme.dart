@@ -4,6 +4,8 @@ import 'package:google_fonts/google_fonts.dart';
 
 final _fontFamily = GoogleFonts.firaSans().fontFamily;
 
+// NOTE: using Platform Adaptive pre-made design from flex_color_scheme
+
 ThemeData generateLightThemeData() {
   return _setupThemeData(
     FlexThemeData.light(
