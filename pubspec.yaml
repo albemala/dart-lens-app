@@ -33,7 +33,7 @@ dependencies:
   flextras: ^1.0.0
   cupertino_icons: ^1.0.5
 
-  analyzer: ^5.7.1
+  analyzer: ^5.13.0
 
   pub_semver: ^2.1.4
   pubspec_parse: ^1.2.3
