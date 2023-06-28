@@ -18,7 +18,7 @@ Future<void> applyPackageVersionChanges(
     // replace current package version with new package version
     // for example: `package_name: ^1.0.0`
     // new version: `package_name: ^1.3.7`
-    final oldVersionPattern = '${RegExp.escape(packageName)}.*';
+    final oldVersionPattern = '${RegExp.escape(packageName)}:.*';
     final newVersionPattern = '$packageName: ^$newPackageVersion';
     pubspecFileContent = pubspecFileContent.replaceFirst(
       RegExp(oldVersionPattern),
