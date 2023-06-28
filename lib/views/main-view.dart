@@ -1,6 +1,9 @@
 import 'package:dart_lens/blocs/preferences-bloc.dart';
 import 'package:dart_lens/blocs/project-analysis-bloc.dart';
+import 'package:dart_lens/defines/app.dart';
+import 'package:dart_lens/functions/feedback.dart';
 import 'package:dart_lens/functions/fs.dart';
+import 'package:dart_lens/views/about-view.dart';
 import 'package:dart_lens/views/project-packages/project-packages-view.dart';
 import 'package:dart_lens/views/project-structure/project-structure-view.dart';
 import 'package:dart_lens/views/string-literals/string-literals-view.dart';
@@ -120,6 +123,11 @@ class _BottomView extends StatelessWidget {
         padding: const EdgeInsets.all(8),
         child: Row(
           children: [
+            TextButton.icon(
+              onPressed: sendFeedback,
+              icon: const Icon(CupertinoIcons.mail),
+              label: const Text('Send feedback'),
+            ),
             IconButton(
               onPressed: () {
                 context.read<PreferencesBloc>().toggleThemeMode();
@@ -127,6 +135,15 @@ class _BottomView extends StatelessWidget {
               icon: preferencesBloc.state.themeMode == ThemeMode.light
                   ? const Icon(CupertinoIcons.brightness)
                   : const Icon(CupertinoIcons.moon),
+            ),
+            Tooltip(
+              message: 'About $appName',
+              child: IconButton(
+                onPressed: () {
+                  AboutView.show(context);
+                },
+                icon: const Icon(CupertinoIcons.info),
+              ),
             ),
           ],
         ),
