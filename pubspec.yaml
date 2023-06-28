@@ -74,7 +74,7 @@ flutter:
   #       - asset: fonts/TrajanPro_Bold.ttf
   #         weight: 700
 
-# flutter pub run package_rename:set
+# dart run package_rename
 package_rename_config:
   macos:
     app_name: DartLens
