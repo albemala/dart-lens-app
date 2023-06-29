@@ -58,13 +58,14 @@ dev_dependencies:
 
   very_good_analysis: ^5.0.0+1
 
+  icons_launcher: ^2.1.2
   package_rename: ^1.3.3
 
 flutter:
   uses-material-design: true
 
-  # assets:
-  #   - images/a_dot_burr.jpeg
+  assets:
+    - assets/
   #   - images/a_dot_ham.jpeg
   # fonts:
   #   - family: Schyler
@@ -76,7 +77,34 @@ flutter:
   #     fonts:
   #       - asset: fonts/TrajanPro.ttf
   #       - asset: fonts/TrajanPro_Bold.ttf
-  #         weight: 700
+
+# bash scripts/generate-app-icons.bash
+icons_launcher:
+  image_path: "assets/app-icon.png"
+  platforms:
+    macos:
+      enable: true
+      # image_path: "assets/app-icon-macos.png"
+    windows:
+      enable: true
+      # image_path: 'assets/ic_logo_border.png'
+    linux:
+      enable: true
+      # image_path: 'assets/ic_logo_border.png'
+    web:
+      enable: false
+      # image_path: 'assets/ic_logo_border.png'
+      # favicon_path: 'assets/ic_logo_round.png'
+    android:
+      enable: false
+      # image_path: 'assets/ic_logo_border.png'
+      # adaptive_background_color: '#ffffff'
+      # adaptive_background_image: 'assets/ic_background.png'
+      # adaptive_foreground_image: 'assets/ic_foreground.png'
+      # adaptive_round_image: 'assets/ic_logo_round.png'
+    ios:
+      enable: false
+      # image_path: 'assets/ic_logo_rectangle.png'
 
 # dart run package_rename
 package_rename_config:
