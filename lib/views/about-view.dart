@@ -1,3 +1,4 @@
+import 'package:dart_lens/assets/assets.gen.dart';
 import 'package:dart_lens/defines/app.dart';
 import 'package:dart_lens/defines/urls.dart';
 import 'package:dart_lens/functions/app.dart';
@@ -44,14 +45,12 @@ class AboutView extends HookWidget {
       children: [
         Row(
           children: [
-            // ClipOval(
-            //   child: Assets.appIcon.image(
-            //     width: 56,
-            //     height: 56,
-            //     filterQuality: FilterQuality.medium,
-            //   ),
-            // ),
-            // const SizedBox(width: 16),
+            Assets.appIcon.image(
+              width: 64,
+              height: 64,
+              filterQuality: FilterQuality.medium,
+            ),
+            const SizedBox(width: 16),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
