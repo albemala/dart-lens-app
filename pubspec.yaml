@@ -67,7 +67,7 @@ flutter:
 
   assets:
     - assets/
-  #   - images/a_dot_ham.jpeg
+    - assets/google-fonts/
 
 # bash scripts/generate-assets.bash
 flutter_gen:
