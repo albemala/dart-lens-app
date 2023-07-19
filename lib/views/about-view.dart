@@ -77,6 +77,13 @@ class AboutView extends HookWidget {
           },
           child: const Text("What's new?"),
         ),
+        const SizedBox(height: 16),
+        FilledButton(
+          onPressed: () async {
+            await openUrl(otherProjectsUrl);
+          },
+          child: const Text("Other useful apps"),
+        ),
         const SizedBox(height: 32),
         Text(
           'Help & Support',

@@ -9,4 +9,4 @@ const issuesUrl = //
     'https://github.com/albemala/dart-lens-app/issues';
 
 // projects
-const hexeeWebsite = 'https://hexee.app/';
+const otherProjectsUrl = 'https://projects.albemala.me/?ref=dart-lens-app';
