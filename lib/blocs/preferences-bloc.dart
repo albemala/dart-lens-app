@@ -1,49 +1,56 @@
+import 'package:dart_lens/blocs/bloc-value.dart';
+import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
 
-part 'preferences-bloc.freezed.dart';
+@immutable
+class PreferencesState extends Equatable {
+  final ThemeMode themeMode;
 
-@freezed
-class PreferencesState with _$PreferencesState {
-  const PreferencesState._();
+  const PreferencesState({
+    required this.themeMode,
+  });
 
-  const factory PreferencesState({
-    required ThemeMode themeMode,
-    // required FlexScheme flexScheme,
-  }) = _PreferencesState;
+  @override
+  List<Object?> get props => [
+        themeMode,
+      ];
 }
 
+const _defaultThemeMode = ThemeMode.light;
+
 class PreferencesBloc extends Cubit<PreferencesState> {
+  late final BlocValue<ThemeMode> _themeMode;
+
   PreferencesBloc()
       : super(
           const PreferencesState(
-            themeMode: ThemeMode.light,
-            // flexScheme: FlexScheme.materialBaseline,
+            themeMode: _defaultThemeMode,
           ),
-        );
-
-  void toggleThemeMode() {
-    setThemeMode(
-      state.themeMode == ThemeMode.light //
-          ? ThemeMode.dark
-          : ThemeMode.light,
+        ) {
+    _themeMode = BlocValue<ThemeMode>(
+      initialValue: _defaultThemeMode,
+      onChange: _updateState,
     );
   }
 
-  void setThemeMode(ThemeMode themeMode) {
+  @override
+  Future<void> close() {
+    _themeMode.dispose();
+    return super.close();
+  }
+
+  void _updateState() {
     emit(
-      state.copyWith(
-        themeMode: themeMode,
+      PreferencesState(
+        themeMode: _themeMode.value,
       ),
     );
   }
 
-  // void setFlexScheme(FlexScheme flexScheme) {
-  //   emit(
-  //     state.copyWith(
-  //       flexScheme: flexScheme,
-  //     ),
-  //   );
-  // }
+  void toggleThemeMode() {
+    _themeMode.value = _themeMode.value == ThemeMode.light //
+        ? ThemeMode.dark
+        : ThemeMode.light;
+  }
 }

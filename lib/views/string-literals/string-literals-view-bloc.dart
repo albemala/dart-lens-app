@@ -3,15 +3,13 @@ import 'dart:isolate';
 
 import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
+import 'package:dart_lens/blocs/bloc-value.dart';
 import 'package:dart_lens/blocs/project-analysis-bloc.dart';
 import 'package:dart_lens/functions/project-structure-analysis.dart';
-import 'package:flutter/foundation.dart';
+import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:path/path.dart';
-
-part 'string-literals-view-bloc.freezed.dart';
 
 enum StringLiteralContext {
   import,
@@ -19,30 +17,53 @@ enum StringLiteralContext {
   other,
 }
 
-@freezed
-class StringLiteralsViewModel with _$StringLiteralsViewModel {
-  const StringLiteralsViewModel._();
+@immutable
+class StringLiteralsViewModel extends Equatable {
+  final bool isLoading;
+  final List<StringLiteralViewModel> stringLiterals;
 
-  const factory StringLiteralsViewModel({
-    required bool isLoading,
-    required List<StringLiteralViewModel> stringLiterals,
-  }) = _StringLiteralsViewModel;
+  const StringLiteralsViewModel({
+    required this.isLoading,
+    required this.stringLiterals,
+  });
+
+  @override
+  List<Object?> get props => [
+        isLoading,
+        stringLiterals,
+      ];
 }
 
-@freezed
-class StringLiteralViewModel with _$StringLiteralViewModel {
-  const StringLiteralViewModel._();
+@immutable
+class StringLiteralViewModel extends Equatable {
+  final String string;
+  final String path;
+  // final int lineNumber;
+  // final StringLiteralContext context;
 
-  const factory StringLiteralViewModel({
-    required String string,
-    required String path,
-    required int lineNumber,
-    required StringLiteralContext context,
-  }) = _StringLiteralViewModel;
+  const StringLiteralViewModel({
+    required this.string,
+    required this.path,
+    // required this.lineNumber,
+    // required this.context,
+  });
+
+  @override
+  List<Object?> get props => [
+        string,
+        path,
+        // lineNumber,
+        // context,
+      ];
 }
 
 class StringLiteralVisitor extends RecursiveAstVisitor<void> {
   final List<StringLiteralViewModel> strings = [];
+  final String filePath;
+
+  StringLiteralVisitor({
+    required this.filePath,
+  });
 
   @override
   void visitSimpleStringLiteral(SimpleStringLiteral node) {
@@ -58,17 +79,18 @@ class StringLiteralVisitor extends RecursiveAstVisitor<void> {
       return;
     }
 
-    final context = _getStringLiteralContext(node);
+    // final context = _getStringLiteralContext(node);
 
     final viewModel = StringLiteralViewModel(
       string: stringValue,
-      path: '',
-      lineNumber: 0, // TODO
-      context: context,
+      path: filePath,
+      // lineNumber: 0, // TODO
+      // context: context,
     );
     strings.add(viewModel);
   }
 
+/*
   StringLiteralContext _getStringLiteralContext(SimpleStringLiteral node) {
     if (node.parent is ImportDirective) {
       return StringLiteralContext.import;
@@ -77,72 +99,83 @@ class StringLiteralVisitor extends RecursiveAstVisitor<void> {
     // return StringLiteralContext.widget;
     return StringLiteralContext.other;
   }
+*/
 }
 
 class StringLiteralsViewBloc extends Cubit<StringLiteralsViewModel> {
-  final BuildContext context;
-  late StreamSubscription<ProjectAnalysisBlocState> projectAnalysisBlocListener;
-
-  String? get _projectPath {
-    final projectAnalysisBlocState = context.read<ProjectAnalysisBloc>().state;
-    return projectAnalysisBlocState.projectPath;
+  factory StringLiteralsViewBloc.fromContext(BuildContext context) {
+    return StringLiteralsViewBloc._(
+      context.read<ProjectAnalysisBloc>(),
+    );
   }
 
-  StringLiteralsViewBloc(this.context)
-      : super(
+  final ProjectAnalysisBloc _projectAnalysisBloc;
+
+  late final StreamSubscription<ProjectAnalysisBlocState>
+      _projectAnalysisBlocListener;
+
+  late final BlocValue<bool> _isLoading;
+  late final BlocValue<List<StringLiteralViewModel>> _stringLiteralViewModels;
+
+  String get _projectPath {
+    return _projectAnalysisBloc.state.projectPath ?? '';
+  }
+
+  StringLiteralsViewBloc._(
+    this._projectAnalysisBloc,
+  ) : super(
           const StringLiteralsViewModel(
             isLoading: false,
             stringLiterals: [],
           ),
         ) {
-    projectAnalysisBlocListener = context //
-        .read<ProjectAnalysisBloc>()
-        .stream
-        .listen((projectAnalysisBlocState) {
-      emit(
-        state.copyWith(
-          stringLiterals: [],
-        ),
-      );
-      _updateState();
+    _isLoading = BlocValue<bool>(
+      initialValue: false,
+      onChange: _updateState,
+    );
+    _stringLiteralViewModels = BlocValue<List<StringLiteralViewModel>>(
+      initialValue: const [],
+      onChange: _updateState,
+    );
+    _projectAnalysisBlocListener =
+        _projectAnalysisBloc.stream.listen((projectAnalysisBlocState) {
+      reload();
     });
-    _updateState();
+    reload();
   }
 
   @override
   Future<void> close() {
-    projectAnalysisBlocListener.cancel();
+    _isLoading.dispose();
+    _stringLiteralViewModels.dispose();
+    _projectAnalysisBlocListener.cancel();
     return super.close();
   }
 
-  void reload() {
-    _updateState();
+  Future<void> reload() async {
+    _isLoading.value = true;
+    _stringLiteralViewModels
+      ..value = []
+      ..value = await _getStringLiteralViewModels();
+    _isLoading.value = false;
   }
 
   Future<void> _updateState() async {
     emit(
-      state.copyWith(isLoading: true),
-    );
-    final stringLiterals = await _updateStringLiteralViewModels();
-    emit(
-      state.copyWith(isLoading: false),
-    );
-
-    emit(
-      state.copyWith(
-        stringLiterals: stringLiterals,
+      StringLiteralsViewModel(
+        isLoading: _isLoading.value,
+        stringLiterals: _stringLiteralViewModels.value,
       ),
     );
   }
 
-  Future<List<StringLiteralViewModel>> _updateStringLiteralViewModels() async {
-    final projectPath = _projectPath;
-    if (projectPath == null || projectPath.isEmpty) return [];
-
+  Future<List<StringLiteralViewModel>> _getStringLiteralViewModels() async {
+    if (_projectPath.isEmpty) return [];
     try {
-      return await Isolate.run(
-        () => _createStringLiteralViewModels(projectPath),
-      );
+      final projectPath = _projectPath;
+      return await Isolate.run(() {
+        return _createStringLiteralViewModels(projectPath);
+      });
     } catch (exception) {
       print(exception);
       return [];
@@ -161,16 +194,13 @@ Future<List<StringLiteralViewModel>> _createStringLiteralViewModels(
       resolvedUnitResult.path,
       from: projectPath,
     );
-
     // iterate over all declarations in this unit and find all string literals
-    final visitor = StringLiteralVisitor();
+    final visitor = StringLiteralVisitor(
+      filePath: filePath,
+    );
     resolvedUnitResult.unit.visitChildren(visitor);
     for (final string in visitor.strings) {
-      stringLiterals.add(
-        string.copyWith(
-          path: filePath,
-        ),
-      );
+      stringLiterals.add(string);
     }
   }
 

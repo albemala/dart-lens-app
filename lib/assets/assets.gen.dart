@@ -9,10 +9,104 @@
 
 import 'package:flutter/widgets.dart';
 
+class $AssetsGoogleFontsGen {
+  const $AssetsGoogleFontsGen();
+
+  /// File path: assets/google-fonts/FiraSans-Black.ttf
+  String get firaSansBlack => 'assets/google-fonts/FiraSans-Black.ttf';
+
+  /// File path: assets/google-fonts/FiraSans-BlackItalic.ttf
+  String get firaSansBlackItalic =>
+      'assets/google-fonts/FiraSans-BlackItalic.ttf';
+
+  /// File path: assets/google-fonts/FiraSans-Bold.ttf
+  String get firaSansBold => 'assets/google-fonts/FiraSans-Bold.ttf';
+
+  /// File path: assets/google-fonts/FiraSans-BoldItalic.ttf
+  String get firaSansBoldItalic =>
+      'assets/google-fonts/FiraSans-BoldItalic.ttf';
+
+  /// File path: assets/google-fonts/FiraSans-ExtraBold.ttf
+  String get firaSansExtraBold => 'assets/google-fonts/FiraSans-ExtraBold.ttf';
+
+  /// File path: assets/google-fonts/FiraSans-ExtraBoldItalic.ttf
+  String get firaSansExtraBoldItalic =>
+      'assets/google-fonts/FiraSans-ExtraBoldItalic.ttf';
+
+  /// File path: assets/google-fonts/FiraSans-ExtraLight.ttf
+  String get firaSansExtraLight =>
+      'assets/google-fonts/FiraSans-ExtraLight.ttf';
+
+  /// File path: assets/google-fonts/FiraSans-ExtraLightItalic.ttf
+  String get firaSansExtraLightItalic =>
+      'assets/google-fonts/FiraSans-ExtraLightItalic.ttf';
+
+  /// File path: assets/google-fonts/FiraSans-Italic.ttf
+  String get firaSansItalic => 'assets/google-fonts/FiraSans-Italic.ttf';
+
+  /// File path: assets/google-fonts/FiraSans-Light.ttf
+  String get firaSansLight => 'assets/google-fonts/FiraSans-Light.ttf';
+
+  /// File path: assets/google-fonts/FiraSans-LightItalic.ttf
+  String get firaSansLightItalic =>
+      'assets/google-fonts/FiraSans-LightItalic.ttf';
+
+  /// File path: assets/google-fonts/FiraSans-Medium.ttf
+  String get firaSansMedium => 'assets/google-fonts/FiraSans-Medium.ttf';
+
+  /// File path: assets/google-fonts/FiraSans-MediumItalic.ttf
+  String get firaSansMediumItalic =>
+      'assets/google-fonts/FiraSans-MediumItalic.ttf';
+
+  /// File path: assets/google-fonts/FiraSans-Regular.ttf
+  String get firaSansRegular => 'assets/google-fonts/FiraSans-Regular.ttf';
+
+  /// File path: assets/google-fonts/FiraSans-SemiBold.ttf
+  String get firaSansSemiBold => 'assets/google-fonts/FiraSans-SemiBold.ttf';
+
+  /// File path: assets/google-fonts/FiraSans-SemiBoldItalic.ttf
+  String get firaSansSemiBoldItalic =>
+      'assets/google-fonts/FiraSans-SemiBoldItalic.ttf';
+
+  /// File path: assets/google-fonts/FiraSans-Thin.ttf
+  String get firaSansThin => 'assets/google-fonts/FiraSans-Thin.ttf';
+
+  /// File path: assets/google-fonts/FiraSans-ThinItalic.ttf
+  String get firaSansThinItalic =>
+      'assets/google-fonts/FiraSans-ThinItalic.ttf';
+
+  /// File path: assets/google-fonts/OFL.txt
+  String get ofl => 'assets/google-fonts/OFL.txt';
+
+  /// List of all assets
+  List<String> get values => [
+        firaSansBlack,
+        firaSansBlackItalic,
+        firaSansBold,
+        firaSansBoldItalic,
+        firaSansExtraBold,
+        firaSansExtraBoldItalic,
+        firaSansExtraLight,
+        firaSansExtraLightItalic,
+        firaSansItalic,
+        firaSansLight,
+        firaSansLightItalic,
+        firaSansMedium,
+        firaSansMediumItalic,
+        firaSansRegular,
+        firaSansSemiBold,
+        firaSansSemiBoldItalic,
+        firaSansThin,
+        firaSansThinItalic,
+        ofl
+      ];
+}
+
 class Assets {
   Assets._();
 
   static const AssetGenImage appIcon = AssetGenImage('assets/app-icon.png');
+  static const $AssetsGoogleFontsGen googleFonts = $AssetsGoogleFontsGen();
 
   /// List of all assets
   List<AssetGenImage> get values => [appIcon];

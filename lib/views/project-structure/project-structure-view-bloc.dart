@@ -3,46 +3,69 @@ import 'dart:isolate';
 
 import 'package:analyzer/dart/ast/ast.dart';
 import 'package:collection/collection.dart';
+import 'package:dart_lens/blocs/bloc-value.dart';
 import 'package:dart_lens/blocs/project-analysis-bloc.dart';
 import 'package:dart_lens/functions/project-structure-analysis.dart';
-import 'package:flutter/foundation.dart';
+import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:path/path.dart';
 
-part 'project-structure-view-bloc.freezed.dart';
+@immutable
+class ProjectStructureViewModel extends Equatable {
+  final bool isLoading;
+  final String projectPath;
+  final List<DirectoryViewModel> directories;
 
-@freezed
-class ProjectStructureViewModel with _$ProjectStructureViewModel {
-  const ProjectStructureViewModel._();
+  const ProjectStructureViewModel({
+    required this.isLoading,
+    required this.projectPath,
+    required this.directories,
+  });
 
-  const factory ProjectStructureViewModel({
-    required bool isLoading,
-    required String projectPath,
-    required List<DirectoryViewModel> directories,
-  }) = _ProjectStructureViewModel;
+  @override
+  List<Object?> get props => [
+        isLoading,
+        projectPath,
+        directories,
+      ];
 }
 
-@freezed
-class DirectoryViewModel with _$DirectoryViewModel {
-  const DirectoryViewModel._();
+@immutable
+class DirectoryViewModel extends Equatable {
+  final String path;
+  final List<FileViewModel> files;
 
-  const factory DirectoryViewModel({
-    required String path,
-    required List<FileViewModel> files,
-  }) = _DirectoryViewModel;
+  const DirectoryViewModel({
+    required this.path,
+    required this.files,
+  });
+
+  @override
+  List<Object?> get props => [
+        path,
+        files,
+      ];
 }
 
-@freezed
-class FileViewModel with _$FileViewModel {
-  const FileViewModel._();
+@immutable
+class FileViewModel extends Equatable {
+  final String name;
+  final List<EntityViewModel> entities;
+  final List<String> imports;
 
-  const factory FileViewModel({
-    required String name,
-    required List<EntityViewModel> entities,
-    required List<String> imports,
-  }) = _FileViewModel;
+  const FileViewModel({
+    required this.name,
+    required this.entities,
+    required this.imports,
+  });
+
+  @override
+  List<Object?> get props => [
+        name,
+        entities,
+        imports,
+      ];
 }
 
 enum EntityViewModelType {
@@ -58,158 +81,222 @@ abstract class EntityViewModel {
   EntityViewModelType get type;
 }
 
-@freezed
-class ParameterViewModel with _$ParameterViewModel {
-  const ParameterViewModel._();
+@immutable
+class ParameterViewModel extends Equatable {
+  final String name;
+  final String type;
 
-  const factory ParameterViewModel({
-    required String name,
-    required String type,
-  }) = _ParameterViewModel;
+  const ParameterViewModel({
+    required this.name,
+    required this.type,
+  });
+
+  @override
+  List<Object?> get props => [
+        name,
+        type,
+      ];
 }
 
-@freezed
-class ClassViewModel with _$ClassViewModel implements EntityViewModel {
-  const ClassViewModel._();
+@immutable
+class ClassViewModel extends Equatable implements EntityViewModel {
+  final String name;
+  final List<ClassPropertyViewModel> properties;
+  final List<ClassConstructorViewModel> constructors;
+  final List<ClassMethodViewModel> methods;
 
-  const factory ClassViewModel({
-    required String name,
-    required List<ClassPropertyViewModel> properties,
-    required List<ClassConstructorViewModel> constructors,
-    required List<ClassMethodViewModel> methods,
-  }) = _ClassViewModel;
+  const ClassViewModel({
+    required this.name,
+    required this.properties,
+    required this.constructors,
+    required this.methods,
+  });
+
+  @override
+  List<Object?> get props => [
+        name,
+        properties,
+        constructors,
+        methods,
+      ];
 
   @override
   EntityViewModelType get type => EntityViewModelType.class_;
 }
 
-@freezed
-class ClassPropertyViewModel with _$ClassPropertyViewModel {
-  const ClassPropertyViewModel._();
+@immutable
+class ClassPropertyViewModel extends Equatable {
+  final String name;
+  final String type;
 
-  const factory ClassPropertyViewModel({
-    required String name,
-    required String type,
-  }) = _ClassPropertyViewModel;
+  const ClassPropertyViewModel({
+    required this.name,
+    required this.type,
+  });
+
+  @override
+  List<Object?> get props => [
+        name,
+        type,
+      ];
 }
 
-@freezed
-class ClassConstructorViewModel with _$ClassConstructorViewModel {
-  const ClassConstructorViewModel._();
+@immutable
+class ClassConstructorViewModel extends Equatable {
+  final String name;
+  final List<ParameterViewModel> parameters;
 
-  const factory ClassConstructorViewModel({
-    required String name,
-    required List<ParameterViewModel> parameters,
-  }) = _ClassConstructorViewModel;
+  const ClassConstructorViewModel({
+    required this.name,
+    required this.parameters,
+  });
+
+  @override
+  List<Object?> get props => [
+        name,
+        parameters,
+      ];
 }
 
-@freezed
-class ClassMethodViewModel with _$ClassMethodViewModel {
-  const ClassMethodViewModel._();
+@immutable
+class ClassMethodViewModel extends Equatable {
+  final String name;
+  final String returnType;
+  final List<ParameterViewModel> parameters;
 
-  const factory ClassMethodViewModel({
-    required String name,
-    required String returnType,
-    required List<ParameterViewModel> parameters,
-  }) = _ClassMethodViewModel;
+  const ClassMethodViewModel({
+    required this.name,
+    required this.returnType,
+    required this.parameters,
+  });
+
+  @override
+  List<Object?> get props => [
+        name,
+        returnType,
+        parameters,
+      ];
 }
 
-@freezed
-class EnumViewModel with _$EnumViewModel implements EntityViewModel {
-  const EnumViewModel._();
+@immutable
+class EnumViewModel extends Equatable implements EntityViewModel {
+  final String name;
+  final List<String> values;
 
-  const factory EnumViewModel({
-    required String name,
-    required List<String> values,
-  }) = _EnumViewModel;
+  const EnumViewModel({
+    required this.name,
+    required this.values,
+  });
+
+  @override
+  List<Object?> get props => [
+        name,
+        values,
+      ];
 
   @override
   EntityViewModelType get type => EntityViewModelType.enum_;
 }
 
-@freezed
-class FunctionViewModel with _$FunctionViewModel implements EntityViewModel {
-  const FunctionViewModel._();
+@immutable
+class FunctionViewModel extends Equatable implements EntityViewModel {
+  final String name;
+  final String returnType;
+  final List<ParameterViewModel> parameters;
 
-  const factory FunctionViewModel({
-    required String name,
-    required String returnType,
-    required List<ParameterViewModel> parameters,
-  }) = _FunctionViewModel;
+  const FunctionViewModel({
+    required this.name,
+    required this.returnType,
+    required this.parameters,
+  });
+
+  @override
+  List<Object?> get props => [
+        name,
+        returnType,
+        parameters,
+      ];
 
   @override
   EntityViewModelType get type => EntityViewModelType.function_;
 }
 
 class ProjectStructureViewBloc extends Cubit<ProjectStructureViewModel> {
-  final BuildContext context;
-  late StreamSubscription<ProjectAnalysisBlocState> projectAnalysisBlocListener;
-
-  String? get _projectPath {
-    final projectAnalysisBlocState = context.read<ProjectAnalysisBloc>().state;
-    return projectAnalysisBlocState.projectPath;
+  factory ProjectStructureViewBloc.fromContext(BuildContext context) {
+    return ProjectStructureViewBloc._(
+      context.read<ProjectAnalysisBloc>(),
+    );
   }
 
-  ProjectStructureViewBloc(this.context)
-      : super(
+  final ProjectAnalysisBloc _projectAnalysisBloc;
+
+  late final StreamSubscription<ProjectAnalysisBlocState>
+      _projectAnalysisBlocListener;
+
+  late final BlocValue<bool> _isLoading;
+  late final BlocValue<List<DirectoryViewModel>> _directoryViewModels;
+
+  String get _projectPath {
+    return _projectAnalysisBloc.state.projectPath ?? '';
+  }
+
+  ProjectStructureViewBloc._(
+    this._projectAnalysisBloc,
+  ) : super(
           const ProjectStructureViewModel(
             isLoading: false,
             projectPath: '',
             directories: [],
           ),
         ) {
-    projectAnalysisBlocListener = context //
-        .read<ProjectAnalysisBloc>()
-        .stream
-        .listen((projectAnalysisBlocState) {
-      emit(
-        state.copyWith(
-          projectPath: '',
-          directories: [],
-        ),
-      );
-      _updateState();
+    _isLoading = BlocValue<bool>(
+      initialValue: false,
+      onChange: _updateState,
+    );
+    _directoryViewModels = BlocValue<List<DirectoryViewModel>>(
+      initialValue: const [],
+      onChange: _updateState,
+    );
+    _projectAnalysisBlocListener =
+        _projectAnalysisBloc.stream.listen((projectAnalysisBlocState) {
+      reload();
     });
-    _updateState();
+    reload();
   }
 
   @override
   Future<void> close() {
-    projectAnalysisBlocListener.cancel();
+    _isLoading.dispose();
+    _directoryViewModels.dispose();
+    _projectAnalysisBlocListener.cancel();
     return super.close();
   }
 
-  void reload() {
-    _updateState();
+  Future<void> reload() async {
+    _isLoading.value = true;
+    _directoryViewModels
+      ..value = const []
+      ..value = await _getDirectoryViewModels();
+    _isLoading.value = false;
   }
 
   Future<void> _updateState() async {
-    final projectPath = _projectPath ?? '';
-
     emit(
-      state.copyWith(isLoading: true),
-    );
-    final directoryViewModels = await _updateDirectoryViewModels();
-    emit(
-      state.copyWith(isLoading: false),
-    );
-
-    emit(
-      state.copyWith(
-        projectPath: projectPath,
-        directories: directoryViewModels,
+      ProjectStructureViewModel(
+        isLoading: _isLoading.value,
+        projectPath: _projectPath,
+        directories: _directoryViewModels.value,
       ),
     );
   }
 
-  Future<List<DirectoryViewModel>> _updateDirectoryViewModels() async {
-    final projectPath = _projectPath;
-    if (projectPath == null || projectPath.isEmpty) return [];
-
+  Future<List<DirectoryViewModel>> _getDirectoryViewModels() async {
+    if (_projectPath.isEmpty) return [];
     try {
-      return await Isolate.run(
-        () => _createDirectoryViewModels(projectPath),
-      );
+      final projectPath = _projectPath;
+      return await Isolate.run(() {
+        return _createDirectoryViewModels(projectPath);
+      });
     } catch (exception) {
       print(exception);
       return [];
@@ -238,7 +325,7 @@ Future<List<DirectoryViewModel>> _createDirectoryViewModels(
     final entities = resolvedUnitResult //
         .unit
         .declarations
-        .map((declaration) {
+        .map<EntityViewModel?>((declaration) {
           if (declaration is ClassDeclaration) {
             return _createClassViewModel(declaration);
           } else if (declaration is FunctionDeclaration) {

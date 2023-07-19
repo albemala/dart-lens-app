@@ -1,29 +1,54 @@
+import 'package:dart_lens/blocs/bloc-value.dart';
+import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
 
-part 'project-analysis-bloc.freezed.dart';
+@immutable
+class ProjectAnalysisBlocState extends Equatable {
+  final String? projectPath;
 
-@freezed
-class ProjectAnalysisBlocState with _$ProjectAnalysisBlocState {
-  const ProjectAnalysisBlocState._();
+  const ProjectAnalysisBlocState({
+    required this.projectPath,
+  });
 
-  const factory ProjectAnalysisBlocState({
-    required String? projectPath,
-  }) = _ProjectAnalysisBlocState;
+  @override
+  List<Object?> get props => [
+        projectPath,
+      ];
 }
 
+const String? _defaultProjectPath = null;
+
 class ProjectAnalysisBloc extends Cubit<ProjectAnalysisBlocState> {
+  late final BlocValue<String?> _projectPath;
+
   ProjectAnalysisBloc()
       : super(
           const ProjectAnalysisBlocState(
-            projectPath: null,
+            projectPath: _defaultProjectPath,
           ),
-        );
-
-  Future<void> setProjectPath(String? projectPath) async {
-    emit(
-      state.copyWith(projectPath: projectPath),
+        ) {
+    _projectPath = BlocValue<String?>(
+      initialValue: _defaultProjectPath,
+      onChange: _updateState,
     );
+  }
+
+  @override
+  Future<void> close() {
+    _projectPath.dispose();
+    return super.close();
+  }
+
+  void _updateState() {
+    emit(
+      ProjectAnalysisBlocState(
+        projectPath: _projectPath.value,
+      ),
+    );
+  }
+
+  void setProjectPath(String? projectPath) {
+    _projectPath.value = projectPath;
   }
 }

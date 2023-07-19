@@ -15,7 +15,7 @@ class ProjectPackagesView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: ProjectPackagesViewBloc.new,
+      create: ProjectPackagesViewBloc.fromContext,
       child: BlocBuilder<ProjectPackagesViewBloc, ProjectPackagesViewModel>(
         builder: _buildView,
       ),

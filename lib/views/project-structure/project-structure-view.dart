@@ -14,7 +14,7 @@ class ProjectStructureView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: ProjectStructureViewBloc.new,
+      create: ProjectStructureViewBloc.fromContext,
       child: BlocBuilder<ProjectStructureViewBloc, ProjectStructureViewModel>(
         builder: _buildView,
       ),

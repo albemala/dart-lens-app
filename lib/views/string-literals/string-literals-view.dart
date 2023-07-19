@@ -15,7 +15,7 @@ class StringLiteralsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: StringLiteralsViewBloc.new,
+      create: StringLiteralsViewBloc.fromContext,
       child: BlocBuilder<StringLiteralsViewBloc, StringLiteralsViewModel>(
         builder: _buildView,
       ),

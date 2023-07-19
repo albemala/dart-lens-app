@@ -2,19 +2,17 @@ import 'dart:async';
 import 'dart:isolate';
 
 import 'package:collection/collection.dart';
+import 'package:dart_lens/blocs/bloc-value.dart';
 import 'package:dart_lens/blocs/project-analysis-bloc.dart';
 import 'package:dart_lens/functions/installed-packages.dart';
 import 'package:dart_lens/functions/packages.dart';
 import 'package:dart_lens/functions/project-packages-analysis.dart';
 import 'package:dart_lens/models/package/package.dart';
+import 'package:equatable/equatable.dart';
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:pub_api_client/pub_api_client.dart';
-
-part 'project-packages-view-bloc.freezed.dart';
 
 enum PackageFilter {
   all(title: 'All'),
@@ -27,47 +25,94 @@ enum PackageFilter {
   });
 }
 
-@freezed
-class ProjectPackagesViewModel with _$ProjectPackagesViewModel {
-  const ProjectPackagesViewModel._();
+@immutable
+class ProjectPackagesViewModel extends Equatable {
+  final bool isLoading;
+  final PackageFilter packageFilter;
+  final int packageVersionsToChangeCount;
+  final List<PackageViewModel> dependencies;
+  final List<PackageViewModel> devDependencies;
 
-  const factory ProjectPackagesViewModel({
-    required bool isLoading,
-    required PackageFilter packageFilter,
-    required int packageVersionsToChangeCount,
-    required IList<PackageViewModel> dependencies,
-    required IList<PackageViewModel> devDependencies,
-  }) = _ProjectPackagesViewModel;
+  const ProjectPackagesViewModel({
+    required this.isLoading,
+    required this.packageFilter,
+    required this.packageVersionsToChangeCount,
+    required this.dependencies,
+    required this.devDependencies,
+  });
+
+  @override
+  List<Object?> get props => [
+        isLoading,
+        packageFilter,
+        packageVersionsToChangeCount,
+        dependencies,
+        devDependencies,
+      ];
 }
 
-@freezed
-class PackageViewModel with _$PackageViewModel {
-  const PackageViewModel._();
+@immutable
+class PackageViewModel extends Equatable {
+  final String name;
+  final String? installedVersion;
+  final String? installableVersion;
+  final String? changeToVersion;
+  final List<PackageVersionViewModel>? availableVersions;
+  final bool isLatestVersionInstalled;
+  final String? url;
+  final String? changelogUrl;
+  final String? description;
 
-  const factory PackageViewModel({
-    required String name,
-    required String? installedVersion,
-    required String? installableVersion,
-    required String? changeToVersion,
-    required IList<PackageVersionViewModel>? availableVersions,
-    required bool isLatestVersionInstalled,
-    required String? url,
-    required String? changelogUrl,
-    required String? description,
-  }) = _PackageViewModel;
+  const PackageViewModel({
+    required this.name,
+    required this.installedVersion,
+    required this.installableVersion,
+    required this.changeToVersion,
+    required this.availableVersions,
+    required this.isLatestVersionInstalled,
+    required this.url,
+    required this.changelogUrl,
+    required this.description,
+  });
+
+  @override
+  List<Object?> get props => [
+        name,
+        installedVersion,
+        installableVersion,
+        changeToVersion,
+        availableVersions,
+        isLatestVersionInstalled,
+        url,
+        changelogUrl,
+        description,
+      ];
 }
 
-@freezed
-class PackageVersionViewModel with _$PackageVersionViewModel {
-  const PackageVersionViewModel._();
+@immutable
+class PackageVersionViewModel extends Equatable {
+  final String version;
+  final bool isInstalled;
+  final bool isInstallable;
+  final bool willBeInstalled;
+  final bool willBeUninstalled;
 
-  const factory PackageVersionViewModel({
-    required String version,
-    required bool isInstalled,
-    required bool isInstallable,
-    required bool willBeInstalled,
-    required bool willBeUninstalled,
-  }) = _PackageVersionViewModel;
+  const PackageVersionViewModel({
+    required this.version,
+    required this.isInstalled,
+    required this.isInstallable,
+    required this.willBeInstalled,
+    required this.willBeUninstalled,
+  });
+
+  @override
+  List<Object?> get props => [
+        version,
+        isInstalled,
+        isInstallable,
+        willBeInstalled,
+        willBeUninstalled,
+      ];
 }
 
 PackageViewModel _createPackageViewModel(
@@ -81,7 +126,7 @@ PackageViewModel _createPackageViewModel(
       availableVersion,
       changeToVersion,
     );
-  }).toIList();
+  }).toList();
   return PackageViewModel(
     name: package.name,
     installedVersion: package.installedVersion,
@@ -114,32 +159,55 @@ PackageVersionViewModel _createPackageVersionViewModel(
   );
 }
 
+const _defaultPackageFilter = PackageFilter.all;
+
 class ProjectPackagesViewBloc extends Cubit<ProjectPackagesViewModel> {
-  final BuildContext context;
-  late StreamSubscription<ProjectAnalysisBlocState> projectAnalysisBlocListener;
-
-  List<Package> packages = [];
-  IMap<String, String> packageVersionsToChange = <String, String>{}.lock;
-
-  String? get _projectPath {
-    final projectAnalysisBlocState = context.read<ProjectAnalysisBloc>().state;
-    return projectAnalysisBlocState.projectPath;
+  factory ProjectPackagesViewBloc.fromContext(BuildContext context) {
+    return ProjectPackagesViewBloc._(
+      context.read<ProjectAnalysisBloc>(),
+    );
   }
 
-  ProjectPackagesViewBloc(this.context)
-      : super(
-          ProjectPackagesViewModel(
+  final ProjectAnalysisBloc _projectAnalysisBloc;
+
+  late final StreamSubscription<ProjectAnalysisBlocState>
+      _projectAnalysisBlocListener;
+
+  late final BlocValue<bool> _isLoading;
+  late final BlocValue<PackageFilter> _packageFilter;
+  late final BlocValue<IMap<String, String>> _packageVersionsToChange;
+
+  IList<Package> _packages = const <Package>[].lock;
+
+  String get _projectPath {
+    return _projectAnalysisBloc.state.projectPath ?? '';
+  }
+
+  ProjectPackagesViewBloc._(
+    this._projectAnalysisBloc,
+  ) : super(
+          const ProjectPackagesViewModel(
             isLoading: false,
-            packageFilter: PackageFilter.all,
+            packageFilter: _defaultPackageFilter,
             packageVersionsToChangeCount: 0,
-            dependencies: <PackageViewModel>[].lock,
-            devDependencies: <PackageViewModel>[].lock,
+            dependencies: <PackageViewModel>[],
+            devDependencies: <PackageViewModel>[],
           ),
         ) {
-    projectAnalysisBlocListener = context //
-        .read<ProjectAnalysisBloc>()
-        .stream
-        .listen((projectAnalysisBlocState) {
+    _isLoading = BlocValue<bool>(
+      initialValue: false,
+      onChange: _updateState,
+    );
+    _packageFilter = BlocValue(
+      initialValue: _defaultPackageFilter,
+      onChange: _updateState,
+    );
+    _packageVersionsToChange = BlocValue(
+      initialValue: <String, String>{}.lock,
+      onChange: _updateState,
+    );
+    _projectAnalysisBlocListener =
+        _projectAnalysisBloc.stream.listen((projectAnalysisBlocState) {
       reload();
     });
     reload();
@@ -147,17 +215,15 @@ class ProjectPackagesViewBloc extends Cubit<ProjectPackagesViewModel> {
 
   @override
   Future<void> close() {
-    projectAnalysisBlocListener.cancel();
+    _isLoading.dispose();
+    _packageFilter.dispose();
+    _packageVersionsToChange.dispose();
+    _projectAnalysisBlocListener.cancel();
     return super.close();
   }
 
   void setPackageFilter(PackageFilter filter) {
-    emit(
-      state.copyWith(
-        packageFilter: filter,
-      ),
-    );
-    _updateState();
+    _packageFilter.value = filter;
   }
 
   void selectPackageVersion(String name, String version) {
@@ -172,31 +238,27 @@ class ProjectPackagesViewBloc extends Cubit<ProjectPackagesViewModel> {
             )
             ?.installedVersion;
 
-    packageVersionsToChange = installedVersion == version
-        ? packageVersionsToChange.remove(name)
-        : packageVersionsToChange.update(
+    _packageVersionsToChange.value = installedVersion == version
+        ? _packageVersionsToChange.value.remove(name)
+        : _packageVersionsToChange.value.update(
             name,
             (value) => version,
             ifAbsent: () => version,
           );
-
-    _updateState();
   }
 
   Future<void> upgradeAllPackages() async {
-    packages
-        .where(_isNotSdkDependency)
-        .whereNot(isPackageLatestVersionInstalled)
-        .forEach((package) {
-      if (package.resolvableVersion == null) return;
-      packageVersionsToChange = packageVersionsToChange.update(
-        package.name,
-        (value) => package.resolvableVersion!,
-        ifAbsent: () => package.resolvableVersion!,
-      );
-    });
-
-    await _updateState();
+    _packageVersionsToChange.value = IMap.fromEntries(
+      _packages
+          .where(_isNotSdkDependency)
+          .whereNot(isPackageLatestVersionInstalled)
+          .map((package) {
+        return MapEntry(
+          package.name,
+          package.resolvableVersion!,
+        );
+      }),
+    );
   }
 
   Future<void> applyChanges() async {
@@ -205,21 +267,17 @@ class ProjectPackagesViewBloc extends Cubit<ProjectPackagesViewModel> {
   }
 
   Future<void> clearChanges() async {
-    packageVersionsToChange = <String, String>{}.lock;
-    await _updateState();
+    _packageVersionsToChange.value = <String, String>{}.lock;
   }
 
   Future<void> reload() async {
-    packages = [];
-    packageVersionsToChange = <String, String>{}.lock;
-    await _updateState();
-
+    _packages = const <Package>[].lock;
+    _packageVersionsToChange.value = <String, String>{}.lock;
     await _loadProjectPackages();
-    await _updateState();
   }
 
   Future<void> _updateState() async {
-    final dependencies = packages
+    final dependencies = _packages
         .where((package) {
           return package.dependencyType == DependencyType.dependency;
         })
@@ -228,12 +286,12 @@ class ProjectPackagesViewBloc extends Cubit<ProjectPackagesViewModel> {
         .map((package) {
           return _createPackageViewModel(
             package,
-            packageVersionsToChange,
+            _packageVersionsToChange.value,
           );
         })
-        .toIList();
+        .toList();
 
-    final devDependencies = packages
+    final devDependencies = _packages
         .where((package) {
           return package.dependencyType == DependencyType.devDependency;
         })
@@ -242,14 +300,16 @@ class ProjectPackagesViewBloc extends Cubit<ProjectPackagesViewModel> {
         .map((package) {
           return _createPackageViewModel(
             package,
-            packageVersionsToChange,
+            _packageVersionsToChange.value,
           );
         })
-        .toIList();
+        .toList();
 
     emit(
-      state.copyWith(
-        packageVersionsToChangeCount: packageVersionsToChange.length,
+      ProjectPackagesViewModel(
+        isLoading: _isLoading.value,
+        packageFilter: _packageFilter.value,
+        packageVersionsToChangeCount: _packageVersionsToChange.value.length,
         dependencies: dependencies,
         devDependencies: devDependencies,
       ),
@@ -259,7 +319,7 @@ class ProjectPackagesViewBloc extends Cubit<ProjectPackagesViewModel> {
   bool _isNotSdkDependency(Package package) => package.type != PackageType.sdk;
 
   bool _applyPackageFilter(Package package) {
-    switch (state.packageFilter) {
+    switch (_packageFilter.value) {
       case PackageFilter.all:
         return true;
       case PackageFilter.upgradable:
@@ -268,48 +328,40 @@ class ProjectPackagesViewBloc extends Cubit<ProjectPackagesViewModel> {
   }
 
   Future<void> _loadProjectPackages() async {
-    final projectPath = _projectPath;
-    if (projectPath == null || projectPath.isEmpty) return;
+    if (_projectPath.isEmpty) return;
 
-    emit(
-      state.copyWith(isLoading: true),
-    );
+    _isLoading.value = true;
     try {
-      packages = await Isolate.run(
-        () => getPackages(projectPath),
+      final projectPath = _projectPath;
+      _packages = IList(
+        await Isolate.run(() {
+          return getPackages(projectPath);
+        }),
       );
     } catch (exception) {
       print(exception);
     }
-    emit(
-      state.copyWith(isLoading: false),
-    );
+    _isLoading.value = false;
   }
 
   Future<void> _applyPackageVersionChangesToProject() async {
-    final projectPath = _projectPath;
-    if (projectPath == null || projectPath.isEmpty) return;
+    if (_packages.isEmpty) return;
+    if (_projectPath.isEmpty) return;
+    if (_packageVersionsToChange.value.isEmpty) return;
 
-    if (packages.isEmpty) return;
-
-    if (packageVersionsToChange.isEmpty) return;
-    final packageVersionsToChangeMap = packageVersionsToChange.unlock;
-
-    emit(
-      state.copyWith(isLoading: true),
-    );
+    _isLoading.value = true;
     try {
-      await Isolate.run(
-        () => applyPackageVersionChanges(
+      final projectPath = _projectPath;
+      final versionsToChange = _packageVersionsToChange.value.unlock;
+      await Isolate.run(() {
+        return applyPackageVersionChanges(
           projectPath,
-          packageVersionsToChangeMap,
-        ),
-      );
+          versionsToChange,
+        );
+      });
     } catch (exception) {
       print(exception);
     }
-    emit(
-      state.copyWith(isLoading: false),
-    );
+    _isLoading.value = false;
   }
 }

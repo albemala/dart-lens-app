@@ -64,7 +64,7 @@ class _TopView extends StatelessWidget {
     Future<void> onPickDirectory() async {
       final directory = await pickExistingDirectory();
       if (directory == null) return;
-      await projectAnalysisBloc.setProjectPath(directory);
+      projectAnalysisBloc.setProjectPath(directory);
     }
 
     return Material(

@@ -6,20 +6,19 @@ part of 'outdated-packages.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$_OutdatedPackages _$$_OutdatedPackagesFromJson(Map json) =>
-    _$_OutdatedPackages(
+OutdatedPackages _$OutdatedPackagesFromJson(Map json) => OutdatedPackages(
       packages: (json['packages'] as List<dynamic>)
           .map((e) =>
               OutdatedPackage.fromJson(Map<String, dynamic>.from(e as Map)))
           .toList(),
     );
 
-Map<String, dynamic> _$$_OutdatedPackagesToJson(_$_OutdatedPackages instance) =>
+Map<String, dynamic> _$OutdatedPackagesToJson(OutdatedPackages instance) =>
     <String, dynamic>{
       'packages': instance.packages.map((e) => e.toJson()).toList(),
     };
 
-_$_OutdatedPackage _$$_OutdatedPackageFromJson(Map json) => _$_OutdatedPackage(
+OutdatedPackage _$OutdatedPackageFromJson(Map json) => OutdatedPackage(
       package: json['package'] as String,
       isDiscontinued: json['isDiscontinued'] as bool,
       current: json['current'] == null
@@ -40,7 +39,7 @@ _$_OutdatedPackage _$$_OutdatedPackageFromJson(Map json) => _$_OutdatedPackage(
               Map<String, dynamic>.from(json['latest'] as Map)),
     );
 
-Map<String, dynamic> _$$_OutdatedPackageToJson(_$_OutdatedPackage instance) =>
+Map<String, dynamic> _$OutdatedPackageToJson(OutdatedPackage instance) =>
     <String, dynamic>{
       'package': instance.package,
       'isDiscontinued': instance.isDiscontinued,
@@ -50,13 +49,11 @@ Map<String, dynamic> _$$_OutdatedPackageToJson(_$_OutdatedPackage instance) =>
       'latest': instance.latest?.toJson(),
     };
 
-_$_PackageResolution _$$_PackageResolutionFromJson(Map json) =>
-    _$_PackageResolution(
+PackageResolution _$PackageResolutionFromJson(Map json) => PackageResolution(
       version: json['version'] as String,
     );
 
-Map<String, dynamic> _$$_PackageResolutionToJson(
-        _$_PackageResolution instance) =>
+Map<String, dynamic> _$PackageResolutionToJson(PackageResolution instance) =>
     <String, dynamic>{
       'version': instance.version,
     };
