@@ -1,10 +1,10 @@
-import 'package:dart_lens/views/project-structure/project-structure-view-bloc.dart';
+import 'package:dart_lens/views/project-structure/project-structure-view-conductor.dart';
 import 'package:flex_seed_scheme/flex_seed_scheme.dart';
 import 'package:flextras/flextras.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 
 class ProjectStructureView extends StatelessWidget {
   const ProjectStructureView({
@@ -13,25 +13,48 @@ class ProjectStructureView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: ProjectStructureViewBloc.fromContext,
-      child: BlocBuilder<ProjectStructureViewBloc, ProjectStructureViewModel>(
-        builder: _buildView,
+    return ChangeNotifierProvider<ProjectStructureViewConductor>(
+      create: ProjectStructureViewConductor.fromContext,
+      child: Column(
+        children: [
+          const Divider(),
+          const _ActionBarView(),
+          const Divider(),
+          Expanded(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                return InteractiveViewer(
+                  constrained: false,
+                  minScale: 0.1,
+                  boundaryMargin: EdgeInsets.symmetric(
+                    horizontal: constraints.maxWidth,
+                    vertical: constraints.maxHeight,
+                  ),
+                  child: const _ProjectStructureView(),
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
+}
 
-  Widget _buildView(BuildContext context, ProjectStructureViewModel viewModel) {
-    return Column(
-      children: [
-        const Divider(),
-        Material(
+class _ActionBarView extends StatelessWidget {
+  const _ActionBarView();
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<ProjectStructureViewConductor>(
+      builder: (context, conductor, child) {
+        return Material(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
             child: SeparatedRow(
               children: [
                 const Spacer(),
-                if (viewModel.isLoading) //
+                if (conductor.isLoading) //
                   const SizedBox(
                     width: 16,
                     height: 16,
@@ -43,9 +66,7 @@ class ProjectStructureView extends StatelessWidget {
                   message: 'Reload project',
                   child: IconButton(
                     onPressed: () {
-                      context //
-                          .read<ProjectStructureViewBloc>()
-                          .reload();
+                      conductor.reload();
                     },
                     icon: const Icon(CupertinoIcons.arrow_clockwise),
                   ),
@@ -54,60 +75,43 @@ class ProjectStructureView extends StatelessWidget {
               separatorBuilder: () => const SizedBox(width: 8),
             ),
           ),
-        ),
-        const Divider(),
-        Expanded(
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              return InteractiveViewer(
-                constrained: false,
-                minScale: 0.1,
-                boundaryMargin: EdgeInsets.symmetric(
-                  horizontal: constraints.maxWidth,
-                  vertical: constraints.maxHeight,
-                ),
-                child: ProjectStructureElementView(viewModel: viewModel),
-              );
-            },
-          ),
-        ),
-      ],
+        );
+      },
     );
   }
 }
 
-class ProjectStructureElementView extends StatelessWidget {
-  final ProjectStructureViewModel viewModel;
-
-  const ProjectStructureElementView({
-    super.key,
-    required this.viewModel,
-  });
+class _ProjectStructureView extends StatelessWidget {
+  const _ProjectStructureView();
 
   @override
   Widget build(BuildContext context) {
-    return PrimaryElementWidget(
-      color: Colors.grey,
-      child: SeparatedColumn(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ElementPathWidget(path: viewModel.projectPath),
-          ...viewModel.directories.map((directoryViewModel) {
-            return DirectoryElementView(viewModel: directoryViewModel);
-          }),
-        ],
-        separatorBuilder: () => const SizedBox(height: 12),
-      ),
+    return Consumer<ProjectStructureViewConductor>(
+      builder: (context, conductor, child) {
+        return PrimaryElementWidget(
+          color: Colors.grey,
+          child: SeparatedColumn(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ElementPathWidget(path: conductor.projectPath),
+              ...conductor.directories.map((projectDirectory) {
+                return DirectoryElementView(projectDirectory: projectDirectory);
+              }),
+            ],
+            separatorBuilder: () => const SizedBox(height: 12),
+          ),
+        );
+      },
     );
   }
 }
 
 class DirectoryElementView extends StatelessWidget {
-  final DirectoryViewModel viewModel;
+  final ProjectDirectory projectDirectory;
 
   const DirectoryElementView({
     super.key,
-    required this.viewModel,
+    required this.projectDirectory,
   });
 
   @override
@@ -117,11 +121,11 @@ class DirectoryElementView extends StatelessWidget {
       child: SeparatedColumn(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ElementPathWidget(path: viewModel.path),
+          ElementPathWidget(path: projectDirectory.path),
           SeparatedRow(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: viewModel.files.map((fileViewModel) {
-              return FileElementView(viewModel: fileViewModel);
+            children: projectDirectory.files.map((projectFile) {
+              return FileElementView(projectFile: projectFile);
             }).toList(),
             separatorBuilder: () => const SizedBox(width: 12),
           ),
@@ -133,11 +137,11 @@ class DirectoryElementView extends StatelessWidget {
 }
 
 class FileElementView extends StatelessWidget {
-  final FileViewModel viewModel;
+  final ProjectFile projectFile;
 
   const FileElementView({
     super.key,
-    required this.viewModel,
+    required this.projectFile,
   });
 
   @override
@@ -147,8 +151,8 @@ class FileElementView extends StatelessWidget {
       child: SeparatedColumn(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ElementPathWidget(path: viewModel.name),
-          ...viewModel.entities.map(buildEntityView),
+          ElementPathWidget(path: projectFile.name),
+          ...projectFile.entities.map(buildEntityView),
         ],
         separatorBuilder: () => const SizedBox(height: 12),
       ),
@@ -156,20 +160,20 @@ class FileElementView extends StatelessWidget {
   }
 }
 
-Widget buildEntityView(EntityViewModel entity) {
+Widget buildEntityView(EntityDefinition entity) {
   switch (entity.type) {
-    case EntityViewModelType.class_:
-      final classViewModel = entity as ClassViewModel;
-      return ClassElementView(viewModel: classViewModel);
-    case EntityViewModelType.function_:
-      final functionViewModel = entity as FunctionViewModel;
-      return FunctionElementView(viewModel: functionViewModel);
-    case EntityViewModelType.enum_:
-      final enumViewModel = entity as EnumViewModel;
-      return EnumElementView(viewModel: enumViewModel);
-    case EntityViewModelType.extension_:
-    case EntityViewModelType.mixin_:
-    case EntityViewModelType.typedef_:
+    case EntityDefinitionType.class_:
+      final classDefinition = entity as ClassDefinition;
+      return ClassElementView(classDefinition: classDefinition);
+    case EntityDefinitionType.function_:
+      final functionDefinition = entity as FunctionDefinition;
+      return FunctionElementView(functionDefinition: functionDefinition);
+    case EntityDefinitionType.enum_:
+      final enumDefinition = entity as EnumDefinition;
+      return EnumElementView(enumDefinition: enumDefinition);
+    case EntityDefinitionType.extension_:
+    case EntityDefinitionType.mixin_:
+    case EntityDefinitionType.typedef_:
       return PrimaryElementWidget(
         color: Colors.red,
         child: Column(
@@ -183,11 +187,11 @@ Widget buildEntityView(EntityViewModel entity) {
 }
 
 class ClassElementView extends StatelessWidget {
-  final ClassViewModel viewModel;
+  final ClassDefinition classDefinition;
 
   const ClassElementView({
     super.key,
-    required this.viewModel,
+    required this.classDefinition,
   });
 
   @override
@@ -201,10 +205,10 @@ class ClassElementView extends StatelessWidget {
             children: [
               const ElementTagWidget(tag: 'Class'),
               const SizedBox(width: 8),
-              ElementNameWidget(name: viewModel.name),
+              ElementNameWidget(name: classDefinition.name),
             ],
           ),
-          ...viewModel.properties.map(
+          ...classDefinition.properties.map(
             (property) {
               return SecondaryElementWidget(
                 color: Colors.pink,
@@ -219,7 +223,7 @@ class ClassElementView extends StatelessWidget {
               );
             },
           ),
-          ...viewModel.constructors.map(
+          ...classDefinition.constructors.map(
             (constructor) => SecondaryElementWidget(
               color: Colors.indigo,
               child: SeparatedColumn(
@@ -248,7 +252,7 @@ class ClassElementView extends StatelessWidget {
               ),
             ),
           ),
-          ...viewModel.methods.map(
+          ...classDefinition.methods.map(
             (method) => SecondaryElementWidget(
               color: Colors.cyan,
               child: SeparatedColumn(
@@ -286,11 +290,11 @@ class ClassElementView extends StatelessWidget {
 }
 
 class FunctionElementView extends StatelessWidget {
-  final FunctionViewModel viewModel;
+  final FunctionDefinition functionDefinition;
 
   const FunctionElementView({
     super.key,
-    required this.viewModel,
+    required this.functionDefinition,
   });
 
   @override
@@ -303,12 +307,12 @@ class FunctionElementView extends StatelessWidget {
           SeparatedRow(
             children: [
               const ElementTagWidget(tag: 'Function'),
-              ElementTypeWidget(type: viewModel.returnType),
-              ElementNameWidget(name: viewModel.name),
+              ElementTypeWidget(type: functionDefinition.returnType),
+              ElementNameWidget(name: functionDefinition.name),
             ],
             separatorBuilder: () => const SizedBox(width: 8),
           ),
-          ...viewModel.parameters.map(
+          ...functionDefinition.parameters.map(
             (parameter) => SeparatedRow(
               children: [
                 const SizedBox(width: 8),
@@ -327,11 +331,11 @@ class FunctionElementView extends StatelessWidget {
 }
 
 class EnumElementView extends StatelessWidget {
-  final EnumViewModel viewModel;
+  final EnumDefinition enumDefinition;
 
   const EnumElementView({
     super.key,
-    required this.viewModel,
+    required this.enumDefinition,
   });
 
   @override
@@ -345,10 +349,10 @@ class EnumElementView extends StatelessWidget {
             children: [
               const ElementTagWidget(tag: 'Enum'),
               const SizedBox(width: 8),
-              ElementNameWidget(name: viewModel.name),
+              ElementNameWidget(name: enumDefinition.name),
             ],
           ),
-          ...viewModel.values.map(
+          ...enumDefinition.values.map(
             (value) => SecondaryElementWidget(
               color: Colors.purple,
               child: Row(

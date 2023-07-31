@@ -1,6 +1,4 @@
-import 'package:equatable/equatable.dart';
-import 'package:meta/meta.dart';
-import 'package:pub_api_client/pub_api_client.dart';
+import 'package:flutter/foundation.dart';
 
 enum PackageType {
   hosted,
@@ -15,7 +13,7 @@ enum DependencyType {
 }
 
 @immutable
-class Package extends Equatable {
+class Package {
   final DependencyType dependencyType;
   final PackageType type;
 
@@ -29,10 +27,10 @@ class Package extends Equatable {
   final String? resolvableVersion;
 
   /// The most recent version that is available on pub.dev
-  final PackageVersion? latestVersion;
+  final String? latestVersion;
 
   /// All versions that are available on pub.dev
-  final List<PackageVersion>? availableVersions;
+  final List<String>? availableVersions;
 
   /// The url to the pub.dev page of the package
   final String? url;
@@ -55,18 +53,4 @@ class Package extends Equatable {
     required this.changelogUrl,
     required this.description,
   });
-
-  @override
-  List<Object?> get props => [
-        dependencyType,
-        type,
-        name,
-        installedVersion,
-        resolvableVersion,
-        latestVersion,
-        availableVersions,
-        url,
-        changelogUrl,
-        description,
-      ];
 }

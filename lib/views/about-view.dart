@@ -82,7 +82,7 @@ class AboutView extends HookWidget {
           onPressed: () async {
             await openUrl(otherProjectsUrl);
           },
-          child: const Text("Other useful apps"),
+          child: const Text('Other useful apps'),
         ),
         const SizedBox(height: 32),
         Text(

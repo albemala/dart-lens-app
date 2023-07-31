@@ -1,11 +1,11 @@
 import 'package:dart_lens/functions/url.dart';
-import 'package:dart_lens/views/project-packages/project-packages-view-bloc.dart';
+import 'package:dart_lens/views/project-packages/project-packages-view-conductor.dart';
 import 'package:dart_lens/widgets/button.dart';
 import 'package:flextras/flextras.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:provider/provider.dart';
 
 class ProjectPackagesView extends StatelessWidget {
   const ProjectPackagesView({
@@ -14,25 +14,36 @@ class ProjectPackagesView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: ProjectPackagesViewBloc.fromContext,
-      child: BlocBuilder<ProjectPackagesViewBloc, ProjectPackagesViewModel>(
-        builder: _buildView,
+    return ChangeNotifierProvider<ProjectPackagesViewConductor>(
+      create: ProjectPackagesViewConductor.fromContext,
+      child: const Column(
+        children: [
+          Divider(),
+          _ActionBarView(),
+          Divider(),
+          Expanded(
+            child: _PackagesView(),
+          ),
+        ],
       ),
     );
   }
+}
 
-  Widget _buildView(BuildContext context, ProjectPackagesViewModel viewModel) {
-    return Column(
-      children: [
-        const Divider(),
-        Material(
+class _ActionBarView extends StatelessWidget {
+  const _ActionBarView();
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<ProjectPackagesViewConductor>(
+      builder: (context, conductor, child) {
+        return Material(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
             child: SeparatedRow(
               children: [
-                if (viewModel.dependencies.isNotEmpty ||
-                    viewModel.devDependencies.isNotEmpty)
+                if (conductor.dependencies.isNotEmpty ||
+                    conductor.devDependencies.isNotEmpty)
                   SeparatedRow(
                     children: [
                       PopupMenuButton<PackageFilter>(
@@ -45,9 +56,7 @@ class ProjectPackagesView extends StatelessWidget {
                                 value: filter,
                                 child: Text(filter.title),
                                 onTap: () {
-                                  context //
-                                      .read<ProjectPackagesViewBloc>()
-                                      .setPackageFilter(filter);
+                                  conductor.setPackageFilter(filter);
                                 },
                               );
                             },
@@ -55,47 +64,41 @@ class ProjectPackagesView extends StatelessWidget {
                         },
                       ),
                       Text(
-                        viewModel.packageFilter.title,
+                        conductor.packageFilter.title,
                       ),
                     ],
                     separatorBuilder: () => const SizedBox(width: 4),
                   ),
-                if (viewModel.dependencies.isNotEmpty ||
-                    viewModel.devDependencies.isNotEmpty)
+                if (conductor.dependencies.isNotEmpty ||
+                    conductor.devDependencies.isNotEmpty)
                   Tooltip(
                     message: 'Select all package upgrades',
                     child: IconButton(
                       onPressed: () {
-                        context //
-                            .read<ProjectPackagesViewBloc>()
-                            .upgradeAllPackages();
+                        conductor.upgradeAllPackages();
                       },
                       icon: const Icon(CupertinoIcons.arrow_up_to_line),
                     ),
                   ),
-                if (viewModel.packageVersionsToChangeCount > 0)
+                if (conductor.packageVersionsToChangeCount > 0)
                   Row(
                     children: [
                       FilledButton(
                         onPressed: () {
-                          context //
-                              .read<ProjectPackagesViewBloc>()
-                              .applyChanges();
+                          conductor.applyChanges();
                         },
                         child: const Text('Apply changes'),
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        'You have changed ${viewModel.packageVersionsToChangeCount} package(s)',
+                        'You have changed ${conductor.packageVersionsToChangeCount} package(s)',
                       ),
                       // button to clear all changes
                       Tooltip(
                         message: 'Clear all changes',
                         child: IconButton(
                           onPressed: () {
-                            context //
-                                .read<ProjectPackagesViewBloc>()
-                                .clearChanges();
+                            conductor.clearChanges();
                           },
                           icon: const Icon(CupertinoIcons.clear),
                         ),
@@ -103,7 +106,7 @@ class ProjectPackagesView extends StatelessWidget {
                     ],
                   ),
                 const Spacer(),
-                if (viewModel.isLoading) //
+                if (conductor.isLoading) //
                   const SizedBox(
                     width: 16,
                     height: 16,
@@ -115,9 +118,7 @@ class ProjectPackagesView extends StatelessWidget {
                   message: 'Reload project',
                   child: IconButton(
                     onPressed: () {
-                      context //
-                          .read<ProjectPackagesViewBloc>()
-                          .reload();
+                      conductor.reload();
                     },
                     icon: const Icon(CupertinoIcons.arrow_clockwise),
                   ),
@@ -126,71 +127,123 @@ class ProjectPackagesView extends StatelessWidget {
               separatorBuilder: () => const SizedBox(width: 16),
             ),
           ),
-        ),
-        const Divider(),
-        Expanded(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (viewModel.dependencies.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 16),
-                    child: Text(
-                      'Dependencies',
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                  ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 8),
-                  child: ListView.separated(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: viewModel.dependencies.length,
-                    itemBuilder: (context, index) {
-                      final dependency = viewModel.dependencies[index];
-                      return PackageView(dependency: dependency);
-                    },
-                    separatorBuilder: (context, index) => const Divider(),
-                  ),
-                ),
-                if (viewModel.devDependencies.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 16),
-                    child: Text(
-                      'Dev dependencies',
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                  ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 8),
-                  child: ListView.separated(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: viewModel.devDependencies.length,
-                    itemBuilder: (context, index) {
-                      final dependency = viewModel.devDependencies[index];
-                      return PackageView(dependency: dependency);
-                    },
-                    separatorBuilder: (context, index) => const Divider(),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
+        );
+      },
     );
   }
 }
 
-class PackageView extends HookWidget {
-  final PackageViewModel dependency;
+class _PackagesView extends StatelessWidget {
+  const _PackagesView();
 
-  const PackageView({
-    super.key,
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<ProjectPackagesViewConductor>(
+      builder: (context, conductor, child) {
+        return SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(top: 16),
+                child: Text(
+                  'Dependencies',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: ListView.separated(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: conductor.dependencies.length,
+                  itemBuilder: (context, index) {
+                    final dependency = conductor.dependencies[index];
+                    return _PackageView(
+                      dependency: dependency,
+                      onVersionSelected: (version) {
+                        conductor.selectPackageVersion(
+                          dependency.name,
+                          version,
+                        );
+                      },
+                      onLatestVersionSelected: () {
+                        conductor.selectPackageVersion(
+                          dependency.name,
+                          dependency.installableVersion!,
+                        );
+                      },
+                      onClearSelectedVersion: () {
+                        conductor.selectPackageVersion(
+                          dependency.name,
+                          dependency.installedVersion!,
+                        );
+                      },
+                    );
+                  },
+                  separatorBuilder: (context, index) => const Divider(),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(top: 16),
+                child: Text(
+                  'Dev dependencies',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: ListView.separated(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: conductor.devDependencies.length,
+                  itemBuilder: (context, index) {
+                    final dependency = conductor.devDependencies[index];
+                    return _PackageView(
+                      dependency: dependency,
+                      onVersionSelected: (version) {
+                        conductor.selectPackageVersion(
+                          dependency.name,
+                          version,
+                        );
+                      },
+                      onLatestVersionSelected: () {
+                        conductor.selectPackageVersion(
+                          dependency.name,
+                          dependency.installableVersion!,
+                        );
+                      },
+                      onClearSelectedVersion: () {
+                        conductor.selectPackageVersion(
+                          dependency.name,
+                          dependency.installedVersion!,
+                        );
+                      },
+                    );
+                  },
+                  separatorBuilder: (context, index) => const Divider(),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _PackageView extends HookWidget {
+  final ProjectPackage dependency;
+  final void Function(String version) onVersionSelected;
+  final void Function() onLatestVersionSelected;
+  final void Function() onClearSelectedVersion;
+
+  const _PackageView({
     required this.dependency,
+    required this.onVersionSelected,
+    required this.onLatestVersionSelected,
+    required this.onClearSelectedVersion,
   });
 
   @override
@@ -213,7 +266,12 @@ class PackageView extends HookWidget {
               ),
               Expanded(
                 flex: 3,
-                child: _PackageVersionsView(dependency: dependency),
+                child: _PackageVersionsView(
+                  dependency: dependency,
+                  onVersionSelected: onVersionSelected,
+                  onLatestVersionSelected: onLatestVersionSelected,
+                  onClearSelectedVersion: onClearSelectedVersion,
+                ),
               ),
             ],
           ),
@@ -224,7 +282,7 @@ class PackageView extends HookWidget {
 }
 
 class _PackageNameView extends StatelessWidget {
-  final PackageViewModel dependency;
+  final ProjectPackage dependency;
 
   const _PackageNameView({
     required this.dependency,
@@ -250,7 +308,10 @@ class _PackageNameView extends StatelessWidget {
             tooltip: dependency.url,
             icon: const Icon(CupertinoIcons.arrow_up_right),
             iconSize: 14,
-            onPressed: () => openUrl(dependency.url!),
+            onPressed: () {
+              // TODO use conductor
+              openUrl(dependency.url!);
+            },
           ),
       ],
     );
@@ -258,10 +319,16 @@ class _PackageNameView extends StatelessWidget {
 }
 
 class _PackageVersionsView extends StatelessWidget {
-  final PackageViewModel dependency;
+  final ProjectPackage dependency;
+  final void Function(String version) onVersionSelected;
+  final void Function() onLatestVersionSelected;
+  final void Function() onClearSelectedVersion;
 
   const _PackageVersionsView({
     required this.dependency,
+    required this.onVersionSelected,
+    required this.onLatestVersionSelected,
+    required this.onClearSelectedVersion,
   });
 
   @override
@@ -274,20 +341,26 @@ class _PackageVersionsView extends StatelessWidget {
             tooltip: 'Changelog',
             icon: const Icon(CupertinoIcons.doc_text),
             iconSize: 16,
-            onPressed: () => openUrl(dependency.changelogUrl!),
+            onPressed: () {
+              // TODO use conductor
+              openUrl(dependency.changelogUrl!);
+            },
           ),
         _VersionSelectorView(
           dependency: dependency,
+          onSelected: onVersionSelected,
         ),
         if (!dependency.isLatestVersionInstalled &&
             dependency.installableVersion != null)
           _LatestVersionView(
             dependency: dependency,
+            onPressed: onLatestVersionSelected,
           ),
         if (dependency.changeToVersion != null &&
             dependency.installedVersion != null)
           _ChangeToVersionView(
             dependency: dependency,
+            onPressed: onClearSelectedVersion,
           ),
       ],
       separatorBuilder: () => const SizedBox(width: 4),
@@ -296,10 +369,12 @@ class _PackageVersionsView extends StatelessWidget {
 }
 
 class _VersionSelectorView extends StatelessWidget {
-  final PackageViewModel dependency;
+  final ProjectPackage dependency;
+  final void Function(String version) onSelected;
 
   const _VersionSelectorView({
     required this.dependency,
+    required this.onSelected,
   });
 
   @override
@@ -316,14 +391,7 @@ class _VersionSelectorView extends StatelessWidget {
       child: PopupMenuButton<String>(
         tooltip: 'Select version',
         initialValue: dependency.installedVersion,
-        onSelected: (version) {
-          context //
-              .read<ProjectPackagesViewBloc>()
-              .selectPackageVersion(
-                dependency.name,
-                version,
-              );
-        },
+        onSelected: onSelected,
         itemBuilder: (itemBuilderContext) {
           return dependency.availableVersions?.map((version) {
                 return PopupMenuItem<String>(
@@ -357,102 +425,8 @@ class _VersionSelectorView extends StatelessWidget {
   }
 }
 
-class _LatestVersionView extends StatelessWidget {
-  final PackageViewModel dependency;
-
-  const _LatestVersionView({
-    required this.dependency,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final textStyle = Theme.of(context).textTheme.bodyMedium;
-    final backgroundColor = Theme.of(context).colorScheme.primaryContainer;
-    final textColor = Theme.of(context).colorScheme.onPrimaryContainer;
-
-    return Tooltip(
-      message:
-          'Latest version: ${dependency.installableVersion}. Click to select.',
-      child: SmallButtonWidget(
-        backgroundColor: backgroundColor,
-        onPressed: () {
-          context //
-              .read<ProjectPackagesViewBloc>()
-              .selectPackageVersion(
-                dependency.name,
-                dependency.installableVersion!,
-              );
-        },
-        child: SeparatedRow(
-          children: [
-            Icon(
-              CupertinoIcons.up_arrow,
-              color: textColor,
-              size: 12,
-            ),
-            Text(
-              dependency.installableVersion!,
-              style: textStyle?.copyWith(
-                color: textColor,
-              ),
-            ),
-          ],
-          separatorBuilder: () => const SizedBox(width: 2),
-        ),
-      ),
-    );
-  }
-}
-
-class _ChangeToVersionView extends StatelessWidget {
-  final PackageViewModel dependency;
-
-  const _ChangeToVersionView({
-    required this.dependency,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final textStyle = Theme.of(context).textTheme.bodyMedium;
-    final backgroundColor = Theme.of(context).colorScheme.secondary;
-    final textColor = Theme.of(context).colorScheme.onSecondary;
-
-    return Tooltip(
-      message:
-          'Change to version: ${dependency.changeToVersion}. Click to reset.',
-      child: SmallButtonWidget(
-        backgroundColor: backgroundColor,
-        onPressed: () {
-          context //
-              .read<ProjectPackagesViewBloc>()
-              .selectPackageVersion(
-                dependency.name,
-                dependency.installedVersion!,
-              );
-        },
-        child: SeparatedRow(
-          children: [
-            Icon(
-              CupertinoIcons.arrow_2_squarepath,
-              color: textColor,
-              size: 12,
-            ),
-            Text(
-              dependency.changeToVersion!,
-              style: textStyle?.copyWith(
-                color: textColor,
-              ),
-            ),
-          ],
-          separatorBuilder: () => const SizedBox(width: 2),
-        ),
-      ),
-    );
-  }
-}
-
 class _VersionMenuItemView extends StatelessWidget {
-  final PackageVersionViewModel version;
+  final AvailableVersion version;
 
   const _VersionMenuItemView({
     required this.version,
@@ -501,6 +475,92 @@ class _VersionMenuItemView extends StatelessWidget {
         Text(version.version),
       ],
       separatorBuilder: () => const SizedBox(width: 4),
+    );
+  }
+}
+
+class _LatestVersionView extends StatelessWidget {
+  // TODO pass dependency.installableVersion
+  final ProjectPackage dependency;
+  final void Function() onPressed;
+
+  const _LatestVersionView({
+    required this.dependency,
+    required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final textStyle = Theme.of(context).textTheme.bodyMedium;
+    final backgroundColor = Theme.of(context).colorScheme.primaryContainer;
+    final textColor = Theme.of(context).colorScheme.onPrimaryContainer;
+
+    return Tooltip(
+      message:
+          'Latest version: ${dependency.installableVersion}. Click to select.',
+      child: SmallButtonWidget(
+        backgroundColor: backgroundColor,
+        onPressed: onPressed,
+        child: SeparatedRow(
+          children: [
+            Icon(
+              CupertinoIcons.up_arrow,
+              color: textColor,
+              size: 12,
+            ),
+            Text(
+              dependency.installableVersion!,
+              style: textStyle?.copyWith(
+                color: textColor,
+              ),
+            ),
+          ],
+          separatorBuilder: () => const SizedBox(width: 2),
+        ),
+      ),
+    );
+  }
+}
+
+class _ChangeToVersionView extends StatelessWidget {
+  // TODO pass dependency.changeToVersion
+  final ProjectPackage dependency;
+  final void Function() onPressed;
+
+  const _ChangeToVersionView({
+    required this.dependency,
+    required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final textStyle = Theme.of(context).textTheme.bodyMedium;
+    final backgroundColor = Theme.of(context).colorScheme.secondary;
+    final textColor = Theme.of(context).colorScheme.onSecondary;
+
+    return Tooltip(
+      message:
+          'Change to version: ${dependency.changeToVersion}. Click to reset.',
+      child: SmallButtonWidget(
+        backgroundColor: backgroundColor,
+        onPressed: onPressed,
+        child: SeparatedRow(
+          children: [
+            Icon(
+              CupertinoIcons.arrow_2_squarepath,
+              color: textColor,
+              size: 12,
+            ),
+            Text(
+              dependency.changeToVersion!,
+              style: textStyle?.copyWith(
+                color: textColor,
+              ),
+            ),
+          ],
+          separatorBuilder: () => const SizedBox(width: 2),
+        ),
+      ),
     );
   }
 }

@@ -1,15 +1,14 @@
 import 'package:dart_lens/models/package/package.dart';
-import 'package:pub_api_client/pub_api_client.dart';
 import 'package:pub_semver/pub_semver.dart';
 
 bool isPackageInstallable(
   Package package,
-  PackageVersion availableVersion,
+  String availableVersion,
 ) {
   try {
-    return Version.parse(availableVersion.version) <=
-        Version.parse(package.resolvableVersion ?? '');
-  } catch (e) {
+    final resolvableVersion = package.resolvableVersion ?? '';
+    return Version.parse(availableVersion) <= Version.parse(resolvableVersion);
+  } catch (_) {
     return false;
   }
 }
