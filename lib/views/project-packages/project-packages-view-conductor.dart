@@ -25,22 +25,22 @@ enum PackageFilter {
 @immutable
 class ProjectPackage {
   final String name;
-  final String? installedVersion;
-  final String? installableVersion;
-  final String? changeToVersion;
-  final List<AvailableVersion>? availableVersions;
-  final bool isLatestVersionInstalled;
-  final String? url;
-  final String? changelogUrl;
-  final String? description;
+  final List<AvailableVersion> availableVersions;
+  final String installedVersion;
+  final String latestVersion;
+  final String versionToInstall;
+  final bool isVersionWarningVisible;
+  final String url;
+  final String changelogUrl;
+  final String description;
 
   const ProjectPackage({
     required this.name,
-    required this.installedVersion,
-    required this.installableVersion,
-    required this.changeToVersion,
     required this.availableVersions,
-    required this.isLatestVersionInstalled,
+    required this.installedVersion,
+    required this.latestVersion,
+    required this.versionToInstall,
+    required this.isVersionWarningVisible,
     required this.url,
     required this.changelogUrl,
     required this.description,
@@ -68,31 +68,41 @@ ProjectPackage _createProjectPackage(
   Package package,
   IMap<String, String> packageVersionsToChange,
 ) {
-  final changeToVersion = packageVersionsToChange[package.name];
-  final availableVersions = package.availableVersions?.map((availableVersion) {
-    return _createAvailableVersion(
-      package,
-      availableVersion,
-      changeToVersion,
-    );
-  }).toList();
+  final versionToInstall = packageVersionsToChange[package.name];
+  final availableVersions = package.type == PackageType.hosted //
+      ? package.availableVersions?.map((availableVersion) {
+          return _createAvailableVersion(
+            package,
+            availableVersion,
+            versionToInstall,
+          );
+        }).toList()
+      : null;
+  final installedVersion = package.type == PackageType.hosted //
+      ? package.installedVersion
+      : null;
+  final latestVersion = package.installedVersion != package.latestVersion //
+      ? package.latestVersion
+      : null;
+  final isVersionWarningVisible =
+      package.resolvableVersion != package.latestVersion;
   return ProjectPackage(
     name: package.name,
-    installedVersion: package.installedVersion,
-    installableVersion: package.resolvableVersion,
-    changeToVersion: changeToVersion,
-    availableVersions: availableVersions,
-    isLatestVersionInstalled: isPackageLatestVersionInstalled(package),
-    url: package.url,
-    changelogUrl: package.changelogUrl,
-    description: package.description,
+    availableVersions: availableVersions ?? const <AvailableVersion>[],
+    installedVersion: installedVersion ?? '',
+    latestVersion: latestVersion ?? '',
+    versionToInstall: versionToInstall ?? '',
+    isVersionWarningVisible: isVersionWarningVisible,
+    url: package.url ?? '',
+    changelogUrl: package.changelogUrl ?? '',
+    description: package.description ?? '',
   );
 }
 
 AvailableVersion _createAvailableVersion(
   Package package,
   String availableVersion,
-  String? changeToVersion,
+  String? versionToInstall,
 ) {
   final isInstalled = package.installedVersion == availableVersion;
   return AvailableVersion(
@@ -100,11 +110,11 @@ AvailableVersion _createAvailableVersion(
     isInstalled: isInstalled,
     isInstallable: isPackageInstallable(package, availableVersion),
     willBeInstalled: !isInstalled &&
-        changeToVersion != null &&
-        changeToVersion == availableVersion,
+        versionToInstall != null &&
+        versionToInstall == availableVersion,
     willBeUninstalled: isInstalled &&
-        changeToVersion != null &&
-        changeToVersion != availableVersion,
+        versionToInstall != null &&
+        versionToInstall != availableVersion,
   );
 }
 
@@ -199,16 +209,18 @@ class ProjectPackagesViewConductor extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> upgradeAllPackages() async {
+  void selectAllLatestVersions() {
     _packageVersionsToChange = IMap.fromEntries(
       _packages
-          .where(_isNotSdkDependency)
-          .whereNot(isPackageLatestVersionInstalled)
-          .where((package) => package.resolvableVersion != null)
-          .map((package) {
+          .where(_isNotSdkDependency) //
+          .where((package) {
+        return package.installedVersion != package.latestVersion;
+      }).where((package) {
+        return package.latestVersion != null;
+      }).map((package) {
         return MapEntry(
           package.name,
-          package.resolvableVersion!,
+          package.latestVersion!,
         );
       }),
     );

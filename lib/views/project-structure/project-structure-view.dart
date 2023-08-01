@@ -52,6 +52,7 @@ class _ActionBarView extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
             child: SeparatedRow(
+              separatorBuilder: () => const SizedBox(width: 8),
               children: [
                 const Spacer(),
                 if (conductor.isLoading) //
@@ -72,7 +73,6 @@ class _ActionBarView extends StatelessWidget {
                   ),
                 ),
               ],
-              separatorBuilder: () => const SizedBox(width: 8),
             ),
           ),
         );
@@ -92,13 +92,13 @@ class _ProjectStructureView extends StatelessWidget {
           color: Colors.grey,
           child: SeparatedColumn(
             crossAxisAlignment: CrossAxisAlignment.start,
+            separatorBuilder: () => const SizedBox(height: 12),
             children: [
               ElementPathWidget(path: conductor.projectPath),
               ...conductor.directories.map((projectDirectory) {
                 return DirectoryElementView(projectDirectory: projectDirectory);
               }),
             ],
-            separatorBuilder: () => const SizedBox(height: 12),
           ),
         );
       },
@@ -120,17 +120,17 @@ class DirectoryElementView extends StatelessWidget {
       color: Colors.teal,
       child: SeparatedColumn(
         crossAxisAlignment: CrossAxisAlignment.start,
+        separatorBuilder: () => const SizedBox(height: 12),
         children: [
           ElementPathWidget(path: projectDirectory.path),
           SeparatedRow(
             crossAxisAlignment: CrossAxisAlignment.start,
+            separatorBuilder: () => const SizedBox(width: 12),
             children: projectDirectory.files.map((projectFile) {
               return FileElementView(projectFile: projectFile);
             }).toList(),
-            separatorBuilder: () => const SizedBox(width: 12),
           ),
         ],
-        separatorBuilder: () => const SizedBox(height: 12),
       ),
     );
   }
@@ -150,11 +150,11 @@ class FileElementView extends StatelessWidget {
       color: Colors.green,
       child: SeparatedColumn(
         crossAxisAlignment: CrossAxisAlignment.start,
+        separatorBuilder: () => const SizedBox(height: 12),
         children: [
           ElementPathWidget(path: projectFile.name),
           ...projectFile.entities.map(buildEntityView),
         ],
-        separatorBuilder: () => const SizedBox(height: 12),
       ),
     );
   }
@@ -200,6 +200,7 @@ class ClassElementView extends StatelessWidget {
       color: Colors.yellow,
       child: SeparatedColumn(
         crossAxisAlignment: CrossAxisAlignment.start,
+        separatorBuilder: () => const SizedBox(height: 8),
         children: [
           Row(
             children: [
@@ -213,12 +214,12 @@ class ClassElementView extends StatelessWidget {
               return SecondaryElementWidget(
                 color: Colors.pink,
                 child: SeparatedRow(
+                  separatorBuilder: () => const SizedBox(width: 8),
                   children: [
                     const ElementTagWidget(tag: 'Property'),
                     ElementTypeWidget(type: property.type),
                     ElementNameWidget(name: property.name),
                   ],
-                  separatorBuilder: () => const SizedBox(width: 8),
                 ),
               );
             },
@@ -228,27 +229,27 @@ class ClassElementView extends StatelessWidget {
               color: Colors.indigo,
               child: SeparatedColumn(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                separatorBuilder: () => const SizedBox(height: 8),
                 children: [
                   SeparatedRow(
+                    separatorBuilder: () => const SizedBox(width: 8),
                     children: [
                       const ElementTagWidget(tag: 'Constructor'),
                       ElementNameWidget(name: constructor.name),
                     ],
-                    separatorBuilder: () => const SizedBox(width: 8),
                   ),
                   ...constructor.parameters.map(
                     (parameter) => SeparatedRow(
+                      separatorBuilder: () => const SizedBox(width: 8),
                       children: [
                         const SizedBox(width: 8),
                         const ElementTagWidget(tag: 'Parameter'),
                         ElementTypeWidget(type: parameter.type),
                         ElementNameWidget(name: parameter.name),
                       ],
-                      separatorBuilder: () => const SizedBox(width: 8),
                     ),
                   ),
                 ],
-                separatorBuilder: () => const SizedBox(height: 8),
               ),
             ),
           ),
@@ -257,33 +258,32 @@ class ClassElementView extends StatelessWidget {
               color: Colors.cyan,
               child: SeparatedColumn(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                separatorBuilder: () => const SizedBox(height: 8),
                 children: [
                   SeparatedRow(
+                    separatorBuilder: () => const SizedBox(width: 8),
                     children: [
                       const ElementTagWidget(tag: 'Method'),
                       ElementTypeWidget(type: method.returnType),
                       ElementNameWidget(name: method.name),
                     ],
-                    separatorBuilder: () => const SizedBox(width: 8),
                   ),
                   ...method.parameters.map(
                     (parameter) => SeparatedRow(
+                      separatorBuilder: () => const SizedBox(width: 8),
                       children: [
                         const SizedBox(width: 8),
                         const ElementTagWidget(tag: 'Parameter'),
                         ElementTypeWidget(type: parameter.type),
                         ElementNameWidget(name: parameter.name),
                       ],
-                      separatorBuilder: () => const SizedBox(width: 8),
                     ),
                   ),
                 ],
-                separatorBuilder: () => const SizedBox(height: 8),
               ),
             ),
           ),
         ],
-        separatorBuilder: () => const SizedBox(height: 8),
       ),
     );
   }
@@ -303,28 +303,28 @@ class FunctionElementView extends StatelessWidget {
       color: Colors.blue,
       child: SeparatedColumn(
         crossAxisAlignment: CrossAxisAlignment.start,
+        separatorBuilder: () => const SizedBox(height: 8),
         children: [
           SeparatedRow(
+            separatorBuilder: () => const SizedBox(width: 8),
             children: [
               const ElementTagWidget(tag: 'Function'),
               ElementTypeWidget(type: functionDefinition.returnType),
               ElementNameWidget(name: functionDefinition.name),
             ],
-            separatorBuilder: () => const SizedBox(width: 8),
           ),
           ...functionDefinition.parameters.map(
             (parameter) => SeparatedRow(
+              separatorBuilder: () => const SizedBox(width: 8),
               children: [
                 const SizedBox(width: 8),
                 const ElementTagWidget(tag: 'Parameter'),
                 ElementTypeWidget(type: parameter.type),
                 ElementNameWidget(name: parameter.name),
               ],
-              separatorBuilder: () => const SizedBox(width: 8),
             ),
           ),
         ],
-        separatorBuilder: () => const SizedBox(height: 8),
       ),
     );
   }
@@ -344,6 +344,7 @@ class EnumElementView extends StatelessWidget {
       color: Colors.purple,
       child: SeparatedColumn(
         crossAxisAlignment: CrossAxisAlignment.start,
+        separatorBuilder: () => const SizedBox(height: 8),
         children: [
           Row(
             children: [
@@ -365,7 +366,6 @@ class EnumElementView extends StatelessWidget {
             ),
           ),
         ],
-        separatorBuilder: () => const SizedBox(height: 8),
       ),
     );
   }

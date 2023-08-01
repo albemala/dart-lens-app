@@ -73,6 +73,7 @@ class _TopView extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: SeparatedRow(
               crossAxisAlignment: CrossAxisAlignment.baseline,
+              separatorBuilder: () => const SizedBox(width: 8),
               children: [
                 const Text(
                   'Project directory:',
@@ -101,7 +102,6 @@ class _TopView extends StatelessWidget {
                     child: const Text('Select'),
                   ),
               ],
-              separatorBuilder: () => const SizedBox(width: 8),
             ),
           ),
         );

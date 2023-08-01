@@ -41,6 +41,7 @@ class _ActionBarView extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
             child: SeparatedRow(
+              separatorBuilder: () => const SizedBox(width: 8),
               children: [
                 const Spacer(),
                 if (conductor.isLoading) //
@@ -61,7 +62,6 @@ class _ActionBarView extends StatelessWidget {
                   ),
                 ),
               ],
-              separatorBuilder: () => const SizedBox(width: 8),
             ),
           ),
         );
@@ -79,6 +79,7 @@ class _StringLiteralsListView extends StatelessWidget {
       builder: (context, conductor, child) {
         return ListView.separated(
           padding: const EdgeInsets.all(16),
+          separatorBuilder: (context, index) => const Divider(),
           itemCount: conductor.stringLiterals.length,
           itemBuilder: (context, index) {
             final dependency = conductor.stringLiterals[index];
@@ -86,6 +87,7 @@ class _StringLiteralsListView extends StatelessWidget {
               builder: (context) {
                 return SeparatedRow(
                   padding: const EdgeInsets.symmetric(vertical: 4),
+                  separatorBuilder: () => const SizedBox(width: 8),
                   children: [
                     SmallButtonWidget(
                       onPressed: () {
@@ -109,12 +111,10 @@ class _StringLiteralsListView extends StatelessWidget {
                       ),
                     ),
                   ],
-                  separatorBuilder: () => const SizedBox(width: 8),
                 );
               },
             );
           },
-          separatorBuilder: (context, index) => const Divider(),
         );
       },
     );
