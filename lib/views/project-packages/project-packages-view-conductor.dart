@@ -7,7 +7,6 @@ import 'package:dart_lens/functions/installed-packages.dart';
 import 'package:dart_lens/functions/packages.dart';
 import 'package:dart_lens/functions/project-packages-analysis.dart';
 import 'package:dart_lens/models/package/package.dart';
-import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -66,7 +65,7 @@ class AvailableVersion {
 
 ProjectPackage _createProjectPackage(
   Package package,
-  IMap<String, String> packageVersionsToChange,
+  Map<String, String> packageVersionsToChange,
 ) {
   final versionToInstall = packageVersionsToChange[package.name];
   final availableVersions = package.type == PackageType.hosted //
@@ -128,10 +127,9 @@ class ProjectPackagesViewConductor extends ChangeNotifier {
   final ProjectAnalysisConductor _projectAnalysisConductor;
 
   bool _isLoading = false;
+  List<Package> _packages = <Package>[];
   PackageFilter _packageFilter = PackageFilter.all;
-  IMap<String, String> _packageVersionsToChange = <String, String>{}.lock;
-
-  IList<Package> _packages = const <Package>[].lock;
+  Map<String, String> _packageVersionsToChange = <String, String>{};
 
   bool get isLoading => _isLoading;
 
@@ -199,7 +197,7 @@ class ProjectPackagesViewConductor extends ChangeNotifier {
             )
             ?.installedVersion;
 
-    _packageVersionsToChange = installedVersion == version
+    installedVersion == version
         ? _packageVersionsToChange.remove(name)
         : _packageVersionsToChange.update(
             name,
@@ -210,7 +208,7 @@ class ProjectPackagesViewConductor extends ChangeNotifier {
   }
 
   void selectAllLatestVersions() {
-    _packageVersionsToChange = IMap.fromEntries(
+    _packageVersionsToChange = Map.fromEntries(
       _packages
           .where(_isNotSdkDependency) //
           .where((package) {
@@ -233,13 +231,13 @@ class ProjectPackagesViewConductor extends ChangeNotifier {
   }
 
   Future<void> clearChanges() async {
-    _packageVersionsToChange = <String, String>{}.lock;
+    _packageVersionsToChange = <String, String>{};
     notifyListeners();
   }
 
   Future<void> reload() async {
-    _packages = const <Package>[].lock;
-    _packageVersionsToChange = <String, String>{}.lock;
+    _packages = <Package>[];
+    _packageVersionsToChange = <String, String>{};
     notifyListeners();
 
     await _loadProjectPackages();
@@ -263,11 +261,9 @@ class ProjectPackagesViewConductor extends ChangeNotifier {
     notifyListeners();
     try {
       final projectPath = _projectPath;
-      _packages = IList(
-        await Isolate.run(() {
-          return getPackages(projectPath);
-        }),
-      );
+      _packages = await Isolate.run(() {
+        return getPackages(projectPath);
+      });
       notifyListeners();
     } catch (exception) {
       print(exception);
@@ -285,7 +281,7 @@ class ProjectPackagesViewConductor extends ChangeNotifier {
     notifyListeners();
     try {
       final projectPath = _projectPath;
-      final versionsToChange = _packageVersionsToChange.unlock;
+      final versionsToChange = _packageVersionsToChange;
       await Isolate.run(() {
         return applyPackageVersionChanges(
           projectPath,
