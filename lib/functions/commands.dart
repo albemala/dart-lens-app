@@ -2,16 +2,15 @@ import 'dart:io';
 
 final flutterCmd = Platform.isWindows ? 'flutter.bat' : 'flutter';
 
-Future<void> runFlutterPubGet(
+Future<ProcessResult> runFlutterPubGet(
   String directoryPath,
 ) async {
-  final flutterPubGetProcess = await Process.run(
+  final processResult = await Process.run(
     flutterCmd,
     ['pub', 'get'],
     workingDirectory: directoryPath,
   );
-  print('flutter pub get output: ${flutterPubGetProcess.stdout}');
-  print('flutter pub get error: ${flutterPubGetProcess.stderr}');
+  return processResult;
 }
 
 Future<ProcessResult> runFlutterPubOutdated(

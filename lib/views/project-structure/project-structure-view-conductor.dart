@@ -153,9 +153,7 @@ class ProjectStructureViewConductor extends ChangeNotifier {
   List<ProjectDirectory> _directories = [];
 
   bool get isLoading => _isLoading;
-
   List<ProjectDirectory> get directories => _directories;
-
   String get projectPath => _projectAnalysisConductor.projectPath;
 
   ProjectStructureViewConductor(

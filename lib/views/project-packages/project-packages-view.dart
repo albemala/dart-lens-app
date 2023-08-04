@@ -21,6 +21,7 @@ class ProjectPackagesView extends StatelessWidget {
           Divider(),
           _ActionBarView(),
           Divider(),
+          _ErrorView(),
           Expanded(
             child: _PackagesView(),
           ),
@@ -101,7 +102,7 @@ class _ActionBarView extends StatelessWidget {
                           onPressed: () {
                             conductor.clearChanges();
                           },
-                          icon: const Icon(CupertinoIcons.clear),
+                          icon: const Icon(CupertinoIcons.xmark_circle),
                         ),
                       ),
                     ],
@@ -127,6 +128,58 @@ class _ActionBarView extends StatelessWidget {
               ],
             ),
           ),
+        );
+      },
+    );
+  }
+}
+
+class _ErrorView extends StatelessWidget {
+  const _ErrorView();
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<ProjectPackagesViewConductor>(
+      builder: (context, conductor, child) {
+        return StreamBuilder<String>(
+          stream: conductor.errorDialogStream,
+          builder: (context, snapshot) {
+            if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+              return Material(
+                color: Theme.of(context).colorScheme.errorContainer,
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          snapshot.data!.trim(),
+                          style:
+                              Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onErrorContainer,
+                                  ),
+                        ),
+                      ),
+                      Transform.translate(
+                        offset: const Offset(0, -10),
+                        child: IconButton(
+                          onPressed: () {
+                            conductor.closeErrorDialog();
+                          },
+                          icon: const Icon(CupertinoIcons.clear),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            } else {
+              return Container();
+            }
+          },
         );
       },
     );

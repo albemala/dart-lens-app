@@ -90,12 +90,8 @@ class StringLiteralsViewConductor extends ChangeNotifier {
   List<StringLiteral> _stringLiterals = [];
 
   bool get isLoading => _isLoading;
-
   List<StringLiteral> get stringLiterals => _stringLiterals;
-
-  String get _projectPath {
-    return _projectAnalysisConductor.projectPath;
-  }
+  String get _projectPath => _projectAnalysisConductor.projectPath;
 
   StringLiteralsViewConductor(
     this._projectAnalysisConductor,

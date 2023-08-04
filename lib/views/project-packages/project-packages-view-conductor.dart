@@ -130,14 +130,14 @@ class ProjectPackagesViewConductor extends ChangeNotifier {
   List<Package> _packages = <Package>[];
   PackageFilter _packageFilter = PackageFilter.all;
   Map<String, String> _packageVersionsToChange = <String, String>{};
-
-  bool get isLoading => _isLoading;
-
-  PackageFilter get packageFilter => _packageFilter;
-
-  int get packageVersionsToChangeCount => _packageVersionsToChange.length;
+  final _errorDialogController = StreamController<String>();
 
   String get _projectPath => _projectAnalysisConductor.projectPath;
+
+  bool get isLoading => _isLoading;
+  PackageFilter get packageFilter => _packageFilter;
+  int get packageVersionsToChangeCount => _packageVersionsToChange.length;
+  Stream<String> get errorDialogStream => _errorDialogController.stream;
 
   List<ProjectPackage> get dependencies => _packages
       .where((package) {
@@ -177,6 +177,7 @@ class ProjectPackagesViewConductor extends ChangeNotifier {
   @override
   void dispose() {
     _projectAnalysisConductor.removeListener(reload);
+    _errorDialogController.close();
     super.dispose();
   }
 
@@ -226,8 +227,25 @@ class ProjectPackagesViewConductor extends ChangeNotifier {
   }
 
   Future<void> applyChanges() async {
-    await _applyPackageVersionChangesToProject();
-    await reload();
+    _isLoading = true;
+    notifyListeners();
+
+    String? errorMessage;
+    try {
+      await _applyPackageVersionChangesToProject();
+    } catch (exception) {
+      print(exception);
+      errorMessage = exception.toString();
+    }
+
+    _isLoading = false;
+    notifyListeners();
+
+    if (errorMessage == null) {
+      await reload();
+    } else {
+      _errorDialogController.add(errorMessage);
+    }
   }
 
   Future<void> clearChanges() async {
@@ -240,7 +258,21 @@ class ProjectPackagesViewConductor extends ChangeNotifier {
     _packageVersionsToChange = <String, String>{};
     notifyListeners();
 
-    await _loadProjectPackages();
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      await _loadProjectPackages();
+    } catch (exception) {
+      print(exception);
+    }
+
+    _isLoading = false;
+    notifyListeners();
+  }
+
+  void closeErrorDialog() {
+    _errorDialogController.add('');
   }
 
   bool _isNotSdkDependency(Package package) => package.type != PackageType.sdk;
@@ -257,18 +289,10 @@ class ProjectPackagesViewConductor extends ChangeNotifier {
   Future<void> _loadProjectPackages() async {
     if (_projectPath.isEmpty) return;
 
-    _isLoading = true;
-    notifyListeners();
-    try {
-      final projectPath = _projectPath;
-      _packages = await Isolate.run(() {
-        return getPackages(projectPath);
-      });
-      notifyListeners();
-    } catch (exception) {
-      print(exception);
-    }
-    _isLoading = false;
+    final projectPath = _projectPath;
+    _packages = await Isolate.run(() {
+      return getPackages(projectPath);
+    });
     notifyListeners();
   }
 
@@ -277,21 +301,13 @@ class ProjectPackagesViewConductor extends ChangeNotifier {
     if (_projectPath.isEmpty) return;
     if (_packageVersionsToChange.isEmpty) return;
 
-    _isLoading = true;
-    notifyListeners();
-    try {
-      final projectPath = _projectPath;
-      final versionsToChange = _packageVersionsToChange;
-      await Isolate.run(() {
-        return applyPackageVersionChanges(
-          projectPath,
-          versionsToChange,
-        );
-      });
-    } catch (exception) {
-      print(exception);
-    }
-    _isLoading = false;
-    notifyListeners();
+    final projectPath = _projectPath;
+    final versionsToChange = _packageVersionsToChange;
+    await Isolate.run(() {
+      return applyPackageVersionChanges(
+        projectPath,
+        versionsToChange,
+      );
+    });
   }
 }
