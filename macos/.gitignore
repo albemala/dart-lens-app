@@ -5,3 +5,13 @@
 # Xcode-related
 **/dgph
 **/xcuserdata/
+
+### fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/metadata
+fastlane/screenshots
+fastlane/test_output
+fastlane/readme.md
+
+build/

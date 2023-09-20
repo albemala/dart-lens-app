@@ -39,3 +39,4 @@ app.*.symbols
 app.*.map.json
 
 .env
+macos-builds/

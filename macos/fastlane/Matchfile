@@ -1,0 +1,5 @@
+storage_mode "git"
+git_url "https://github.com/albemala/apple-certificates-profiles.git"
+app_identifier "app.dartlens"
+platform "macos"
+username ENV["APPLE_ID"]

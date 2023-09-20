@@ -1,0 +1,82 @@
+platform :mac do
+
+  lane :generate_certificates_profiles do |options|
+    match(
+      type: "development",
+    )
+    match(
+      type: "appstore",
+    )
+    match(
+      type: "developer_id",
+      additional_cert_types: [
+        "mac_installer_distribution",
+        "developer_id_installer",
+      ],
+    )
+  end
+
+  lane :get_certificates_profiles do |options|
+    match(
+      type: "development",
+      readonly: true,
+    )
+    match(
+      type: "appstore",
+      readonly: true,
+    )
+    match(
+      type: "developer_id",
+      additional_cert_types: [
+        "mac_installer_distribution",
+        "developer_id_installer",
+      ],
+      readonly: true,
+    )
+  end
+
+  lane :build_app_store do |options|
+    build_mac_app(
+      export_team_id: ENV["TEAM_ID"],
+      scheme: "Runner",
+      export_method: "app-store",
+      export_options: {
+        provisioningProfiles: {
+          "app.dartlens" => "match AppStore app.dartlens macos",
+        }
+      },
+      output_directory: "build",
+    )
+  end
+
+  lane :build_standalone do |options|
+    build_mac_app(
+      export_team_id: ENV["TEAM_ID"],
+      scheme: "Runner",
+      export_method: "developer-id",
+      export_options: {
+        provisioningProfiles: {
+          "app.dartlens" => "match Direct app.dartlens macos",
+        },
+      },
+      output_directory: "build",
+    )
+  end
+
+  lane :publish_app_store do |options|
+    upload_to_app_store(
+      skip_metadata: true,
+      skip_screenshots: true,
+    )
+  end
+
+  lane :publish_standalone do |options|
+    notarize(
+      asc_provider: ENV["TEAM_ID"],
+      package: "build/DartLens.app",
+      print_log: true,
+      verbose: true,
+    )
+  end
+
+end
