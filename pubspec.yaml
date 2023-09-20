@@ -64,11 +64,11 @@ flutter:
 
   assets:
     - assets/
-    - assets/google-fonts/
+    - assets/fonts/
 
 # bash scripts/generate-assets.bash
 flutter_gen:
-  output: lib/assets/
+  output: lib/defines/
   integrations:
     flutter_svg: true
   assets:

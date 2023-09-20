@@ -1,5 +1,5 @@
-import 'package:dart_lens/assets/assets.gen.dart';
 import 'package:dart_lens/defines/app.dart';
+import 'package:dart_lens/defines/assets.gen.dart';
 import 'package:dart_lens/defines/urls.dart';
 import 'package:dart_lens/functions/app.dart';
 import 'package:dart_lens/functions/feedback.dart';
