@@ -6,9 +6,10 @@ import 'package:analyzer/file_system/physical_file_system.dart';
 import 'package:dart_lens/functions/commands.dart';
 import 'package:path/path.dart' as path;
 
-Future<List<ResolvedUnitResult>> getProjectStructure(
-  String projectDirectoryPath,
-) async {
+Future<List<ResolvedUnitResult>> getProjectStructure({
+  required String flutterBinaryPath,
+  required String projectDirectoryPath,
+}) async {
   print('Exploring project at $projectDirectoryPath');
 
   final projectDirectory = Directory(projectDirectoryPath);
@@ -28,7 +29,9 @@ Future<List<ResolvedUnitResult>> getProjectStructure(
   // NOTE: on macOS, App Sandbox must be disabled for this to work
 
   // run `flutter doctor -v`
-  final flutterDoctorResult = await runFlutterDoctor();
+  final flutterDoctorResult = await runFlutterDoctor(
+    flutterBinaryPath: flutterBinaryPath,
+  );
   // extract flutter sdk path from flutter doctor output
   // example to look for: Flutter version <version> on channel <channel> at <path>
   final flutterSdkPathRegex =

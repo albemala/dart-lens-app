@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:isolate';
 
 import 'package:collection/collection.dart';
+import 'package:dart_lens/conductors/preferences-conductor.dart';
 import 'package:dart_lens/conductors/project-analysis-conductor.dart';
 import 'package:dart_lens/functions/installed-packages.dart';
 import 'package:dart_lens/functions/packages.dart';
@@ -120,10 +121,12 @@ AvailableVersion _createAvailableVersion(
 class ProjectPackagesViewConductor extends ChangeNotifier {
   factory ProjectPackagesViewConductor.fromContext(BuildContext context) {
     return ProjectPackagesViewConductor(
+      context.read<PreferencesConductor>(),
       context.read<ProjectAnalysisConductor>(),
     );
   }
 
+  final PreferencesConductor _preferencesConductor;
   final ProjectAnalysisConductor _projectAnalysisConductor;
 
   bool _isLoading = false;
@@ -168,6 +171,7 @@ class ProjectPackagesViewConductor extends ChangeNotifier {
       .toList();
 
   ProjectPackagesViewConductor(
+    this._preferencesConductor,
     this._projectAnalysisConductor,
   ) {
     _projectAnalysisConductor.addListener(reload);
@@ -289,9 +293,13 @@ class ProjectPackagesViewConductor extends ChangeNotifier {
   Future<void> _loadProjectPackages() async {
     if (_projectPath.isEmpty) return;
 
+    final flutterBinaryPath = _preferencesConductor.flutterBinaryPath;
     final projectPath = _projectPath;
     _packages = await Isolate.run(() {
-      return getPackages(projectPath);
+      return getPackages(
+        flutterBinaryPath: flutterBinaryPath,
+        projectDirectoryPath: projectPath,
+      );
     });
     notifyListeners();
   }
@@ -301,12 +309,14 @@ class ProjectPackagesViewConductor extends ChangeNotifier {
     if (_projectPath.isEmpty) return;
     if (_packageVersionsToChange.isEmpty) return;
 
+    final flutterBinaryPath = _preferencesConductor.flutterBinaryPath;
     final projectPath = _projectPath;
     final versionsToChange = _packageVersionsToChange;
     await Isolate.run(() {
       return applyPackageVersionChanges(
-        projectPath,
-        versionsToChange,
+        flutterBinaryPath: flutterBinaryPath,
+        projectDirectoryPath: projectPath,
+        packageVersionsToChange: versionsToChange,
       );
     });
   }

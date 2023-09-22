@@ -1,5 +1,7 @@
+import 'package:dart_lens/conductors/local-storage-conductor.dart';
 import 'package:dart_lens/conductors/preferences-conductor.dart';
 import 'package:dart_lens/conductors/project-analysis-conductor.dart';
+import 'package:dart_lens/conductors/routing-conductor.dart';
 import 'package:dart_lens/functions/theme.dart';
 import 'package:dart_lens/views/main-view.dart';
 import 'package:flutter/material.dart';
@@ -14,18 +16,27 @@ class AppView extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: RoutingConductor.fromContext),
+        ChangeNotifierProvider(create: LocalStorageConductor.fromContext),
         ChangeNotifierProvider(create: PreferencesConductor.fromContext),
         ChangeNotifierProvider(create: ProjectAnalysisConductor.fromContext),
       ],
       child: Consumer<PreferencesConductor>(
-        builder: (context, conductor, child) {
+        builder: (context, preferencesConductor, child) {
           return MaterialApp(
             title: 'Flutter Code Explorer',
-            themeMode: conductor.themeMode,
+            themeMode: preferencesConductor.themeMode,
             theme: generateLightThemeData(),
             darkTheme: generateDarkThemeData(),
             debugShowCheckedModeBanner: false,
-            home: const MainView(),
+            home: Consumer<RoutingConductor>(
+              builder: (context, routingConductor, child) {
+                return RoutingView(
+                  routingStream: routingConductor.routingStream,
+                  child: const MainView(),
+                );
+              },
+            ),
           );
         },
       ),

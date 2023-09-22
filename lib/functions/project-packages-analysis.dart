@@ -7,9 +7,10 @@ import 'package:path/path.dart' as path;
 import 'package:pub_api_client/pub_api_client.dart';
 import 'package:pubspec_parse/pubspec_parse.dart';
 
-Future<List<Package>> getPackages(
-  String projectDirectoryPath,
-) async {
+Future<List<Package>> getPackages({
+  required String flutterBinaryPath,
+  required String projectDirectoryPath,
+}) async {
   print('Exploring packages at $projectDirectoryPath');
 
   final pubspecFile = File(path.join(projectDirectoryPath, 'pubspec.yaml'));
@@ -20,7 +21,10 @@ Future<List<Package>> getPackages(
   final pubspecFileContent = pubspecFile.readAsStringSync();
   final pubspec = Pubspec.parse(pubspecFileContent);
 
-  final outdatedPackages = await getOutdatedPackages(projectDirectoryPath);
+  final outdatedPackages = await getOutdatedPackages(
+    flutterBinaryPath: flutterBinaryPath,
+    projectDirectoryPath: projectDirectoryPath,
+  );
   // print('Outdated packages: $outdatedPackages');
   if (outdatedPackages == null) return [];
 

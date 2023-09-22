@@ -3,10 +3,11 @@ import 'dart:io';
 import 'package:dart_lens/functions/commands.dart';
 import 'package:path/path.dart' as path;
 
-Future<void> applyPackageVersionChanges(
-  String projectDirectoryPath,
-  Map<String, String> packageVersionsToChange,
-) async {
+Future<void> applyPackageVersionChanges({
+  required String flutterBinaryPath,
+  required String projectDirectoryPath,
+  required Map<String, String> packageVersionsToChange,
+}) async {
   final pubspecFile = File(path.join(projectDirectoryPath, 'pubspec.yaml'));
   if (!pubspecFile.existsSync()) {
     throw Exception('pubspec.yaml does not exist');
@@ -23,7 +24,10 @@ Future<void> applyPackageVersionChanges(
   pubspecFile.writeAsStringSync(updatedPubspecFileContent);
 
   // run `flutter pub get` to update the lock file
-  final processResult = await runFlutterPubGet(projectDirectoryPath);
+  final processResult = await runFlutterPubGet(
+    flutterBinaryPath: flutterBinaryPath,
+    workingDirectory: projectDirectoryPath,
+  );
 
   // in case of error, restore pubspec.yaml file content and throw the error
   if (processResult.stderr.toString().isNotEmpty) {

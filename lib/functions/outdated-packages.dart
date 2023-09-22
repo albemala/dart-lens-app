@@ -6,11 +6,14 @@ import 'package:dart_lens/models/outdated-packages/outdated-packages.dart';
 
 /// Runs `flutter pub outdated --json` on [projectDirectoryPath]
 /// and parses the output
-Future<OutdatedPackages?> getOutdatedPackages(
-  String projectDirectoryPath,
-) async {
-  final flutterPubOutdatedResult =
-      await runFlutterPubOutdated(projectDirectoryPath);
+Future<OutdatedPackages?> getOutdatedPackages({
+  required String flutterBinaryPath,
+  required String projectDirectoryPath,
+}) async {
+  final flutterPubOutdatedResult = await runFlutterPubOutdated(
+    flutterBinaryPath: flutterBinaryPath,
+    workingDirectory: projectDirectoryPath,
+  );
   final flutterPubOutdatedJson = flutterPubOutdatedResult.stdout.toString();
   try {
     final flutterPubOutdatedMap = jsonDecode(flutterPubOutdatedJson) as Map;

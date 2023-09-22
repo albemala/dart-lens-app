@@ -1,31 +1,35 @@
 import 'dart:io';
 
-final flutterCmd = Platform.isWindows ? 'flutter.bat' : 'flutter';
+final shell = Platform.environment['SHELL'] ?? '';
 
-Future<ProcessResult> runFlutterPubGet(
-  String directoryPath,
-) async {
+Future<ProcessResult> runFlutterPubGet({
+  required String flutterBinaryPath,
+  required String workingDirectory,
+}) async {
   final processResult = await Process.run(
-    flutterCmd,
-    ['pub', 'get'],
-    workingDirectory: directoryPath,
+    shell,
+    ['-c', '$flutterBinaryPath pub get'],
+    workingDirectory: workingDirectory,
   );
   return processResult;
 }
 
-Future<ProcessResult> runFlutterPubOutdated(
-  String projectDirectoryPath,
-) async {
+Future<ProcessResult> runFlutterPubOutdated({
+  required String flutterBinaryPath,
+  required String workingDirectory,
+}) async {
   return Process.run(
-    flutterCmd,
-    ['pub', 'outdated', '--json'],
-    workingDirectory: projectDirectoryPath,
+    shell,
+    ['-c', '$flutterBinaryPath pub outdated --json'],
+    workingDirectory: workingDirectory,
   );
 }
 
-Future<ProcessResult> runFlutterDoctor() async {
+Future<ProcessResult> runFlutterDoctor({
+  required String flutterBinaryPath,
+}) async {
   return Process.run(
-    flutterCmd,
-    ['doctor', '-v'],
+    shell,
+    ['-c', '$flutterBinaryPath doctor -v'],
   );
 }

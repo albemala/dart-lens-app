@@ -1,9 +1,10 @@
-import 'package:dart_lens/conductors/preferences-conductor.dart';
 import 'package:dart_lens/conductors/project-analysis-conductor.dart';
+import 'package:dart_lens/conductors/routing-conductor.dart';
 import 'package:dart_lens/defines/app.dart';
 import 'package:dart_lens/functions/feedback.dart';
 import 'package:dart_lens/functions/fs.dart';
 import 'package:dart_lens/views/about-view.dart';
+import 'package:dart_lens/views/preferences-view.dart';
 import 'package:dart_lens/views/project-packages/project-packages-view.dart';
 import 'package:dart_lens/views/project-structure/project-structure-view.dart';
 import 'package:dart_lens/views/string-literals/string-literals-view.dart';
@@ -126,26 +127,41 @@ class _BottomView extends StatelessWidget {
               icon: const Icon(CupertinoIcons.mail),
               label: const Text('Send feedback'),
             ),
-            Consumer<PreferencesConductor>(
-              builder: (context, conductor, child) {
-                return IconButton(
-                  onPressed: () {
-                    conductor.toggleThemeMode();
-                  },
-                  icon: conductor.themeMode == ThemeMode.light
-                      ? const Icon(CupertinoIcons.brightness)
-                      : const Icon(CupertinoIcons.moon),
+            Consumer<RoutingConductor>(
+              builder: (context, routingConductor, child) {
+                return Tooltip(
+                  message: 'Preferences',
+                  child: IconButton(
+                    onPressed: () {
+                      routingConductor.showDialog(
+                        (context) => PreferencesView.create(
+                          context,
+                          onClose: routingConductor.closeCurrentRoute,
+                        ),
+                      );
+                    },
+                    icon: const Icon(CupertinoIcons.gear),
+                  ),
                 );
               },
             ),
-            Tooltip(
-              message: 'About $appName',
-              child: IconButton(
-                onPressed: () {
-                  AboutView.show(context);
-                },
-                icon: const Icon(CupertinoIcons.info),
-              ),
+            Consumer<RoutingConductor>(
+              builder: (context, routingConductor, child) {
+                return Tooltip(
+                  message: 'About $appName',
+                  child: IconButton(
+                    onPressed: () {
+                      routingConductor.showDialog(
+                        (context) => AboutView.create(
+                          context,
+                          onClose: routingConductor.closeCurrentRoute,
+                        ),
+                      );
+                    },
+                    icon: const Icon(CupertinoIcons.info),
+                  ),
+                );
+              },
             ),
           ],
         ),

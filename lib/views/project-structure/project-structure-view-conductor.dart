@@ -3,6 +3,7 @@ import 'dart:isolate';
 
 import 'package:analyzer/dart/ast/ast.dart';
 import 'package:collection/collection.dart';
+import 'package:dart_lens/conductors/preferences-conductor.dart';
 import 'package:dart_lens/conductors/project-analysis-conductor.dart';
 import 'package:dart_lens/functions/project-structure-analysis.dart';
 import 'package:flutter/widgets.dart';
@@ -143,10 +144,12 @@ class FunctionDefinition implements EntityDefinition {
 class ProjectStructureViewConductor extends ChangeNotifier {
   factory ProjectStructureViewConductor.fromContext(BuildContext context) {
     return ProjectStructureViewConductor(
+      context.read<PreferencesConductor>(),
       context.read<ProjectAnalysisConductor>(),
     );
   }
 
+  final PreferencesConductor _preferencesConductor;
   final ProjectAnalysisConductor _projectAnalysisConductor;
 
   bool _isLoading = false;
@@ -157,6 +160,7 @@ class ProjectStructureViewConductor extends ChangeNotifier {
   String get projectPath => _projectAnalysisConductor.projectPath;
 
   ProjectStructureViewConductor(
+    this._preferencesConductor,
     this._projectAnalysisConductor,
   ) {
     _projectAnalysisConductor.addListener(reload);
@@ -183,9 +187,13 @@ class ProjectStructureViewConductor extends ChangeNotifier {
     if (projectPath.isEmpty) return [];
     try {
       // ignore: no_leading_underscores_for_local_identifiers
+      final flutterBinaryPath = _preferencesConductor.flutterBinaryPath;
       final _projectPath = projectPath;
       return await Isolate.run(() {
-        return _createDirectories(_projectPath);
+        return _createDirectories(
+          flutterBinaryPath: flutterBinaryPath,
+          projectPath: _projectPath,
+        );
       });
     } catch (exception) {
       print(exception);
@@ -194,12 +202,16 @@ class ProjectStructureViewConductor extends ChangeNotifier {
   }
 }
 
-Future<List<ProjectDirectory>> _createDirectories(
-  String projectPath,
-) async {
+Future<List<ProjectDirectory>> _createDirectories({
+  required String flutterBinaryPath,
+  required String projectPath,
+}) async {
   final directories = <String, List<ProjectFile>>{};
 
-  final resolvedUnitResults = await getProjectStructure(projectPath);
+  final resolvedUnitResults = await getProjectStructure(
+    flutterBinaryPath: flutterBinaryPath,
+    projectDirectoryPath: projectPath,
+  );
   for (final resolvedUnitResult in resolvedUnitResults) {
     final filePath = relative(
       resolvedUnitResult.path,

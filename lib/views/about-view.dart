@@ -8,26 +8,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
 class AboutView extends HookWidget {
-  static Future<void> show(BuildContext context) async {
-    await showDialog<void>(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text(
-            'About',
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          content: const AboutView(),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Close'),
-            ),
-          ],
-        );
-      },
+  static AlertDialog create(
+    BuildContext context, {
+    required void Function() onClose,
+  }) {
+    return AlertDialog(
+      title: Text(
+        'About',
+        style: Theme.of(context).textTheme.titleMedium,
+      ),
+      content: const AboutView(),
+      actions: [
+        TextButton(
+          onPressed: onClose,
+          child: const Text('Close'),
+        ),
+      ],
     );
   }
 
@@ -104,13 +100,13 @@ class AboutView extends HookWidget {
           child: const Text('Report an issue'),
         ),
 /*
-        const SizedBox(height: 8),
-        OutlinedButton(
-          onPressed: () async {
-            await openUrl(websiteUrl);
-          },
-          child: const Text('Visit website'),
-        ),
+      const SizedBox(height: 8),
+      OutlinedButton(
+        onPressed: () async {
+          await openUrl(websiteUrl);
+        },
+        child: const Text('Visit website'),
+      ),
 */
         const SizedBox(height: 32),
         Text(

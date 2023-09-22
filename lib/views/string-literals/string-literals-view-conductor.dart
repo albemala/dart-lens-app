@@ -3,6 +3,7 @@ import 'dart:isolate';
 
 import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
+import 'package:dart_lens/conductors/preferences-conductor.dart';
 import 'package:dart_lens/conductors/project-analysis-conductor.dart';
 import 'package:dart_lens/functions/project-structure-analysis.dart';
 import 'package:flutter/material.dart';
@@ -80,10 +81,12 @@ class StringLiteralVisitor extends RecursiveAstVisitor<void> {
 class StringLiteralsViewConductor extends ChangeNotifier {
   factory StringLiteralsViewConductor.fromContext(BuildContext context) {
     return StringLiteralsViewConductor(
+      context.read<PreferencesConductor>(),
       context.read<ProjectAnalysisConductor>(),
     );
   }
 
+  final PreferencesConductor _preferencesConductor;
   final ProjectAnalysisConductor _projectAnalysisConductor;
 
   bool _isLoading = false;
@@ -94,6 +97,7 @@ class StringLiteralsViewConductor extends ChangeNotifier {
   String get _projectPath => _projectAnalysisConductor.projectPath;
 
   StringLiteralsViewConductor(
+    this._preferencesConductor,
     this._projectAnalysisConductor,
   ) {
     _projectAnalysisConductor.addListener(reload);
@@ -119,9 +123,13 @@ class StringLiteralsViewConductor extends ChangeNotifier {
   Future<List<StringLiteral>> _getStringLiterals() async {
     if (_projectPath.isEmpty) return [];
     try {
+      final flutterBinaryPath = _preferencesConductor.flutterBinaryPath;
       final projectPath = _projectPath;
       return await Isolate.run(() {
-        return _createStringLiterals(projectPath);
+        return _createStringLiterals(
+          flutterBinaryPath: flutterBinaryPath,
+          projectPath: projectPath,
+        );
       });
     } catch (exception) {
       print(exception);
@@ -130,12 +138,16 @@ class StringLiteralsViewConductor extends ChangeNotifier {
   }
 }
 
-Future<List<StringLiteral>> _createStringLiterals(
-  String projectPath,
-) async {
+Future<List<StringLiteral>> _createStringLiterals({
+  required String flutterBinaryPath,
+  required String projectPath,
+}) async {
   final stringLiterals = <StringLiteral>[];
 
-  final resolvedUnitResults = await getProjectStructure(projectPath);
+  final resolvedUnitResults = await getProjectStructure(
+    flutterBinaryPath: flutterBinaryPath,
+    projectDirectoryPath: projectPath,
+  );
   for (final resolvedUnitResult in resolvedUnitResults) {
     final filePath = relative(
       resolvedUnitResult.path,
