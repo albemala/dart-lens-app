@@ -9,8 +9,8 @@ import 'package:dart_lens/views/project-packages/project-packages-view.dart';
 import 'package:dart_lens/views/project-structure/project-structure-view.dart';
 import 'package:dart_lens/views/string-literals/string-literals-view.dart';
 import 'package:flextras/flextras.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
 class MainView extends StatelessWidget {
@@ -124,7 +124,7 @@ class _BottomView extends StatelessWidget {
           children: [
             TextButton.icon(
               onPressed: sendFeedback,
-              icon: const Icon(CupertinoIcons.mail),
+              icon: const Icon(LucideIcons.mail),
               label: const Text('Send feedback'),
             ),
             Consumer<RoutingConductor>(
@@ -140,7 +140,7 @@ class _BottomView extends StatelessWidget {
                         ),
                       );
                     },
-                    icon: const Icon(CupertinoIcons.gear),
+                    icon: const Icon(LucideIcons.settings),
                   ),
                 );
               },
@@ -158,7 +158,7 @@ class _BottomView extends StatelessWidget {
                         ),
                       );
                     },
-                    icon: const Icon(CupertinoIcons.info),
+                    icon: const Icon(LucideIcons.info),
                   ),
                 );
               },

@@ -1,9 +1,9 @@
 import 'package:dart_lens/views/project-structure/project-structure-view-conductor.dart';
 import 'package:flex_seed_scheme/flex_seed_scheme.dart';
 import 'package:flextras/flextras.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
 class ProjectStructureView extends StatelessWidget {
@@ -69,7 +69,7 @@ class _ActionBarView extends StatelessWidget {
                     onPressed: () {
                       conductor.reload();
                     },
-                    icon: const Icon(CupertinoIcons.arrow_clockwise),
+                    icon: const Icon(LucideIcons.rotateCw),
                   ),
                 ),
               ],

@@ -31,7 +31,7 @@ dependencies:
   flex_color_scheme: ^7.1.2
   flex_seed_scheme: ^1.3.0
   flextras: ^1.0.0
-  cupertino_icons: ^1.0.5
+  lucide_icons: ^0.257.0
 
   analyzer: ^5.13.0
 

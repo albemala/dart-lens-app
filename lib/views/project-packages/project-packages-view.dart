@@ -2,9 +2,9 @@ import 'package:dart_lens/functions/url.dart';
 import 'package:dart_lens/views/project-packages/project-packages-view-conductor.dart';
 import 'package:dart_lens/widgets/button.dart';
 import 'package:flextras/flextras.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
 class ProjectPackagesView extends StatelessWidget {
@@ -44,12 +44,11 @@ class _ActionBarView extends StatelessWidget {
             child: SeparatedRow(
               separatorBuilder: () => const SizedBox(width: 16),
               children: [
-                SeparatedRow(
-                  separatorBuilder: () => const SizedBox(width: 4),
+                Row(
                   children: [
                     PopupMenuButton<PackageFilter>(
                       tooltip: 'Filter packages',
-                      icon: const Icon(CupertinoIcons.cube_box),
+                      icon: const Icon(LucideIcons.filter),
                       itemBuilder: (context) {
                         return PackageFilter.values.map(
                           (filter) {
@@ -77,7 +76,7 @@ class _ActionBarView extends StatelessWidget {
                         onPressed: () {
                           conductor.selectAllLatestVersions();
                         },
-                        icon: const Icon(CupertinoIcons.arrow_up_to_line),
+                        icon: const Icon(LucideIcons.arrowUpToLine),
                       ),
                     ),
                   ],
@@ -102,7 +101,7 @@ class _ActionBarView extends StatelessWidget {
                           onPressed: () {
                             conductor.clearChanges();
                           },
-                          icon: const Icon(CupertinoIcons.xmark_circle),
+                          icon: const Icon(LucideIcons.xCircle),
                         ),
                       ),
                     ],
@@ -122,7 +121,7 @@ class _ActionBarView extends StatelessWidget {
                     onPressed: () {
                       conductor.reload();
                     },
-                    icon: const Icon(CupertinoIcons.arrow_clockwise),
+                    icon: const Icon(LucideIcons.rotateCw),
                   ),
                 ),
               ],
@@ -169,7 +168,7 @@ class _ErrorView extends StatelessWidget {
                           onPressed: () {
                             conductor.closeErrorDialog();
                           },
-                          icon: const Icon(CupertinoIcons.clear),
+                          icon: const Icon(LucideIcons.x),
                         ),
                       ),
                     ],
@@ -366,7 +365,7 @@ class _PackageListItemView extends StatelessWidget {
         if (dependency.url.isNotEmpty)
           IconButton(
             tooltip: dependency.url,
-            icon: const Icon(CupertinoIcons.arrow_up_right),
+            icon: const Icon(LucideIcons.externalLink),
             iconSize: 14,
             onPressed: onOpenPackageUrl,
           ),
@@ -374,7 +373,7 @@ class _PackageListItemView extends StatelessWidget {
         if (dependency.changelogUrl.isNotEmpty)
           IconButton(
             tooltip: 'Changelog',
-            icon: const Icon(CupertinoIcons.doc_text),
+            icon: const Icon(LucideIcons.fileText),
             iconSize: 16,
             onPressed: onOpenPackageChangelogUrl,
           ),
@@ -409,7 +408,7 @@ class _PackageListItemView extends StatelessWidget {
                   Tooltip(
                     message: 'Version might not be installable',
                     child: Icon(
-                      CupertinoIcons.exclamationmark_triangle,
+                      LucideIcons.alertTriangle,
                       size: 14,
                       color: Theme.of(context).colorScheme.error,
                     ),
@@ -480,7 +479,7 @@ class _VersionSelectorView extends StatelessWidget {
                 ),
               ),
               Icon(
-                CupertinoIcons.chevron_down,
+                LucideIcons.chevronDown,
                 color: textColor,
                 size: 12,
               ),
@@ -508,7 +507,7 @@ class _VersionMenuItemView extends StatelessWidget {
           Tooltip(
             message: 'Version might not be installable',
             child: Icon(
-              CupertinoIcons.exclamationmark_triangle,
+              LucideIcons.alertTriangle,
               size: 14,
               color: Theme.of(context).colorScheme.error,
             ),
@@ -517,7 +516,7 @@ class _VersionMenuItemView extends StatelessWidget {
           Tooltip(
             message: 'Version is installed',
             child: Icon(
-              CupertinoIcons.arrow_right,
+              LucideIcons.arrowRight,
               size: 14,
               color: Theme.of(context).colorScheme.primary,
             ),
@@ -526,7 +525,7 @@ class _VersionMenuItemView extends StatelessWidget {
           Tooltip(
             message: 'Version will be uninstalled',
             child: Icon(
-              CupertinoIcons.xmark,
+              LucideIcons.x,
               size: 14,
               color: Theme.of(context).colorScheme.error,
             ),
@@ -535,7 +534,7 @@ class _VersionMenuItemView extends StatelessWidget {
           Tooltip(
             message: 'Version will be installed',
             child: Icon(
-              CupertinoIcons.checkmark_alt,
+              LucideIcons.check,
               size: 14,
               color: Theme.of(context).colorScheme.primary,
             ),
@@ -570,7 +569,7 @@ class _LatestVersionView extends StatelessWidget {
         separatorBuilder: () => const SizedBox(width: 2),
         children: [
           Icon(
-            CupertinoIcons.up_arrow,
+            LucideIcons.arrowUp,
             color: textColor,
             size: 12,
           ),
@@ -610,7 +609,7 @@ class _VersionToInstallView extends StatelessWidget {
         separatorBuilder: () => const SizedBox(width: 2),
         children: [
           Icon(
-            CupertinoIcons.arrow_2_squarepath,
+            LucideIcons.repeat2,
             color: textColor,
             size: 12,
           ),

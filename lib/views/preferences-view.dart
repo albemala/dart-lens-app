@@ -1,7 +1,7 @@
 import 'package:dart_lens/conductors/preferences-conductor.dart';
 import 'package:dart_lens/functions/commands.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
 class PreferencesView extends StatelessWidget {
@@ -99,7 +99,7 @@ class PreferencesView extends StatelessWidget {
                       child: Row(
                         children: [
                           Icon(
-                            CupertinoIcons.exclamationmark_circle,
+                            LucideIcons.alertTriangle,
                             color:
                                 Theme.of(context).colorScheme.onErrorContainer,
                           ),

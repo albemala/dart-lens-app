@@ -2,9 +2,9 @@ import 'package:dart_lens/functions/clipboard.dart';
 import 'package:dart_lens/views/string-literals/string-literals-view-conductor.dart';
 import 'package:dart_lens/widgets/button.dart';
 import 'package:flextras/flextras.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
 class StringLiteralsView extends StatelessWidget {
@@ -58,7 +58,7 @@ class _ActionBarView extends StatelessWidget {
                     onPressed: () {
                       conductor.reload();
                     },
-                    icon: const Icon(CupertinoIcons.arrow_clockwise),
+                    icon: const Icon(LucideIcons.rotateCw),
                   ),
                 ),
               ],
