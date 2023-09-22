@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:collection/collection.dart';
 import 'package:dart_lens/functions/commands.dart';
 import 'package:dart_lens/models/outdated-packages/outdated-packages.dart';
+import 'package:flutter/foundation.dart';
 
 /// Runs `flutter pub outdated --json` on [projectDirectoryPath]
 /// and parses the output
@@ -24,8 +25,8 @@ Future<OutdatedPackages?> getOutdatedPackages({
     );
     return outdatedPackages;
   } catch (e, s) {
-    print(e);
-    print(s);
+    if (kDebugMode) print(e);
+    if (kDebugMode) print(s);
     return null;
   }
 }

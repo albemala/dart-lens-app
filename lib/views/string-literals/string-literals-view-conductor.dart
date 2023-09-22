@@ -6,6 +6,7 @@ import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:dart_lens/conductors/preferences-conductor.dart';
 import 'package:dart_lens/conductors/project-analysis-conductor.dart';
 import 'package:dart_lens/functions/project-structure-analysis.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart';
 import 'package:provider/provider.dart';
@@ -132,7 +133,7 @@ class StringLiteralsViewConductor extends ChangeNotifier {
         );
       });
     } catch (exception) {
-      print(exception);
+      if (kDebugMode) print(exception);
       return [];
     }
   }

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 Future<void> copyToClipboard(BuildContext context, String text) async {
   if (text.isEmpty) return;
   await FlutterClipboard.copy(text);
+  // TODO use routing conductor to show snackbar
   ScaffoldMessenger.of(context).clearSnackBars();
   ScaffoldMessenger.of(context).showSnackBar(
     const SnackBar(

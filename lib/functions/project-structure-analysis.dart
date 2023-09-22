@@ -4,13 +4,14 @@ import 'package:analyzer/dart/analysis/analysis_context_collection.dart';
 import 'package:analyzer/dart/analysis/results.dart';
 import 'package:analyzer/file_system/physical_file_system.dart';
 import 'package:dart_lens/functions/commands.dart';
+import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as path;
 
 Future<List<ResolvedUnitResult>> getProjectStructure({
   required String flutterBinaryPath,
   required String projectDirectoryPath,
 }) async {
-  print('Exploring project at $projectDirectoryPath');
+  if (kDebugMode) print('Exploring project at $projectDirectoryPath');
 
   final projectDirectory = Directory(projectDirectoryPath);
   if (!projectDirectory.existsSync()) {
@@ -41,14 +42,14 @@ Future<List<ResolvedUnitResult>> getProjectStructure({
   );
 
   final flutterSdkPath = flutterSdkPathMatch?.group(1);
-  print('flutterSdkPath: $flutterSdkPath');
+  if (kDebugMode) print('flutterSdkPath: $flutterSdkPath');
   if (flutterSdkPath == null) {
     throw Exception('Could not detect flutter sdk path');
   }
 
   final dartSdkPath =
       path.normalize(path.join(flutterSdkPath, 'bin/cache/dart-sdk'));
-  print('dartSdkPath: $dartSdkPath');
+  if (kDebugMode) print('dartSdkPath: $dartSdkPath');
 
   final collection = AnalysisContextCollection(
     includedPaths: [projectDirectory.path],
@@ -58,9 +59,9 @@ Future<List<ResolvedUnitResult>> getProjectStructure({
   );
 
   final resolvedUnitResults = <ResolvedUnitResult>[];
-  print('Found ${collection.contexts.length} contexts');
+  if (kDebugMode) print('Found ${collection.contexts.length} contexts');
   for (final context in collection.contexts) {
-    print('Context: ${context.contextRoot.root.path}');
+    if (kDebugMode) print('Context: ${context.contextRoot.root.path}');
     for (final filePath in context.contextRoot.analyzedFiles()) {
       // skip files that are not dart files
       if (!filePath.endsWith('.dart')) continue;
@@ -68,7 +69,7 @@ Future<List<ResolvedUnitResult>> getProjectStructure({
       if (filePath.endsWith('.g.dart')) continue;
       if (filePath.endsWith('.freezed.dart')) continue;
 
-      print('File: $filePath');
+      if (kDebugMode) print('File: $filePath');
 
       final session = context.currentSession;
       final resolvedUnit = await session.getResolvedUnit(filePath);

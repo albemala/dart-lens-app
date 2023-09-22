@@ -8,6 +8,7 @@ import 'package:dart_lens/functions/installed-packages.dart';
 import 'package:dart_lens/functions/packages.dart';
 import 'package:dart_lens/functions/project-packages-analysis.dart';
 import 'package:dart_lens/models/package/package.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -238,7 +239,7 @@ class ProjectPackagesViewConductor extends ChangeNotifier {
     try {
       await _applyPackageVersionChangesToProject();
     } catch (exception) {
-      print(exception);
+      if (kDebugMode) print(exception);
       errorMessage = exception.toString();
     }
 
@@ -268,7 +269,7 @@ class ProjectPackagesViewConductor extends ChangeNotifier {
     try {
       await _loadProjectPackages();
     } catch (exception) {
-      print(exception);
+      if (kDebugMode) print(exception);
     }
 
     _isLoading = false;

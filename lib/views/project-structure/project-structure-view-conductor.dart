@@ -6,6 +6,7 @@ import 'package:collection/collection.dart';
 import 'package:dart_lens/conductors/preferences-conductor.dart';
 import 'package:dart_lens/conductors/project-analysis-conductor.dart';
 import 'package:dart_lens/functions/project-structure-analysis.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:path/path.dart';
 import 'package:provider/provider.dart';
@@ -186,8 +187,8 @@ class ProjectStructureViewConductor extends ChangeNotifier {
   Future<List<ProjectDirectory>> _getDirectories() async {
     if (projectPath.isEmpty) return [];
     try {
-      // ignore: no_leading_underscores_for_local_identifiers
       final flutterBinaryPath = _preferencesConductor.flutterBinaryPath;
+      // ignore: no_leading_underscores_for_local_identifiers
       final _projectPath = projectPath;
       return await Isolate.run(() {
         return _createDirectories(
@@ -196,7 +197,7 @@ class ProjectStructureViewConductor extends ChangeNotifier {
         );
       });
     } catch (exception) {
-      print(exception);
+      if (kDebugMode) print(exception);
       return [];
     }
   }

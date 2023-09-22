@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:dart_lens/functions/outdated-packages.dart';
 import 'package:dart_lens/models/outdated-packages/outdated-packages.dart';
 import 'package:dart_lens/models/package/package.dart';
+import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as path;
 import 'package:pub_api_client/pub_api_client.dart';
 import 'package:pubspec_parse/pubspec_parse.dart';
@@ -11,7 +12,7 @@ Future<List<Package>> getPackages({
   required String flutterBinaryPath,
   required String projectDirectoryPath,
 }) async {
-  print('Exploring packages at $projectDirectoryPath');
+  if (kDebugMode) print('Exploring packages at $projectDirectoryPath');
 
   final pubspecFile = File(path.join(projectDirectoryPath, 'pubspec.yaml'));
   if (!pubspecFile.existsSync()) {
