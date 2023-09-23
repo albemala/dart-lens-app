@@ -30,7 +30,8 @@ https://user-images.githubusercontent.com/2332860/225593097-3298bebd-4fcf-4a2b-8
 
 ## How to run it
 
-There are no official releases yet. You can run the app from source code with `flutter run`.
+You can download the latest macOS release [here](https://github.com/albemala/dart-lens-app/releases/latest/download/DartLens.app.zip),
+or you can run the app from [source code](https://github.com/albemala/dart-lens-app/releases/latest/) with `flutter run`.
 
 ## Development
 
