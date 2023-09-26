@@ -10,9 +10,13 @@ class PreferencesView extends StatelessWidget {
     required void Function() onClose,
   }) {
     return AlertDialog(
-      title: Text(
-        'Preferences',
-        style: Theme.of(context).textTheme.titleMedium,
+      title: Builder(
+        builder: (context) {
+          return Text(
+            'Preferences',
+            style: Theme.of(context).textTheme.titleMedium,
+          );
+        },
       ),
       content: const PreferencesView(),
       actions: [
