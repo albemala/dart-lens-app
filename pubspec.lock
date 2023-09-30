@@ -725,7 +725,7 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: ebef0be4dbaa0795216435dd636fc05b2db6979d
+      ref: "1.2.0"
       resolved-ref: ebef0be4dbaa0795216435dd636fc05b2db6979d
       url: "https://github.com/albemala/send_support_email.git"
     source: git

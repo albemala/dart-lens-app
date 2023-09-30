@@ -48,7 +48,7 @@ dependencies:
   send_support_email:
     git:
       url: https://github.com/albemala/send_support_email.git
-      ref: ebef0be4dbaa0795216435dd636fc05b2db6979d
+      ref: 1.2.0
 
 dev_dependencies:
   flutter_test:
