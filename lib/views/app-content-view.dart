@@ -13,17 +13,17 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
-class MainView extends StatelessWidget {
-  const MainView({
+class AppContentView extends StatelessWidget {
+  const AppContentView({
     super.key,
   });
 
   @override
   Widget build(BuildContext context) {
-    return const DefaultTabController(
-      length: 3,
-      child: Scaffold(
-        body: Column(
+    return const Scaffold(
+      body: DefaultTabController(
+        length: 3,
+        child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _TopView(),

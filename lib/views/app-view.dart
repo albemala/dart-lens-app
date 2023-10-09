@@ -3,7 +3,7 @@ import 'package:dart_lens/conductors/preferences-conductor.dart';
 import 'package:dart_lens/conductors/project-analysis-conductor.dart';
 import 'package:dart_lens/conductors/routing-conductor.dart';
 import 'package:dart_lens/functions/theme.dart';
-import 'package:dart_lens/views/main-view.dart';
+import 'package:dart_lens/views/app-content-view.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -33,7 +33,7 @@ class AppView extends StatelessWidget {
               builder: (context, routingConductor, child) {
                 return RoutingView(
                   routingStream: routingConductor.routingStream,
-                  child: const MainView(),
+                  child: const AppContentView(),
                 );
               },
             ),
