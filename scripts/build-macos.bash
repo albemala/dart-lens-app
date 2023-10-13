@@ -27,3 +27,5 @@ rm -rf $ARCHIVE_PATH
 mkdir -p $ARCHIVE_PATH
 cp -r "macos/build/DartLens.app.zip" $ARCHIVE_PATH
 cp -r "macos/build/DartLens.app.dSYM.zip" $ARCHIVE_PATH
+# upload to Google Cloud Storage
+gcloud storage cp --recursive $ARCHIVE_PATH gs://dart-lens-app-releases
