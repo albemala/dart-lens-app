@@ -114,13 +114,11 @@ package_rename_config:
     app_name: DartLens
     package_name: app.dartlens
     copyright_notice: Copyright © 2023 dartlens.app. All rights reserved.
-
   windows:
     app_name: DartLens
     organization: dartlens.app
     copyright_notice: Copyright © 2023 dartlens.app. All rights reserved.
     exe_name: DartLens
-
   linux:
     app_name: DartLens
     package_name: app.dartlens

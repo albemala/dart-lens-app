@@ -35,38 +35,17 @@ platform :mac do
     )
   end
 
-  lane :build_app_store do |options|
-    build_mac_app(
-      export_team_id: ENV["TEAM_ID"],
-      scheme: "Runner",
-      export_method: "app-store",
-      export_options: {
-        provisioningProfiles: {
-          "app.dartlens" => "match AppStore app.dartlens macos",
-        }
-      },
-      output_directory: "build",
-    )
-  end
-
   lane :build_standalone do |options|
     build_mac_app(
-      export_team_id: ENV["TEAM_ID"],
       scheme: "Runner",
       export_method: "developer-id",
+      export_team_id: ENV["TEAM_ID"],
       export_options: {
         provisioningProfiles: {
           "app.dartlens" => "match Direct app.dartlens macos",
         },
       },
       output_directory: "build",
-    )
-  end
-
-  lane :publish_app_store do |options|
-    upload_to_app_store(
-      skip_metadata: true,
-      skip_screenshots: true,
     )
   end
 
