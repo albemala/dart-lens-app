@@ -1,18 +1,18 @@
 name: dart_lens
 description: An intuitive and powerful tool for exploring and managing Dart and Flutter projects.
+version: 1.2.0+3
 
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
-version: 1.2.0+3
-
 environment:
-  sdk: '>=3.0.0 <4.0.0'
+  sdk: ">=3.2.0 <4.0.0"
+  flutter: ">=3.16.0"
 
 dependencies:
   flutter:
     sdk: flutter
 
-  collection: ^1.17.1
+  collection: ^1.18.0
 
   # state management
   provider: ^6.0.5
@@ -21,47 +21,47 @@ dependencies:
 
   hive: ^2.2.3
   hive_flutter: ^1.1.0
-  path_provider: ^2.1.0
+  path_provider: ^2.1.1
 
-  path: ^1.8.2
-  file_picker: ^5.3.2
+  path: ^1.8.3
+  file_picker: ^6.1.1
 
   # UI
-  google_fonts: ^4.0.4
-  flex_color_scheme: ^7.1.2
-  flex_seed_scheme: ^1.3.0
+  google_fonts: ^6.1.0
+  flex_color_scheme: ^7.3.1
+  flex_seed_scheme: ^1.4.0
   flextras: ^1.0.0
   lucide_icons: ^0.257.0
 
-  analyzer: ^5.13.0
+  analyzer: ^6.2.0
 
   pub_semver: ^2.1.4
   pubspec_parse: ^1.2.3
   pub_api_client: # ^2.4.0
     git:
       url: https://github.com/fluttertools/pub_api_client.git
-      ref: 10e90ad7436843a1cb224a477e22fda35be5cd77
+      ref: ceb15e1b0ecb26b29d7035e14972f05d60d3b75a
 
   clipboard: ^0.1.3
-  url_launcher: ^6.1.11
-  package_info_plus: ^4.0.2
+  url_launcher: ^6.2.2
+  package_info_plus: ^5.0.1
   send_support_email:
     git:
       url: https://github.com/albemala/send_support_email.git
-      ref: 1.2.0
+      ref: 1.3.0
 
 dev_dependencies:
-  flutter_test:
-    sdk: flutter
+#  flutter_test:
+#    sdk: flutter
 
-  build_runner: ^2.4.5
-  json_serializable: ^6.7.0
+  build_runner: ^2.4.7
+  json_serializable: ^6.7.1
 
-  very_good_analysis: ^5.0.0+1
+  very_good_analysis: ^5.1.0
 
-  flutter_gen_runner: ^5.3.1
-  icons_launcher: ^2.1.2
-  package_rename: ^1.3.3
+  flutter_gen_runner: ^5.4.0
+  icons_launcher: ^2.1.6
+  package_rename: ^1.5.3
 
 flutter:
   uses-material-design: true
