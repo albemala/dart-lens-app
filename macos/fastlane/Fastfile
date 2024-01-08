@@ -3,6 +3,7 @@ platform :mac do
   lane :generate_certificates_profiles do |options|
     match(
       type: "development",
+#       force_for_new_devices: true,
     )
     match(
       type: "appstore",
