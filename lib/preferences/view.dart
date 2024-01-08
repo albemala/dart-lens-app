@@ -1,5 +1,5 @@
-import 'package:dart_lens/conductors/preferences-conductor.dart';
-import 'package:dart_lens/functions/commands.dart';
+import 'package:dart_lens/commands.dart';
+import 'package:dart_lens/preferences/bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';

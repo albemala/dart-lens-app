@@ -1,7 +1,7 @@
-import 'package:dart_lens/conductors/local-storage-conductor.dart';
-import 'package:dart_lens/conductors/routing-conductor.dart';
-import 'package:dart_lens/functions/fs.dart';
-import 'package:dart_lens/views/preferences-view.dart';
+import 'package:dart_lens/fs.dart';
+import 'package:dart_lens/local-store/bloc.dart';
+import 'package:dart_lens/preferences/view.dart';
+import 'package:dart_lens/routing/functions.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

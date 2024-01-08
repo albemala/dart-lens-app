@@ -1,9 +1,9 @@
-import 'package:dart_lens/conductors/local-storage-conductor.dart';
-import 'package:dart_lens/conductors/preferences-conductor.dart';
-import 'package:dart_lens/conductors/project-analysis-conductor.dart';
-import 'package:dart_lens/conductors/routing-conductor.dart';
-import 'package:dart_lens/functions/theme.dart';
-import 'package:dart_lens/views/app-content-view.dart';
+import 'package:dart_lens/app-content/view.dart';
+import 'package:dart_lens/app/theme.dart';
+import 'package:dart_lens/local-store/bloc.dart';
+import 'package:dart_lens/preferences/bloc.dart';
+import 'package:dart_lens/project-analysis/bloc.dart';
+import 'package:dart_lens/routing/functions.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

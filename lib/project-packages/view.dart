@@ -1,5 +1,5 @@
-import 'package:dart_lens/functions/url.dart';
-import 'package:dart_lens/views/project-packages/project-packages-view-conductor.dart';
+import 'package:dart_lens/project-packages/bloc.dart';
+import 'package:dart_lens/urls/functions.dart';
 import 'package:dart_lens/widgets/button.dart';
 import 'package:flextras/flextras.dart';
 import 'package:flutter/material.dart';

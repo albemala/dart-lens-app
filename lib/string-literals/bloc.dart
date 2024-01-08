@@ -3,9 +3,9 @@ import 'dart:isolate';
 
 import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
-import 'package:dart_lens/conductors/preferences-conductor.dart';
-import 'package:dart_lens/conductors/project-analysis-conductor.dart';
-import 'package:dart_lens/functions/project-structure-analysis.dart';
+import 'package:dart_lens/preferences/bloc.dart';
+import 'package:dart_lens/project-analysis/bloc.dart';
+import 'package:dart_lens/project-structure-analysis.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart';

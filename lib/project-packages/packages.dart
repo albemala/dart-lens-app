@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:dart_lens/functions/commands.dart';
+import 'package:dart_lens/commands.dart';
 import 'package:path/path.dart' as path;
 
 Future<void> applyPackageVersionChanges({

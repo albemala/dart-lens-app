@@ -1,4 +1,4 @@
-import 'package:dart_lens/views/project-structure/project-structure-view-conductor.dart';
+import 'package:dart_lens/project-structure/bloc.dart';
 import 'package:flex_seed_scheme/flex_seed_scheme.dart';
 import 'package:flextras/flextras.dart';
 import 'package:flutter/material.dart';

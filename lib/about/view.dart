@@ -1,9 +1,9 @@
-import 'package:dart_lens/defines/app.dart';
-import 'package:dart_lens/defines/assets.gen.dart';
-import 'package:dart_lens/defines/urls.dart';
-import 'package:dart_lens/functions/app.dart';
-import 'package:dart_lens/functions/feedback.dart';
-import 'package:dart_lens/functions/url.dart';
+import 'package:dart_lens/about/functions.dart';
+import 'package:dart_lens/app/defines.dart';
+import 'package:dart_lens/assets.gen.dart';
+import 'package:dart_lens/feedback.dart';
+import 'package:dart_lens/urls/defines.dart';
+import 'package:dart_lens/urls/functions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 

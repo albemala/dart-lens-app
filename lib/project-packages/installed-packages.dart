@@ -1,4 +1,4 @@
-import 'package:dart_lens/models/package/package.dart';
+import 'package:dart_lens/project-packages/package.dart';
 import 'package:pub_semver/pub_semver.dart';
 
 bool isPackageInstallable(

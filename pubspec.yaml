@@ -72,7 +72,7 @@ flutter:
 
 # bash scripts/generate-assets.bash
 flutter_gen:
-  output: lib/defines/
+  output: lib/
   integrations:
     flutter_svg: true
   assets:

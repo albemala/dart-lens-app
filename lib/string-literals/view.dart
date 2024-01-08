@@ -1,5 +1,5 @@
-import 'package:dart_lens/functions/clipboard.dart';
-import 'package:dart_lens/views/string-literals/string-literals-view-conductor.dart';
+import 'package:dart_lens/clipboard.dart';
+import 'package:dart_lens/string-literals/bloc.dart';
 import 'package:dart_lens/widgets/button.dart';
 import 'package:flextras/flextras.dart';
 import 'package:flutter/material.dart';

@@ -2,12 +2,12 @@ import 'dart:async';
 import 'dart:isolate';
 
 import 'package:collection/collection.dart';
-import 'package:dart_lens/conductors/preferences-conductor.dart';
-import 'package:dart_lens/conductors/project-analysis-conductor.dart';
-import 'package:dart_lens/functions/installed-packages.dart';
-import 'package:dart_lens/functions/packages.dart';
-import 'package:dart_lens/functions/project-packages-analysis.dart';
-import 'package:dart_lens/models/package/package.dart';
+import 'package:dart_lens/preferences/bloc.dart';
+import 'package:dart_lens/project-analysis/bloc.dart';
+import 'package:dart_lens/project-packages/installed-packages.dart';
+import 'package:dart_lens/project-packages/package.dart';
+import 'package:dart_lens/project-packages/packages.dart';
+import 'package:dart_lens/project-packages/project-packages-analysis.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';

@@ -1,8 +1,8 @@
 import 'dart:io';
 
-import 'package:dart_lens/functions/outdated-packages.dart';
-import 'package:dart_lens/models/outdated-packages/outdated-packages.dart';
-import 'package:dart_lens/models/package/package.dart';
+import 'package:dart_lens/project-packages/outdated-packages.dart';
+import 'package:dart_lens/project-packages/outdated-packages/outdated-packages.dart';
+import 'package:dart_lens/project-packages/package.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as path;
 import 'package:pub_api_client/pub_api_client.dart';

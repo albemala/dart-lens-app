@@ -1,8 +1,8 @@
 import 'dart:convert';
 
 import 'package:collection/collection.dart';
-import 'package:dart_lens/functions/commands.dart';
-import 'package:dart_lens/models/outdated-packages/outdated-packages.dart';
+import 'package:dart_lens/commands.dart';
+import 'package:dart_lens/project-packages/outdated-packages/outdated-packages.dart';
 import 'package:flutter/foundation.dart';
 
 /// Runs `flutter pub outdated --json` on [projectDirectoryPath]
