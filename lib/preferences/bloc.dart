@@ -66,6 +66,9 @@ class PreferencesBloc extends Cubit<PreferencesState> {
     BuildContext context,
   ) async {
     await _load();
+    flutterBinaryPathController.value = TextEditingValue(
+      text: state.flutterBinaryPath,
+    );
     // the first time the app is opened,
     // show the preferences dialog if the flutter binary path is empty,
     // so the user can set it
