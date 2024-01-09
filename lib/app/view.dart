@@ -3,9 +3,8 @@ import 'package:dart_lens/app/theme.dart';
 import 'package:dart_lens/local-store/bloc.dart';
 import 'package:dart_lens/preferences/bloc.dart';
 import 'package:dart_lens/project-analysis/bloc.dart';
-import 'package:dart_lens/routing/functions.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class AppView extends StatelessWidget {
   const AppView({
@@ -14,29 +13,21 @@ class AppView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: RoutingConductor.fromContext),
-        ChangeNotifierProvider(create: LocalStorageConductor.fromContext),
-        ChangeNotifierProvider(create: PreferencesConductor.fromContext),
-        ChangeNotifierProvider(create: ProjectAnalysisConductor.fromContext),
+    return MultiBlocProvider(
+      providers: const [
+        BlocProvider(create: LocalStoreBloc.fromContext),
+        BlocProvider(create: PreferencesBloc.fromContext),
+        BlocProvider(create: ProjectAnalysisBloc.fromContext),
       ],
-      child: Consumer<PreferencesConductor>(
-        builder: (context, preferencesConductor, child) {
+      child: BlocBuilder<PreferencesBloc, PreferencesState>(
+        builder: (context, preferences) {
           return MaterialApp(
             title: 'Flutter Code Explorer',
-            themeMode: preferencesConductor.themeMode,
+            themeMode: preferences.themeMode,
             theme: generateLightThemeData(),
             darkTheme: generateDarkThemeData(),
             debugShowCheckedModeBanner: false,
-            home: Consumer<RoutingConductor>(
-              builder: (context, routingConductor, child) {
-                return RoutingView(
-                  routingStream: routingConductor.routingStream,
-                  child: const AppContentView(),
-                );
-              },
-            ),
+            home: const AppContentView(),
           );
         },
       ),

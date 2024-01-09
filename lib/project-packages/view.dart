@@ -3,27 +3,340 @@ import 'package:dart_lens/urls/functions.dart';
 import 'package:dart_lens/widgets/button.dart';
 import 'package:flextras/flextras.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-import 'package:provider/provider.dart';
 
-class ProjectPackagesView extends StatelessWidget {
-  const ProjectPackagesView({
+class ProjectPackagesViewBuilder extends StatelessWidget {
+  const ProjectPackagesViewBuilder({
     super.key,
   });
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider<ProjectPackagesViewConductor>(
-      create: ProjectPackagesViewConductor.fromContext,
-      child: const Column(
+    return BlocProvider<ProjectPackagesViewBloc>(
+      create: ProjectPackagesViewBloc.fromContext,
+      child: BlocBuilder<ProjectPackagesViewBloc, ProjectPackagesViewModel>(
+        builder: (context, viewModel) {
+          return ProjectPackagesView(
+            bloc: context.read<ProjectPackagesViewBloc>(),
+            viewModel: viewModel,
+          );
+        },
+      ),
+    );
+  }
+}
+
+class ProjectPackagesView extends StatelessWidget {
+  final ProjectPackagesViewBloc bloc;
+  final ProjectPackagesViewModel viewModel;
+
+  const ProjectPackagesView({
+    super.key,
+    required this.bloc,
+    required this.viewModel,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        const Divider(),
+        _ActionBarView(
+          packageFilter: viewModel.packageFilter,
+          packageVersionsToChangeCount: viewModel.packageVersionsToChangeCount,
+          isLoading: viewModel.isLoading,
+          onSetPackageFilter: bloc.setPackageFilter,
+          onSelectAllLatestVersions: bloc.selectAllLatestVersions,
+          onApplyChanges: bloc.applyChanges,
+          onClearChanges: bloc.clearChanges,
+          onReload: bloc.reload,
+        ),
+        const Divider(),
+        if (viewModel.errorMessage.isNotEmpty) //
+          _ErrorView(
+            errorMessage: viewModel.errorMessage,
+            onClose: bloc.clearErrorMessage,
+          ),
+        Expanded(
+          child: _PackagesView(
+            dependencies: viewModel.dependencies,
+            devDependencies: viewModel.devDependencies,
+            onSelectPackageVersion: bloc.selectPackageVersion,
+            onOpenPackageUrl: openUrl,
+            onOpenPackageChangelogUrl: openUrl,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ActionBarView extends StatelessWidget {
+  final PackageFilter packageFilter;
+  final int packageVersionsToChangeCount;
+  final bool isLoading;
+  final void Function(PackageFilter) onSetPackageFilter;
+  final void Function() onSelectAllLatestVersions;
+  final void Function() onApplyChanges;
+  final void Function() onClearChanges;
+  final void Function() onReload;
+
+  const _ActionBarView({
+    required this.packageFilter,
+    required this.packageVersionsToChangeCount,
+    required this.isLoading,
+    required this.onSetPackageFilter,
+    required this.onSelectAllLatestVersions,
+    required this.onApplyChanges,
+    required this.onClearChanges,
+    required this.onReload,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        child: SeparatedRow(
+          separatorBuilder: () => const SizedBox(width: 16),
+          children: [
+            Row(
+              children: [
+                PopupMenuButton<PackageFilter>(
+                  tooltip: 'Filter packages',
+                  icon: const Icon(LucideIcons.filter),
+                  itemBuilder: (context) {
+                    return PackageFilter.values.map(
+                      (filter) {
+                        return PopupMenuItem<PackageFilter>(
+                          value: filter,
+                          child: Text(filter.title),
+                          onTap: () {
+                            onSetPackageFilter(filter);
+                          },
+                        );
+                      },
+                    ).toList();
+                  },
+                ),
+                Text(
+                  packageFilter.title,
+                ),
+              ],
+            ),
+            Row(
+              children: [
+                Tooltip(
+                  message: 'Select all latest versions',
+                  child: IconButton(
+                    onPressed: onSelectAllLatestVersions,
+                    icon: const Icon(LucideIcons.arrowUpToLine),
+                  ),
+                ),
+              ],
+            ),
+            if (packageVersionsToChangeCount > 0)
+              Row(
+                children: [
+                  FilledButton(
+                    onPressed: onApplyChanges,
+                    child: const Text('Apply changes'),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'You have changed $packageVersionsToChangeCount package(s)',
+                  ),
+                  // button to clear all changes
+                  Tooltip(
+                    message: 'Clear all changes',
+                    child: IconButton(
+                      onPressed: onClearChanges,
+                      icon: const Icon(LucideIcons.xCircle),
+                    ),
+                  ),
+                ],
+              ),
+            const Spacer(),
+            if (isLoading) //
+              const SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                ),
+              ),
+            Tooltip(
+              message: 'Reload project',
+              child: IconButton(
+                onPressed: onReload,
+                icon: const Icon(LucideIcons.rotateCw),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ErrorView extends StatelessWidget {
+  final String errorMessage;
+  final void Function() onClose;
+
+  const _ErrorView({
+    required this.errorMessage,
+    required this.onClose,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Theme.of(context).colorScheme.errorContainer,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Text(
+                errorMessage,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.onErrorContainer,
+                    ),
+              ),
+            ),
+            Transform.translate(
+              offset: const Offset(0, -10),
+              child: IconButton(
+                onPressed: onClose,
+                icon: const Icon(LucideIcons.x),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _PackagesView extends StatelessWidget {
+  final List<ProjectPackage> dependencies;
+  final List<ProjectPackage> devDependencies;
+  final void Function(String, String) onSelectPackageVersion;
+  final void Function(String) onOpenPackageUrl;
+  final void Function(String) onOpenPackageChangelogUrl;
+
+  const _PackagesView({
+    required this.dependencies,
+    required this.devDependencies,
+    required this.onSelectPackageVersion,
+    required this.onOpenPackageUrl,
+    required this.onOpenPackageChangelogUrl,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Divider(),
-          _ActionBarView(),
-          Divider(),
-          _ErrorView(),
-          Expanded(
-            child: _PackagesView(),
+          Padding(
+            padding: const EdgeInsets.only(top: 16),
+            child: Text(
+              'Dependencies',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: ListView.separated(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              separatorBuilder: (context, index) => const Divider(),
+              itemCount: dependencies.length,
+              itemBuilder: (context, index) {
+                final dependency = dependencies[index];
+                return _HoverableListItemView(
+                  child: _PackageListItemView(
+                    dependency: dependency,
+                    onOpenPackageUrl: () {
+                      openUrl(dependency.url);
+                    },
+                    onOpenPackageChangelogUrl: () {
+                      openUrl(dependency.changelogUrl);
+                    },
+                    onVersionSelected: (version) {
+                      onSelectPackageVersion(
+                        dependency.name,
+                        version,
+                      );
+                    },
+                    onLatestVersionSelected: () {
+                      onSelectPackageVersion(
+                        dependency.name,
+                        dependency.latestVersion,
+                      );
+                    },
+                    onClearSelectedVersion: () {
+                      onSelectPackageVersion(
+                        dependency.name,
+                        dependency.installedVersion,
+                      );
+                    },
+                  ),
+                );
+              },
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(top: 16),
+            child: Text(
+              'Dev dependencies',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: ListView.separated(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              separatorBuilder: (context, index) => const Divider(),
+              itemCount: devDependencies.length,
+              itemBuilder: (context, index) {
+                final dependency = devDependencies[index];
+                return _HoverableListItemView(
+                  child: _PackageListItemView(
+                    dependency: dependency,
+                    onOpenPackageUrl: () {
+                      openUrl(dependency.url);
+                    },
+                    onOpenPackageChangelogUrl: () {
+                      openUrl(dependency.changelogUrl);
+                    },
+                    onVersionSelected: (version) {
+                      onSelectPackageVersion(
+                        dependency.name,
+                        version,
+                      );
+                    },
+                    onLatestVersionSelected: () {
+                      onSelectPackageVersion(
+                        dependency.name,
+                        dependency.latestVersion,
+                      );
+                    },
+                    onClearSelectedVersion: () {
+                      onSelectPackageVersion(
+                        dependency.name,
+                        dependency.installedVersion,
+                      );
+                    },
+                  ),
+                );
+              },
+            ),
           ),
         ],
       ),
@@ -31,277 +344,7 @@ class ProjectPackagesView extends StatelessWidget {
   }
 }
 
-class _ActionBarView extends StatelessWidget {
-  const _ActionBarView();
-
-  @override
-  Widget build(BuildContext context) {
-    return Consumer<ProjectPackagesViewConductor>(
-      builder: (context, conductor, child) {
-        return Material(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-            child: SeparatedRow(
-              separatorBuilder: () => const SizedBox(width: 16),
-              children: [
-                Row(
-                  children: [
-                    PopupMenuButton<PackageFilter>(
-                      tooltip: 'Filter packages',
-                      icon: const Icon(LucideIcons.filter),
-                      itemBuilder: (context) {
-                        return PackageFilter.values.map(
-                          (filter) {
-                            return PopupMenuItem<PackageFilter>(
-                              value: filter,
-                              child: Text(filter.title),
-                              onTap: () {
-                                conductor.setPackageFilter(filter);
-                              },
-                            );
-                          },
-                        ).toList();
-                      },
-                    ),
-                    Text(
-                      conductor.packageFilter.title,
-                    ),
-                  ],
-                ),
-                Row(
-                  children: [
-                    Tooltip(
-                      message: 'Select all latest versions',
-                      child: IconButton(
-                        onPressed: () {
-                          conductor.selectAllLatestVersions();
-                        },
-                        icon: const Icon(LucideIcons.arrowUpToLine),
-                      ),
-                    ),
-                  ],
-                ),
-                if (conductor.packageVersionsToChangeCount > 0)
-                  Row(
-                    children: [
-                      FilledButton(
-                        onPressed: () {
-                          conductor.applyChanges();
-                        },
-                        child: const Text('Apply changes'),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        'You have changed ${conductor.packageVersionsToChangeCount} package(s)',
-                      ),
-                      // button to clear all changes
-                      Tooltip(
-                        message: 'Clear all changes',
-                        child: IconButton(
-                          onPressed: () {
-                            conductor.clearChanges();
-                          },
-                          icon: const Icon(LucideIcons.xCircle),
-                        ),
-                      ),
-                    ],
-                  ),
-                const Spacer(),
-                if (conductor.isLoading) //
-                  const SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                    ),
-                  ),
-                Tooltip(
-                  message: 'Reload project',
-                  child: IconButton(
-                    onPressed: () {
-                      conductor.reload();
-                    },
-                    icon: const Icon(LucideIcons.rotateCw),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-}
-
-class _ErrorView extends StatelessWidget {
-  const _ErrorView();
-
-  @override
-  Widget build(BuildContext context) {
-    return Consumer<ProjectPackagesViewConductor>(
-      builder: (context, conductor, child) {
-        return StreamBuilder<String>(
-          stream: conductor.errorDialogStream,
-          builder: (context, snapshot) {
-            if (snapshot.hasData && snapshot.data!.isNotEmpty) {
-              return Material(
-                color: Theme.of(context).colorScheme.errorContainer,
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          snapshot.data!.trim(),
-                          style:
-                              Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onErrorContainer,
-                                  ),
-                        ),
-                      ),
-                      Transform.translate(
-                        offset: const Offset(0, -10),
-                        child: IconButton(
-                          onPressed: () {
-                            conductor.closeErrorDialog();
-                          },
-                          icon: const Icon(LucideIcons.x),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            } else {
-              return Container();
-            }
-          },
-        );
-      },
-    );
-  }
-}
-
-class _PackagesView extends StatelessWidget {
-  const _PackagesView();
-
-  @override
-  Widget build(BuildContext context) {
-    return Consumer<ProjectPackagesViewConductor>(
-      builder: (context, conductor, child) {
-        return SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(top: 16),
-                child: Text(
-                  'Dependencies',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(top: 8),
-                child: ListView.separated(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  separatorBuilder: (context, index) => const Divider(),
-                  itemCount: conductor.dependencies.length,
-                  itemBuilder: (context, index) {
-                    final dependency = conductor.dependencies[index];
-                    return _HoverableListItemView(
-                      child: _PackageListItemView(
-                        dependency: dependency,
-                        onOpenPackageUrl: () {
-                          openUrl(dependency.url);
-                        },
-                        onOpenPackageChangelogUrl: () {
-                          openUrl(dependency.changelogUrl);
-                        },
-                        onVersionSelected: (version) {
-                          conductor.selectPackageVersion(
-                            dependency.name,
-                            version,
-                          );
-                        },
-                        onLatestVersionSelected: () {
-                          conductor.selectPackageVersion(
-                            dependency.name,
-                            dependency.latestVersion,
-                          );
-                        },
-                        onClearSelectedVersion: () {
-                          conductor.selectPackageVersion(
-                            dependency.name,
-                            dependency.installedVersion,
-                          );
-                        },
-                      ),
-                    );
-                  },
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(top: 16),
-                child: Text(
-                  'Dev dependencies',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(top: 8),
-                child: ListView.separated(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  separatorBuilder: (context, index) => const Divider(),
-                  itemCount: conductor.devDependencies.length,
-                  itemBuilder: (context, index) {
-                    final dependency = conductor.devDependencies[index];
-                    return _HoverableListItemView(
-                      child: _PackageListItemView(
-                        dependency: dependency,
-                        onOpenPackageUrl: () {
-                          openUrl(dependency.url);
-                        },
-                        onOpenPackageChangelogUrl: () {
-                          openUrl(dependency.changelogUrl);
-                        },
-                        onVersionSelected: (version) {
-                          conductor.selectPackageVersion(
-                            dependency.name,
-                            version,
-                          );
-                        },
-                        onLatestVersionSelected: () {
-                          conductor.selectPackageVersion(
-                            dependency.name,
-                            dependency.latestVersion,
-                          );
-                        },
-                        onClearSelectedVersion: () {
-                          conductor.selectPackageVersion(
-                            dependency.name,
-                            dependency.installedVersion,
-                          );
-                        },
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-}
-
-class _HoverableListItemView extends HookWidget {
+class _HoverableListItemView extends StatefulWidget {
   final Widget child;
 
   const _HoverableListItemView({
@@ -309,19 +352,24 @@ class _HoverableListItemView extends HookWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    final isHovering = useState(false);
+  State<_HoverableListItemView> createState() => _HoverableListItemViewState();
+}
 
+class _HoverableListItemViewState extends State<_HoverableListItemView> {
+  bool isHovering = false;
+
+  @override
+  Widget build(BuildContext context) {
     return MouseRegion(
-      onEnter: (_) => isHovering.value = true,
-      onExit: (_) => isHovering.value = false,
+      onEnter: (_) => setState(() => isHovering = true),
+      onExit: (_) => setState(() => isHovering = false),
       child: Material(
-        color: isHovering.value
+        color: isHovering
             ? Theme.of(context).colorScheme.surfaceVariant
             : Colors.transparent,
         child: SizedBox(
           height: 48,
-          child: child,
+          child: widget.child,
         ),
       ),
     );
@@ -332,7 +380,7 @@ class _PackageListItemView extends StatelessWidget {
   final ProjectPackage dependency;
   final void Function() onOpenPackageUrl;
   final void Function() onOpenPackageChangelogUrl;
-  final void Function(String version) onVersionSelected;
+  final void Function(String) onVersionSelected;
   final void Function() onLatestVersionSelected;
   final void Function() onClearSelectedVersion;
 
@@ -437,7 +485,7 @@ class _PackageListItemView extends StatelessWidget {
 
 class _VersionSelectorView extends StatelessWidget {
   final ProjectPackage dependency;
-  final void Function(String version) onSelected;
+  final void Function(String) onSelected;
 
   const _VersionSelectorView({
     required this.dependency,

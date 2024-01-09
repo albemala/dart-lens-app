@@ -2,75 +2,97 @@ import 'package:dart_lens/fs.dart';
 import 'package:dart_lens/local-store/bloc.dart';
 import 'package:dart_lens/preferences/view.dart';
 import 'package:dart_lens/routing/functions.dart';
+import 'package:dart_lens/widgets/dialog.dart';
+import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:json_annotation/json_annotation.dart';
 
-const _defaultThemeMode = ThemeMode.light;
+part 'bloc.g.dart';
 
-class PreferencesConductor extends ChangeNotifier with StoredConductorMixin {
-  factory PreferencesConductor.fromContext(BuildContext context) {
-    return PreferencesConductor(
-      context.read<RoutingConductor>(),
-      context.read<LocalStorageConductor>(),
+const defaultThemeMode = ThemeMode.light;
+
+@JsonSerializable()
+@immutable
+class PreferencesState extends Equatable {
+  final ThemeMode themeMode;
+  final String flutterBinaryPath;
+
+  const PreferencesState({
+    required this.themeMode,
+    required this.flutterBinaryPath,
+  });
+
+  @override
+  List<Object?> get props => [
+        themeMode,
+        flutterBinaryPath,
+      ];
+
+  factory PreferencesState.fromJson(Map<String, dynamic> json) {
+    return _$PreferencesStateFromJson(json);
+  }
+
+  Map<String, dynamic> toJson() {
+    return _$PreferencesStateToJson(this);
+  }
+}
+
+class PreferencesBloc extends Cubit<PreferencesState> {
+  final LocalStoreBloc _localStoreBloc;
+
+  final flutterBinaryPathController = TextEditingController();
+
+  factory PreferencesBloc.fromContext(BuildContext context) {
+    return PreferencesBloc(
+      context,
+      context.read<LocalStoreBloc>(),
     );
   }
 
-  PreferencesConductor(
-    this._routingConductor,
-    this._localStorageConductor,
-  ) {
-    _init();
+  PreferencesBloc(
+    BuildContext context,
+    this._localStoreBloc,
+  ) : super(
+          const PreferencesState(
+            themeMode: defaultThemeMode,
+            flutterBinaryPath: '',
+          ),
+        ) {
+    _init(context);
   }
 
-  Future<void> _init() async {
-    await init();
+  Future<void> _init(
+    BuildContext context,
+  ) async {
+    await _load();
     // the first time the app is opened,
     // show the preferences dialog if the flutter binary path is empty,
     // so the user can set it
-    if (flutterBinaryPath.isEmpty) {
-      _routingConductor.showDialog(
-        (context) => PreferencesView.create(
-          context,
-          onClose: _routingConductor.closeCurrentRoute,
+    if (state.flutterBinaryPath.isEmpty) {
+      openDialog(
+        context,
+        createAlertDialog(
+          title: 'Preferences',
+          content: const PreferencesViewBuilder(),
+          onClose: () {
+            closeCurrentRoute(context);
+          },
         ),
       );
     }
   }
 
-  final RoutingConductor _routingConductor;
-  final LocalStorageConductor _localStorageConductor;
-
   @override
-  StorageConductor get storageConductor => _localStorageConductor;
-
-  var _themeMode = _defaultThemeMode;
-
-  final _flutterBinaryPathController = TextEditingController();
-
-  ThemeMode get themeMode => _themeMode;
-
-  TextEditingController get flutterBinaryPathController =>
-      _flutterBinaryPathController;
-
-  String get flutterBinaryPath => _flutterBinaryPathController.text;
-
-  @override
-  void dispose() {
-    _flutterBinaryPathController.dispose();
-    super.dispose();
+  Future<void> close() async {
+    flutterBinaryPathController.dispose();
+    await super.close();
   }
 
   void setThemeMode(ThemeMode themeMode) {
-    _themeMode = themeMode;
-    notifyListeners();
-  }
-
-  void setFlutterBinaryPath(String value) {
-    _flutterBinaryPathController.value = TextEditingValue(
-      text: value,
-      selection: _flutterBinaryPathController.selection,
+    _updateStateAndSave(
+      themeMode: themeMode,
     );
-    notifyListeners();
   }
 
   Future<void> pickFlutterBinaryPath() async {
@@ -81,25 +103,42 @@ class PreferencesConductor extends ChangeNotifier with StoredConductorMixin {
     setFlutterBinaryPath(path);
   }
 
-  @override
-  String get storeName => 'preferences';
-
-  static const _themeModeKey = 'themeMode';
-  static const _flutterBinaryKey = 'flutterBinaryPath';
-
-  @override
-  Map<String, dynamic> toMap() {
-    return {
-      _themeModeKey: _themeMode.index,
-      _flutterBinaryKey: _flutterBinaryPathController.text,
-    };
+  void setFlutterBinaryPath(String value) {
+    flutterBinaryPathController.value = TextEditingValue(
+      text: value,
+      selection: flutterBinaryPathController.selection,
+    );
+    _updateStateAndSave(
+      flutterBinaryPath: value,
+    );
   }
 
-  @override
-  void fromMap(Map<String, dynamic> map) {
-    final themeModeIndex =
-        map[_themeModeKey] as int? ?? _defaultThemeMode.index;
-    _themeMode = ThemeMode.values[themeModeIndex];
-    _flutterBinaryPathController.text = map[_flutterBinaryKey] as String? ?? '';
+  void _updateStateAndSave({
+    ThemeMode? themeMode,
+    String? flutterBinaryPath,
+  }) {
+    emit(
+      PreferencesState(
+        themeMode: themeMode ?? state.themeMode,
+        flutterBinaryPath: flutterBinaryPath ?? state.flutterBinaryPath,
+      ),
+    );
+    _save();
+  }
+
+  static const storeName = 'preferences';
+
+  Future<void> _load() async {
+    final map = await _localStoreBloc.load(storeName);
+    emit(
+      PreferencesState.fromJson(map),
+    );
+  }
+
+  Future<void> _save() async {
+    await _localStoreBloc.save(
+      storeName,
+      state.toJson(),
+    );
   }
 }

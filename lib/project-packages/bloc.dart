@@ -8,9 +8,10 @@ import 'package:dart_lens/project-packages/installed-packages.dart';
 import 'package:dart_lens/project-packages/package.dart';
 import 'package:dart_lens/project-packages/packages.dart';
 import 'package:dart_lens/project-packages/project-packages-analysis.dart';
+import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 enum PackageFilter {
   all(title: 'All'),
@@ -24,7 +25,33 @@ enum PackageFilter {
 }
 
 @immutable
-class ProjectPackage {
+class AvailableVersion extends Equatable {
+  final String version;
+  final bool isInstalled;
+  final bool isInstallable;
+  final bool willBeInstalled;
+  final bool willBeUninstalled;
+
+  const AvailableVersion({
+    required this.version,
+    required this.isInstalled,
+    required this.isInstallable,
+    required this.willBeInstalled,
+    required this.willBeUninstalled,
+  });
+
+  @override
+  List<Object?> get props => [
+        version,
+        isInstalled,
+        isInstallable,
+        willBeInstalled,
+        willBeUninstalled,
+      ];
+}
+
+@immutable
+class ProjectPackage extends Equatable {
   final String name;
   final List<AvailableVersion> availableVersions;
   final String installedVersion;
@@ -46,23 +73,273 @@ class ProjectPackage {
     required this.changelogUrl,
     required this.description,
   });
+
+  @override
+  List<Object?> get props => [
+        name,
+        availableVersions,
+        installedVersion,
+        latestVersion,
+        versionToInstall,
+        isVersionWarningVisible,
+        url,
+        changelogUrl,
+        description,
+      ];
 }
 
 @immutable
-class AvailableVersion {
-  final String version;
-  final bool isInstalled;
-  final bool isInstallable;
-  final bool willBeInstalled;
-  final bool willBeUninstalled;
+class ProjectPackagesViewModel extends Equatable {
+  final bool isLoading;
+  final PackageFilter packageFilter;
+  final int packageVersionsToChangeCount;
+  final List<ProjectPackage> dependencies;
+  final List<ProjectPackage> devDependencies;
+  final String errorMessage;
 
-  const AvailableVersion({
-    required this.version,
-    required this.isInstalled,
-    required this.isInstallable,
-    required this.willBeInstalled,
-    required this.willBeUninstalled,
+  const ProjectPackagesViewModel({
+    required this.isLoading,
+    required this.packageFilter,
+    required this.packageVersionsToChangeCount,
+    required this.dependencies,
+    required this.devDependencies,
+    required this.errorMessage,
   });
+
+  @override
+  List<Object?> get props => [
+        isLoading,
+        packageFilter,
+        packageVersionsToChangeCount,
+        dependencies,
+        devDependencies,
+        errorMessage,
+      ];
+}
+
+class ProjectPackagesViewBloc extends Cubit<ProjectPackagesViewModel> {
+  final PreferencesBloc _preferencesBloc;
+  final ProjectAnalysisBloc _projectAnalysisBloc;
+  StreamSubscription<ProjectAnalysisState>? _projectAnalysisBlocSubscription;
+
+  bool _isLoading = false;
+  List<Package> _packages = <Package>[];
+  PackageFilter _packageFilter = PackageFilter.all;
+  Map<String, String> _packageVersionsToChange = <String, String>{};
+  String _errorMessage = '';
+
+  String get _projectPath => _projectAnalysisBloc.state.projectPath;
+
+  factory ProjectPackagesViewBloc.fromContext(BuildContext context) {
+    return ProjectPackagesViewBloc(
+      context.read<PreferencesBloc>(),
+      context.read<ProjectAnalysisBloc>(),
+    );
+  }
+
+  ProjectPackagesViewBloc(
+    this._preferencesBloc,
+    this._projectAnalysisBloc,
+  ) : super(
+          const ProjectPackagesViewModel(
+            isLoading: false,
+            packageFilter: PackageFilter.all,
+            packageVersionsToChangeCount: 0,
+            dependencies: <ProjectPackage>[],
+            devDependencies: <ProjectPackage>[],
+            errorMessage: '',
+          ),
+        ) {
+    _projectAnalysisBlocSubscription = _projectAnalysisBloc.stream.listen((_) {
+      reload();
+    });
+    reload();
+  }
+
+  @override
+  Future<void> close() async {
+    await _projectAnalysisBlocSubscription?.cancel();
+    await super.close();
+  }
+
+  void setPackageFilter(PackageFilter filter) {
+    _packageFilter = filter;
+    _updateViewModel();
+  }
+
+  void selectPackageVersion(String name, String version) {
+    final installedVersion = _getDependencies()
+            .firstWhereOrNull(
+              (packageViewModel) => packageViewModel.name == name,
+            )
+            ?.installedVersion ??
+        _getDevDependencies()
+            .firstWhereOrNull(
+              (packageViewModel) => packageViewModel.name == name,
+            )
+            ?.installedVersion;
+
+    installedVersion == version
+        ? _packageVersionsToChange.remove(name)
+        : _packageVersionsToChange.update(
+            name,
+            (value) => version,
+            ifAbsent: () => version,
+          );
+    _updateViewModel();
+  }
+
+  void selectAllLatestVersions() {
+    _packageVersionsToChange = Map.fromEntries(
+      _packages
+          .where(_isNotSdkDependency) //
+          .where((package) {
+        return package.installedVersion != package.latestVersion;
+      }).where((package) {
+        return package.latestVersion != null;
+      }).map((package) {
+        return MapEntry(
+          package.name,
+          package.latestVersion!,
+        );
+      }),
+    );
+    _updateViewModel();
+  }
+
+  Future<void> applyChanges() async {
+    _isLoading = true;
+    _updateViewModel();
+
+    String? errorMessage;
+    try {
+      await _applyPackageVersionChangesToProject();
+    } catch (exception) {
+      if (kDebugMode) print(exception);
+      errorMessage = exception.toString();
+    }
+
+    _isLoading = false;
+    _updateViewModel();
+
+    if (errorMessage == null) {
+      await reload();
+    } else {
+      _errorMessage = errorMessage.trim();
+      _updateViewModel();
+    }
+  }
+
+  Future<void> clearChanges() async {
+    _packageVersionsToChange = <String, String>{};
+    _updateViewModel();
+  }
+
+  Future<void> reload() async {
+    _packages = <Package>[];
+    _packageVersionsToChange = <String, String>{};
+    _updateViewModel();
+
+    _isLoading = true;
+    _updateViewModel();
+
+    try {
+      await _loadProjectPackages();
+    } catch (exception) {
+      if (kDebugMode) print(exception);
+    }
+
+    _isLoading = false;
+    _updateViewModel();
+  }
+
+  void clearErrorMessage() {
+    _errorMessage = '';
+    _updateViewModel();
+  }
+
+  bool _isNotSdkDependency(Package package) => package.type != PackageType.sdk;
+
+  bool _applyPackageFilter(Package package) {
+    switch (_packageFilter) {
+      case PackageFilter.all:
+        return true;
+      case PackageFilter.upgradable:
+        return !isPackageLatestVersionInstalled(package);
+    }
+  }
+
+  Future<void> _loadProjectPackages() async {
+    if (_projectPath.isEmpty) return;
+
+    final flutterBinaryPath = _preferencesBloc.state.flutterBinaryPath;
+    final projectPath = _projectPath;
+    _packages = await Isolate.run(() {
+      return getPackages(
+        flutterBinaryPath: flutterBinaryPath,
+        projectDirectoryPath: projectPath,
+      );
+    });
+    _updateViewModel();
+  }
+
+  Future<void> _applyPackageVersionChangesToProject() async {
+    if (_packages.isEmpty) return;
+    if (_projectPath.isEmpty) return;
+    if (_packageVersionsToChange.isEmpty) return;
+
+    final flutterBinaryPath = _preferencesBloc.state.flutterBinaryPath;
+    final projectPath = _projectPath;
+    final versionsToChange = _packageVersionsToChange;
+    await Isolate.run(() {
+      return applyPackageVersionChanges(
+        flutterBinaryPath: flutterBinaryPath,
+        projectDirectoryPath: projectPath,
+        packageVersionsToChange: versionsToChange,
+      );
+    });
+  }
+
+  void _updateViewModel() {
+    emit(
+      ProjectPackagesViewModel(
+        isLoading: _isLoading,
+        packageFilter: _packageFilter,
+        packageVersionsToChangeCount: _packageVersionsToChange.length,
+        dependencies: _getDependencies(),
+        devDependencies: _getDevDependencies(),
+        errorMessage: _errorMessage,
+      ),
+    );
+  }
+
+  List<ProjectPackage> _getDependencies() => _packages
+      .where((package) {
+        return package.dependencyType == DependencyType.dependency;
+      })
+      .where(_isNotSdkDependency)
+      .where(_applyPackageFilter)
+      .map((package) {
+        return _createProjectPackage(
+          package,
+          _packageVersionsToChange,
+        );
+      })
+      .toList();
+
+  List<ProjectPackage> _getDevDependencies() => _packages
+      .where((package) {
+        return package.dependencyType == DependencyType.devDependency;
+      })
+      .where(_isNotSdkDependency)
+      .where(_applyPackageFilter)
+      .map((package) {
+        return _createProjectPackage(
+          package,
+          _packageVersionsToChange,
+        );
+      })
+      .toList();
 }
 
 ProjectPackage _createProjectPackage(
@@ -117,208 +394,4 @@ AvailableVersion _createAvailableVersion(
         versionToInstall != null &&
         versionToInstall != availableVersion,
   );
-}
-
-class ProjectPackagesViewConductor extends ChangeNotifier {
-  factory ProjectPackagesViewConductor.fromContext(BuildContext context) {
-    return ProjectPackagesViewConductor(
-      context.read<PreferencesConductor>(),
-      context.read<ProjectAnalysisConductor>(),
-    );
-  }
-
-  final PreferencesConductor _preferencesConductor;
-  final ProjectAnalysisConductor _projectAnalysisConductor;
-
-  bool _isLoading = false;
-  List<Package> _packages = <Package>[];
-  PackageFilter _packageFilter = PackageFilter.all;
-  Map<String, String> _packageVersionsToChange = <String, String>{};
-  final _errorDialogController = StreamController<String>();
-
-  String get _projectPath => _projectAnalysisConductor.projectPath;
-
-  bool get isLoading => _isLoading;
-  PackageFilter get packageFilter => _packageFilter;
-  int get packageVersionsToChangeCount => _packageVersionsToChange.length;
-  Stream<String> get errorDialogStream => _errorDialogController.stream;
-
-  List<ProjectPackage> get dependencies => _packages
-      .where((package) {
-        return package.dependencyType == DependencyType.dependency;
-      })
-      .where(_isNotSdkDependency)
-      .where(_applyPackageFilter)
-      .map((package) {
-        return _createProjectPackage(
-          package,
-          _packageVersionsToChange,
-        );
-      })
-      .toList();
-
-  List<ProjectPackage> get devDependencies => _packages
-      .where((package) {
-        return package.dependencyType == DependencyType.devDependency;
-      })
-      .where(_isNotSdkDependency)
-      .where(_applyPackageFilter)
-      .map((package) {
-        return _createProjectPackage(
-          package,
-          _packageVersionsToChange,
-        );
-      })
-      .toList();
-
-  ProjectPackagesViewConductor(
-    this._preferencesConductor,
-    this._projectAnalysisConductor,
-  ) {
-    _projectAnalysisConductor.addListener(reload);
-    reload();
-  }
-
-  @override
-  void dispose() {
-    _projectAnalysisConductor.removeListener(reload);
-    _errorDialogController.close();
-    super.dispose();
-  }
-
-  void setPackageFilter(PackageFilter filter) {
-    _packageFilter = filter;
-    notifyListeners();
-  }
-
-  void selectPackageVersion(String name, String version) {
-    final installedVersion = dependencies
-            .firstWhereOrNull(
-              (packageViewModel) => packageViewModel.name == name,
-            )
-            ?.installedVersion ??
-        devDependencies
-            .firstWhereOrNull(
-              (packageViewModel) => packageViewModel.name == name,
-            )
-            ?.installedVersion;
-
-    installedVersion == version
-        ? _packageVersionsToChange.remove(name)
-        : _packageVersionsToChange.update(
-            name,
-            (value) => version,
-            ifAbsent: () => version,
-          );
-    notifyListeners();
-  }
-
-  void selectAllLatestVersions() {
-    _packageVersionsToChange = Map.fromEntries(
-      _packages
-          .where(_isNotSdkDependency) //
-          .where((package) {
-        return package.installedVersion != package.latestVersion;
-      }).where((package) {
-        return package.latestVersion != null;
-      }).map((package) {
-        return MapEntry(
-          package.name,
-          package.latestVersion!,
-        );
-      }),
-    );
-    notifyListeners();
-  }
-
-  Future<void> applyChanges() async {
-    _isLoading = true;
-    notifyListeners();
-
-    String? errorMessage;
-    try {
-      await _applyPackageVersionChangesToProject();
-    } catch (exception) {
-      if (kDebugMode) print(exception);
-      errorMessage = exception.toString();
-    }
-
-    _isLoading = false;
-    notifyListeners();
-
-    if (errorMessage == null) {
-      await reload();
-    } else {
-      _errorDialogController.add(errorMessage);
-    }
-  }
-
-  Future<void> clearChanges() async {
-    _packageVersionsToChange = <String, String>{};
-    notifyListeners();
-  }
-
-  Future<void> reload() async {
-    _packages = <Package>[];
-    _packageVersionsToChange = <String, String>{};
-    notifyListeners();
-
-    _isLoading = true;
-    notifyListeners();
-
-    try {
-      await _loadProjectPackages();
-    } catch (exception) {
-      if (kDebugMode) print(exception);
-    }
-
-    _isLoading = false;
-    notifyListeners();
-  }
-
-  void closeErrorDialog() {
-    _errorDialogController.add('');
-  }
-
-  bool _isNotSdkDependency(Package package) => package.type != PackageType.sdk;
-
-  bool _applyPackageFilter(Package package) {
-    switch (_packageFilter) {
-      case PackageFilter.all:
-        return true;
-      case PackageFilter.upgradable:
-        return !isPackageLatestVersionInstalled(package);
-    }
-  }
-
-  Future<void> _loadProjectPackages() async {
-    if (_projectPath.isEmpty) return;
-
-    final flutterBinaryPath = _preferencesConductor.flutterBinaryPath;
-    final projectPath = _projectPath;
-    _packages = await Isolate.run(() {
-      return getPackages(
-        flutterBinaryPath: flutterBinaryPath,
-        projectDirectoryPath: projectPath,
-      );
-    });
-    notifyListeners();
-  }
-
-  Future<void> _applyPackageVersionChangesToProject() async {
-    if (_packages.isEmpty) return;
-    if (_projectPath.isEmpty) return;
-    if (_packageVersionsToChange.isEmpty) return;
-
-    final flutterBinaryPath = _preferencesConductor.flutterBinaryPath;
-    final projectPath = _projectPath;
-    final versionsToChange = _packageVersionsToChange;
-    await Isolate.run(() {
-      return applyPackageVersionChanges(
-        flutterBinaryPath: flutterBinaryPath,
-        projectDirectoryPath: projectPath,
-        packageVersionsToChange: versionsToChange,
-      );
-    });
-  }
 }

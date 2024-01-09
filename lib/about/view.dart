@@ -4,37 +4,108 @@ import 'package:dart_lens/assets.gen.dart';
 import 'package:dart_lens/feedback.dart';
 import 'package:dart_lens/urls/defines.dart';
 import 'package:dart_lens/urls/functions.dart';
+import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-class AboutView extends HookWidget {
-  static AlertDialog create(
-    BuildContext context, {
-    required void Function() onClose,
-  }) {
-    return AlertDialog(
-      title: Text(
-        'About',
-        style: Theme.of(context).textTheme.titleMedium,
+@immutable
+class AboutViewModel extends Equatable {
+  final String appVersion;
+
+  const AboutViewModel({
+    required this.appVersion,
+  });
+
+  @override
+  List<Object> get props => [
+        appVersion,
+      ];
+}
+
+class AboutViewBloc extends Cubit<AboutViewModel> {
+  factory AboutViewBloc.fromContext(BuildContext context) {
+    return AboutViewBloc();
+  }
+
+  AboutViewBloc()
+      : super(
+          const AboutViewModel(appVersion: '...'),
+        ) {
+    _init();
+  }
+
+  Future<void> _init() async {
+    await _updateViewModel();
+  }
+
+  Future<void> _updateViewModel() async {
+    emit(
+      AboutViewModel(
+        appVersion: await getAppVersion(),
       ),
-      content: const AboutView(),
-      actions: [
-        TextButton(
-          onPressed: onClose,
-          child: const Text('Close'),
-        ),
-      ],
     );
   }
 
-  const AboutView({
+  Future<void> openReleaseNotes() async {
+    await openUrl(releaseNotesUrl);
+  }
+
+  Future<void> openOtherApps() async {
+    await openUrl(otherProjectsUrl);
+  }
+
+  Future<void> openEmail() async {
+    await sendFeedback();
+  }
+
+/*
+  Future<void> openWebsite() async {
+    await openUrl(repositoryUrl);
+  }
+*/
+
+  Future<void> openIssues() async {
+    await openUrl(issuesUrl);
+  }
+
+  Future<void> openTwitter() async {
+    await openUrl(twitterUrl);
+  }
+}
+
+class AboutViewBuilder extends StatelessWidget {
+  const AboutViewBuilder({
     super.key,
   });
 
   @override
   Widget build(BuildContext context) {
-    final appVersion = useFuture(getAppVersion());
+    return BlocProvider<AboutViewBloc>(
+      create: AboutViewBloc.fromContext,
+      child: BlocBuilder<AboutViewBloc, AboutViewModel>(
+        builder: (context, viewModel) {
+          return AboutView(
+            bloc: context.read<AboutViewBloc>(),
+            viewModel: viewModel,
+          );
+        },
+      ),
+    );
+  }
+}
 
+class AboutView extends StatelessWidget {
+  final AboutViewBloc bloc;
+  final AboutViewModel viewModel;
+
+  const AboutView({
+    super.key,
+    required this.bloc,
+    required this.viewModel,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -57,7 +128,7 @@ class AboutView extends HookWidget {
                 Row(
                   children: [
                     Text(
-                      appVersion.data ?? '',
+                      viewModel.appVersion,
                       style: Theme.of(context).textTheme.labelMedium,
                     ),
                   ],
@@ -68,16 +139,12 @@ class AboutView extends HookWidget {
         ),
         const SizedBox(height: 16),
         OutlinedButton(
-          onPressed: () async {
-            await openUrl(releaseNotesUrl);
-          },
+          onPressed: bloc.openReleaseNotes,
           child: const Text("What's new?"),
         ),
         const SizedBox(height: 16),
         FilledButton(
-          onPressed: () async {
-            await openUrl(otherProjectsUrl);
-          },
+          onPressed: bloc.openOtherApps,
           child: const Text('Other useful apps'),
         ),
         const SizedBox(height: 32),
@@ -87,23 +154,19 @@ class AboutView extends HookWidget {
         ),
         const SizedBox(height: 16),
         OutlinedButton(
-          onPressed: () async {
-            await sendFeedback();
-          },
+          onPressed: bloc.openEmail,
           child: const Text('Send feedback'),
         ),
         const SizedBox(height: 8),
         OutlinedButton(
-          onPressed: () async {
-            await openUrl(issuesUrl);
-          },
+          onPressed: bloc.openIssues,
           child: const Text('Report an issue'),
         ),
 /*
       const SizedBox(height: 8),
       OutlinedButton(
-        onPressed: () async {
-          await openUrl(websiteUrl);
+        onPressed: ()  {
+          bloc.openWebsite();
         },
         child: const Text('Visit website'),
       ),
@@ -115,9 +178,7 @@ class AboutView extends HookWidget {
         ),
         const SizedBox(height: 16),
         OutlinedButton(
-          onPressed: () async {
-            await openUrl(twitterUrl);
-          },
+          onPressed: bloc.openTwitter,
           child: const Text('Twitter'),
         ),
       ],

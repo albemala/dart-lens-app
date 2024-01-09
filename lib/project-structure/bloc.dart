@@ -6,13 +6,14 @@ import 'package:collection/collection.dart';
 import 'package:dart_lens/preferences/bloc.dart';
 import 'package:dart_lens/project-analysis/bloc.dart';
 import 'package:dart_lens/project-structure-analysis.dart';
+import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:path/path.dart';
-import 'package:provider/provider.dart';
 
 @immutable
-class ProjectDirectory {
+class ProjectDirectory extends Equatable {
   final String path;
   final List<ProjectFile> files;
 
@@ -20,10 +21,16 @@ class ProjectDirectory {
     required this.path,
     required this.files,
   });
+
+  @override
+  List<Object?> get props => [
+        path,
+        files,
+      ];
 }
 
 @immutable
-class ProjectFile {
+class ProjectFile extends Equatable {
   final String name;
   final List<EntityDefinition> entities;
   final List<String> imports;
@@ -33,6 +40,13 @@ class ProjectFile {
     required this.entities,
     required this.imports,
   });
+
+  @override
+  List<Object?> get props => [
+        name,
+        entities,
+        imports,
+      ];
 }
 
 enum EntityDefinitionType {
@@ -49,7 +63,7 @@ abstract class EntityDefinition {
 }
 
 @immutable
-class ParameterDefinition {
+class ParameterDefinition extends Equatable {
   final String name;
   final String type;
 
@@ -57,10 +71,16 @@ class ParameterDefinition {
     required this.name,
     required this.type,
   });
+
+  @override
+  List<Object?> get props => [
+        name,
+        type,
+      ];
 }
 
 @immutable
-class ClassDefinition implements EntityDefinition {
+class ClassDefinition extends Equatable implements EntityDefinition {
   final String name;
   final List<ClassPropertyDefinition> properties;
   final List<ClassConstructorDefinition> constructors;
@@ -75,10 +95,18 @@ class ClassDefinition implements EntityDefinition {
 
   @override
   EntityDefinitionType get type => EntityDefinitionType.class_;
+
+  @override
+  List<Object?> get props => [
+        name,
+        properties,
+        constructors,
+        methods,
+      ];
 }
 
 @immutable
-class ClassPropertyDefinition {
+class ClassPropertyDefinition extends Equatable {
   final String name;
   final String type;
 
@@ -86,10 +114,16 @@ class ClassPropertyDefinition {
     required this.name,
     required this.type,
   });
+
+  @override
+  List<Object?> get props => [
+        name,
+        type,
+      ];
 }
 
 @immutable
-class ClassConstructorDefinition {
+class ClassConstructorDefinition extends Equatable {
   final String name;
   final List<ParameterDefinition> parameters;
 
@@ -97,10 +131,16 @@ class ClassConstructorDefinition {
     required this.name,
     required this.parameters,
   });
+
+  @override
+  List<Object?> get props => [
+        name,
+        parameters,
+      ];
 }
 
 @immutable
-class ClassMethodDefinition {
+class ClassMethodDefinition extends Equatable {
   final String name;
   final String returnType;
   final List<ParameterDefinition> parameters;
@@ -110,10 +150,17 @@ class ClassMethodDefinition {
     required this.returnType,
     required this.parameters,
   });
+
+  @override
+  List<Object?> get props => [
+        name,
+        returnType,
+        parameters,
+      ];
 }
 
 @immutable
-class EnumDefinition implements EntityDefinition {
+class EnumDefinition extends Equatable implements EntityDefinition {
   final String name;
   final List<String> values;
 
@@ -124,10 +171,16 @@ class EnumDefinition implements EntityDefinition {
 
   @override
   EntityDefinitionType get type => EntityDefinitionType.enum_;
+
+  @override
+  List<Object?> get props => [
+        name,
+        values,
+      ];
 }
 
 @immutable
-class FunctionDefinition implements EntityDefinition {
+class FunctionDefinition extends Equatable implements EntityDefinition {
   final String name;
   final String returnType;
   final List<ParameterDefinition> parameters;
@@ -140,60 +193,104 @@ class FunctionDefinition implements EntityDefinition {
 
   @override
   EntityDefinitionType get type => EntityDefinitionType.function_;
+
+  @override
+  List<Object?> get props => [
+        name,
+        returnType,
+        parameters,
+      ];
 }
 
-class ProjectStructureViewConductor extends ChangeNotifier {
-  factory ProjectStructureViewConductor.fromContext(BuildContext context) {
-    return ProjectStructureViewConductor(
-      context.read<PreferencesConductor>(),
-      context.read<ProjectAnalysisConductor>(),
-    );
-  }
+@immutable
+class ProjectStructureViewModel extends Equatable {
+  final bool isLoading;
+  final String projectPath;
+  final List<ProjectDirectory> directories;
 
-  final PreferencesConductor _preferencesConductor;
-  final ProjectAnalysisConductor _projectAnalysisConductor;
+  const ProjectStructureViewModel({
+    required this.isLoading,
+    required this.projectPath,
+    required this.directories,
+  });
+
+  @override
+  List<Object?> get props => [
+        isLoading,
+        projectPath,
+        directories,
+      ];
+}
+
+class ProjectStructureViewBloc extends Cubit<ProjectStructureViewModel> {
+  final PreferencesBloc _preferencesBloc;
+  final ProjectAnalysisBloc _projectAnalysisBloc;
+  StreamSubscription<ProjectAnalysisState>? _projectAnalysisBlocSubscription;
 
   bool _isLoading = false;
   List<ProjectDirectory> _directories = [];
 
-  bool get isLoading => _isLoading;
-  List<ProjectDirectory> get directories => _directories;
-  String get projectPath => _projectAnalysisConductor.projectPath;
+  String get _projectPath => _projectAnalysisBloc.state.projectPath;
 
-  ProjectStructureViewConductor(
-    this._preferencesConductor,
-    this._projectAnalysisConductor,
-  ) {
-    _projectAnalysisConductor.addListener(reload);
+  factory ProjectStructureViewBloc.fromContext(BuildContext context) {
+    return ProjectStructureViewBloc(
+      context.read<PreferencesBloc>(),
+      context.read<ProjectAnalysisBloc>(),
+    );
+  }
+
+  ProjectStructureViewBloc(
+    this._preferencesBloc,
+    this._projectAnalysisBloc,
+  ) : super(
+          const ProjectStructureViewModel(
+            isLoading: false,
+            projectPath: '',
+            directories: [],
+          ),
+        ) {
+    _projectAnalysisBlocSubscription = _projectAnalysisBloc.stream.listen((_) {
+      reload();
+    });
     reload();
   }
 
   @override
-  void dispose() {
-    _projectAnalysisConductor.removeListener(reload);
-    super.dispose();
+  Future<void> close() async {
+    await _projectAnalysisBlocSubscription?.cancel();
+    await super.close();
   }
 
   Future<void> reload() async {
     _isLoading = true;
     _directories = const [];
-    notifyListeners();
+    _updateViewModel();
 
     _directories = await _getDirectories();
     _isLoading = false;
-    notifyListeners();
+    _updateViewModel();
+  }
+
+  void _updateViewModel() {
+    emit(
+      ProjectStructureViewModel(
+        isLoading: _isLoading,
+        projectPath: _projectPath,
+        directories: _directories,
+      ),
+    );
   }
 
   Future<List<ProjectDirectory>> _getDirectories() async {
-    if (projectPath.isEmpty) return [];
+    if (_projectPath.isEmpty) return [];
     try {
-      final flutterBinaryPath = _preferencesConductor.flutterBinaryPath;
+      final flutterBinaryPath = _preferencesBloc.state.flutterBinaryPath;
       // ignore: no_leading_underscores_for_local_identifiers
-      final _projectPath = projectPath;
+      final projectPath = _projectPath;
       return await Isolate.run(() {
         return _createDirectories(
           flutterBinaryPath: flutterBinaryPath,
-          projectPath: _projectPath,
+          projectPath: projectPath,
         );
       });
     } catch (exception) {

@@ -3,13 +3,17 @@ import 'dart:isolate';
 
 import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
+import 'package:dart_lens/clipboard.dart';
 import 'package:dart_lens/preferences/bloc.dart';
 import 'package:dart_lens/project-analysis/bloc.dart';
 import 'package:dart_lens/project-structure-analysis.dart';
+import 'package:dart_lens/routing/functions.dart';
+import 'package:dart_lens/widgets/snack-bar.dart';
+import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:path/path.dart';
-import 'package:provider/provider.dart';
 
 /*
 enum StringLiteralContext {
@@ -79,52 +83,75 @@ class StringLiteralVisitor extends RecursiveAstVisitor<void> {
 */
 }
 
-class StringLiteralsViewConductor extends ChangeNotifier {
-  factory StringLiteralsViewConductor.fromContext(BuildContext context) {
-    return StringLiteralsViewConductor(
-      context.read<PreferencesConductor>(),
-      context.read<ProjectAnalysisConductor>(),
-    );
-  }
+@immutable
+class StringLiteralsViewModel extends Equatable {
+  final bool isLoading;
+  final List<StringLiteral> stringLiterals;
 
-  final PreferencesConductor _preferencesConductor;
-  final ProjectAnalysisConductor _projectAnalysisConductor;
+  const StringLiteralsViewModel({
+    required this.isLoading,
+    required this.stringLiterals,
+  });
+
+  @override
+  List<Object?> get props => [
+        isLoading,
+        stringLiterals,
+      ];
+}
+
+class StringLiteralsViewBloc extends Cubit<StringLiteralsViewModel> {
+  final PreferencesBloc _preferencesBloc;
+  final ProjectAnalysisBloc _projectAnalysisBloc;
+  StreamSubscription<ProjectAnalysisState>? _projectAnalysisBlocSubscription;
 
   bool _isLoading = false;
   List<StringLiteral> _stringLiterals = [];
 
-  bool get isLoading => _isLoading;
-  List<StringLiteral> get stringLiterals => _stringLiterals;
-  String get _projectPath => _projectAnalysisConductor.projectPath;
+  String get _projectPath => _projectAnalysisBloc.state.projectPath;
 
-  StringLiteralsViewConductor(
-    this._preferencesConductor,
-    this._projectAnalysisConductor,
-  ) {
-    _projectAnalysisConductor.addListener(reload);
+  factory StringLiteralsViewBloc.fromContext(BuildContext context) {
+    return StringLiteralsViewBloc(
+      context.read<PreferencesBloc>(),
+      context.read<ProjectAnalysisBloc>(),
+    );
+  }
+
+  StringLiteralsViewBloc(
+    this._preferencesBloc,
+    this._projectAnalysisBloc,
+  ) : super(
+          const StringLiteralsViewModel(
+            isLoading: false,
+            stringLiterals: [],
+          ),
+        ) {
+    _projectAnalysisBlocSubscription = _projectAnalysisBloc.stream.listen((_) {
+      reload();
+    });
     reload();
   }
 
   @override
-  void dispose() {
-    _projectAnalysisConductor.removeListener(reload);
-    super.dispose();
+  Future<void> close() async {
+    await _projectAnalysisBlocSubscription?.cancel();
+    await super.close();
   }
 
   Future<void> reload() async {
     _isLoading = true;
     _stringLiterals = [];
-    notifyListeners();
+    _updateViewModel();
 
     _stringLiterals = await _getStringLiterals();
     _isLoading = false;
-    notifyListeners();
+    _updateViewModel();
   }
 
   Future<List<StringLiteral>> _getStringLiterals() async {
     if (_projectPath.isEmpty) return [];
     try {
-      final flutterBinaryPath = _preferencesConductor.flutterBinaryPath;
+      final flutterBinaryPath = _preferencesBloc.state.flutterBinaryPath;
       final projectPath = _projectPath;
       return await Isolate.run(() {
         return _createStringLiterals(
@@ -136,6 +163,26 @@ class StringLiteralsViewConductor extends ChangeNotifier {
       if (kDebugMode) print(exception);
       return [];
     }
+  }
+
+  void _updateViewModel() {
+    emit(
+      StringLiteralsViewModel(
+        isLoading: _isLoading,
+        stringLiterals: _stringLiterals,
+      ),
+    );
+  }
+
+  Future<void> copyStringToClipboard(
+    BuildContext context,
+    String string,
+  ) async {
+    await copyToClipboard(string);
+    showSnackBar(
+      context,
+      createCopiedToClipboardSnackBar(),
+    );
   }
 }
 

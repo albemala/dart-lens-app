@@ -2,106 +2,137 @@ import 'package:dart_lens/project-structure/bloc.dart';
 import 'package:flex_seed_scheme/flex_seed_scheme.dart';
 import 'package:flextras/flextras.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-import 'package:provider/provider.dart';
 
-class ProjectStructureView extends StatelessWidget {
-  const ProjectStructureView({
+class ProjectStructureViewBuilder extends StatelessWidget {
+  const ProjectStructureViewBuilder({
     super.key,
   });
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider<ProjectStructureViewConductor>(
-      create: ProjectStructureViewConductor.fromContext,
-      child: Column(
-        children: [
-          const Divider(),
-          const _ActionBarView(),
-          const Divider(),
-          Expanded(
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                return InteractiveViewer(
-                  constrained: false,
-                  minScale: 0.1,
-                  boundaryMargin: EdgeInsets.symmetric(
-                    horizontal: constraints.maxWidth,
-                    vertical: constraints.maxHeight,
-                  ),
-                  child: const _ProjectStructureView(),
-                );
-              },
-            ),
-          ),
-        ],
+    return BlocProvider<ProjectStructureViewBloc>(
+      create: ProjectStructureViewBloc.fromContext,
+      child: BlocBuilder<ProjectStructureViewBloc, ProjectStructureViewModel>(
+        builder: (context, viewModel) {
+          return ProjectStructureView(
+            bloc: context.read<ProjectStructureViewBloc>(),
+            viewModel: viewModel,
+          );
+        },
       ),
     );
   }
 }
 
-class _ActionBarView extends StatelessWidget {
-  const _ActionBarView();
+class ProjectStructureView extends StatelessWidget {
+  final ProjectStructureViewBloc bloc;
+  final ProjectStructureViewModel viewModel;
+
+  const ProjectStructureView({
+    super.key,
+    required this.bloc,
+    required this.viewModel,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<ProjectStructureViewConductor>(
-      builder: (context, conductor, child) {
-        return Material(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-            child: SeparatedRow(
-              separatorBuilder: () => const SizedBox(width: 8),
-              children: [
-                const Spacer(),
-                if (conductor.isLoading) //
-                  const SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                    ),
-                  ),
-                Tooltip(
-                  message: 'Reload project',
-                  child: IconButton(
-                    onPressed: () {
-                      conductor.reload();
-                    },
-                    icon: const Icon(LucideIcons.rotateCw),
-                  ),
+    return Column(
+      children: [
+        const Divider(),
+        _ActionBarView(
+          isLoading: viewModel.isLoading,
+          onReload: bloc.reload,
+        ),
+        const Divider(),
+        Expanded(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return InteractiveViewer(
+                constrained: false,
+                minScale: 0.1,
+                boundaryMargin: EdgeInsets.symmetric(
+                  horizontal: constraints.maxWidth,
+                  vertical: constraints.maxHeight,
                 ),
-              ],
-            ),
+                child: _ProjectStructureView(
+                  projectPath: viewModel.projectPath,
+                  directories: viewModel.directories,
+                ),
+              );
+            },
           ),
-        );
-      },
+        ),
+      ],
+    );
+  }
+}
+
+class _ActionBarView extends StatelessWidget {
+  final bool isLoading;
+  final void Function() onReload;
+
+  const _ActionBarView({
+    required this.isLoading,
+    required this.onReload,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        child: SeparatedRow(
+          separatorBuilder: () => const SizedBox(width: 8),
+          children: [
+            const Spacer(),
+            if (isLoading) //
+              const SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                ),
+              ),
+            Tooltip(
+              message: 'Reload project',
+              child: IconButton(
+                onPressed: onReload,
+                icon: const Icon(LucideIcons.rotateCw),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
 
 class _ProjectStructureView extends StatelessWidget {
-  const _ProjectStructureView();
+  final String projectPath;
+  final List<ProjectDirectory> directories;
+
+  const _ProjectStructureView({
+    required this.projectPath,
+    required this.directories,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<ProjectStructureViewConductor>(
-      builder: (context, conductor, child) {
-        return PrimaryElementWidget(
-          color: Colors.grey,
-          child: SeparatedColumn(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            separatorBuilder: () => const SizedBox(height: 12),
-            children: [
-              ElementPathWidget(path: conductor.projectPath),
-              ...conductor.directories.map((projectDirectory) {
-                return DirectoryElementView(projectDirectory: projectDirectory);
-              }),
-            ],
-          ),
-        );
-      },
+    return PrimaryElementWidget(
+      color: Colors.grey,
+      child: SeparatedColumn(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        separatorBuilder: () => const SizedBox(height: 12),
+        children: [
+          ElementPathWidget(path: projectPath),
+          ...directories.map((projectDirectory) {
+            return DirectoryElementView(projectDirectory: projectDirectory);
+          }),
+        ],
+      ),
     );
   }
 }

@@ -1,17 +1,9 @@
-import 'package:dart_lens/about/view.dart';
-import 'package:dart_lens/app/defines.dart';
-import 'package:dart_lens/feedback.dart';
-import 'package:dart_lens/fs.dart';
-import 'package:dart_lens/preferences/view.dart';
-import 'package:dart_lens/project-analysis/bloc.dart';
+import 'package:dart_lens/app-content/app-bottom-view.dart';
+import 'package:dart_lens/app-content/app-top-view.dart';
 import 'package:dart_lens/project-packages/view.dart';
 import 'package:dart_lens/project-structure/view.dart';
-import 'package:dart_lens/routing/functions.dart';
 import 'package:dart_lens/string-literals/view.dart';
-import 'package:flextras/flextras.dart';
 import 'package:flutter/material.dart';
-import 'package:lucide_icons/lucide_icons.dart';
-import 'package:provider/provider.dart';
 
 class AppContentView extends StatelessWidget {
   const AppContentView({
@@ -26,7 +18,7 @@ class AppContentView extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _TopView(),
+            AppTopViewBuilder(),
             Divider(),
             TabBar(
               isScrollable: true,
@@ -40,129 +32,14 @@ class AppContentView extends StatelessWidget {
               child: TabBarView(
                 physics: NeverScrollableScrollPhysics(),
                 children: [
-                  ProjectPackagesView(),
-                  ProjectStructureView(),
-                  StringLiteralsView(),
+                  ProjectPackagesViewBuilder(),
+                  ProjectStructureViewBuilder(),
+                  StringLiteralsViewBuilder(),
                 ],
               ),
             ),
             Divider(),
-            _BottomView(),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _TopView extends StatelessWidget {
-  const _TopView();
-
-  @override
-  Widget build(BuildContext context) {
-    return Consumer<ProjectAnalysisConductor>(
-      builder: (context, conductor, child) {
-        Future<void> onPickDirectory() async {
-          final directory = await pickExistingDirectory();
-          if (directory == null) return;
-          conductor.setProjectPath(directory);
-        }
-
-        return Material(
-          color: Theme.of(context).colorScheme.surface,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: SeparatedRow(
-              crossAxisAlignment: CrossAxisAlignment.baseline,
-              separatorBuilder: () => const SizedBox(width: 8),
-              children: [
-                const Text(
-                  'Project directory:',
-                ),
-                Expanded(
-                  child: conductor.projectPath.isEmpty
-                      ? const Opacity(
-                          opacity: 0.7,
-                          child: Text(
-                            'No project selected',
-                          ),
-                        )
-                      : Text(
-                          conductor.projectPath,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                ),
-                if (conductor.projectPath.isEmpty)
-                  FilledButton(
-                    onPressed: onPickDirectory,
-                    child: const Text('Select'),
-                  )
-                else
-                  OutlinedButton(
-                    onPressed: onPickDirectory,
-                    child: const Text('Select'),
-                  ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-}
-
-class _BottomView extends StatelessWidget {
-  const _BottomView();
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Theme.of(context).colorScheme.surface,
-      child: Padding(
-        padding: const EdgeInsets.all(8),
-        child: Row(
-          children: [
-            TextButton.icon(
-              onPressed: sendFeedback,
-              icon: const Icon(LucideIcons.mail),
-              label: const Text('Send feedback'),
-            ),
-            Consumer<RoutingConductor>(
-              builder: (context, routingConductor, child) {
-                return Tooltip(
-                  message: 'Preferences',
-                  child: IconButton(
-                    onPressed: () {
-                      routingConductor.showDialog(
-                        (context) => PreferencesView.create(
-                          context,
-                          onClose: routingConductor.closeCurrentRoute,
-                        ),
-                      );
-                    },
-                    icon: const Icon(LucideIcons.settings),
-                  ),
-                );
-              },
-            ),
-            Consumer<RoutingConductor>(
-              builder: (context, routingConductor, child) {
-                return Tooltip(
-                  message: 'About $appName',
-                  child: IconButton(
-                    onPressed: () {
-                      routingConductor.showDialog(
-                        (context) => AboutView.create(
-                          context,
-                          onClose: routingConductor.closeCurrentRoute,
-                        ),
-                      );
-                    },
-                    icon: const Icon(LucideIcons.info),
-                  ),
-                );
-              },
-            ),
+            AppBottomViewBuilder(),
           ],
         ),
       ),

@@ -1,21 +1,33 @@
+import 'dart:async';
+
+import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:path_provider/path_provider.dart';
 
-class LocalStorageConductor extends ChangeNotifier implements StorageConductor {
-  factory LocalStorageConductor.fromContext(BuildContext context) {
-    return LocalStorageConductor();
-  }
-
-  LocalStorageConductor() {
-    _init();
-  }
-
-  bool _isInitialized = false;
+@immutable
+class LocalStoreState extends Equatable {
+  const LocalStoreState();
 
   @override
-  bool get isInitialized => _isInitialized;
+  List<Object?> get props => [];
+}
+
+class LocalStoreBloc extends Cubit<LocalStoreState> {
+  bool _isInitialized = false;
+
+  factory LocalStoreBloc.fromContext(BuildContext context) {
+    return LocalStoreBloc();
+  }
+
+  LocalStoreBloc()
+      : super(
+          const LocalStoreState(),
+        ) {
+    _init();
+  }
 
   Future<void> _init() async {
     if (!kIsWeb) {
@@ -24,73 +36,34 @@ class LocalStorageConductor extends ChangeNotifier implements StorageConductor {
       Hive.init(appSupportDirectory.path);
     }
     _isInitialized = true;
-    notifyListeners();
   }
 
   @override
-  Future<void> dispose() async {
+  Future<void> close() async {
     await Hive.close();
-    super.dispose();
+    return super.close();
   }
 
-  @override
-  void register<T extends StoredConductorMixin>(T conductor) {
-    conductor.addListener(() => _save(conductor));
+  Future<void> save(String storeName, Map<String, dynamic> map) async {
+    await _waitForInitialization();
+    final box = await _getBox(storeName);
+    await box.put(storeName, map);
   }
 
-  @override
-  void unregister<T extends StoredConductorMixin>(T conductor) {
-    conductor.removeListener(() => _save(conductor));
-  }
-
-  Future<void> _save<T extends StoredConductorMixin>(T conductor) async {
-    final box = await _getBox(conductor.storeName);
-    final map = conductor.toMap();
-    await box.put(conductor.storeName, map);
-  }
-
-  @override
-  Future<void> load<T extends StoredConductorMixin>(T conductor) async {
-    final box = await _getBox(conductor.storeName);
-    final map = box.get(conductor.storeName) ?? {};
-    conductor.fromMap(Map<String, dynamic>.from(map));
+  Future<Map<String, dynamic>> load(String storeName) async {
+    await _waitForInitialization();
+    final box = await _getBox(storeName);
+    final map = box.get(storeName) ?? {};
+    return Map<String, dynamic>.from(map);
   }
 
   Future<Box<Map<dynamic, dynamic>>> _getBox(String boxName) {
     return Hive.openBox<Map<dynamic, dynamic>>(boxName);
   }
-}
-
-abstract class StorageConductor extends ChangeNotifier {
-  bool get isInitialized;
-  void register<T extends StoredConductorMixin>(T conductor);
-  void unregister<T extends StoredConductorMixin>(T conductor);
-  Future<void> load<T extends StoredConductorMixin>(T conductor);
-}
-
-mixin StoredConductorMixin on ChangeNotifier {
-  StorageConductor get storageConductor;
-
-  Future<void> init() async {
-    await _waitForInitialization();
-    await storageConductor.load(this);
-    notifyListeners();
-    storageConductor.register(this);
-  }
 
   Future<void> _waitForInitialization() async {
-    while (!storageConductor.isInitialized) {
+    while (!_isInitialized) {
       await Future<void>.delayed(const Duration(milliseconds: 300));
     }
   }
-
-  @override
-  void dispose() {
-    storageConductor.unregister(this);
-    super.dispose();
-  }
-
-  String get storeName;
-  Map<String, dynamic> toMap();
-  void fromMap(Map<String, dynamic> map);
 }
